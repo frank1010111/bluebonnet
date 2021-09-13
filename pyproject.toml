@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "bluebonnet"
+version = "0.1.0"
+description = "Scaling solutions for production analysis from unconventional oil and gas wells"
+authors = ["Frank Male"]
+license = "BSD 3-Clause"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
