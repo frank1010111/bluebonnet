@@ -1,0 +1,134 @@
+def b_water_McCain(temperature: float, pressure: float) -> float:
+    """
+    Calculates the b-factor for water
+
+    Parameters
+    ----------
+    temperature : float
+        water temperature in Fahrenheit
+    pressure: np.ndarray
+        water pressure in psia
+
+    Returns
+    -------
+    float
+        b-factor (reservoir bbl / standard bbl)
+
+    Examples
+    -------
+    >>> b_water_McCain(400, 3000)
+
+    """
+    dV_dp = (
+        -1.95301e-9 * pressure * temperature
+        - 1.72834e-13 * pressure ** 2 * temperature
+        - 3.58922e-7 * pressure
+        - 2.25341e-10 * pressure ** 2
+    )
+    dV_dt = -1.0001e-2 + 1.33391e-4 * temperature + 5.50654e-7 * temperature ** 2
+    return (1 + dV_dp) * (1 + dV_dt)
+
+
+def b_water_McCain_dp(temperature: float, pressure: float) -> float:
+    """
+    Calculates the derivative of the b-factor for water with respect to pressure
+
+    Parameters
+    ----------
+    temperature : float
+        water temperature in Fahrenheit
+    pressure: float
+        water pressure in psia
+
+    Returns
+    -------
+    float
+        derivative of b-factor (reservoir bbl / standard bbl) / psi
+
+    Examples
+    -------
+    >>> b_water_McCain_dp(400, 3000)
+
+    """
+    d2V_dp2 = (
+        -1.95301e-9 * temperature
+        - 2 * 1.72834e-13 * pressure * temperature
+        - 3.58922e-7
+        - 2 * 2.25341e-10 * pressure
+    )
+    dV_dt = -1.0001e-2 + 1.33391e-4 * temperature + 5.50654e-7 * temperature ** 2
+    return d2V_dp2 * (1 + dV_dt)
+
+
+def density_water_McCain(temperature: float, pressure: float, salinity: float) -> float:
+    """
+    Calculates the density for water
+
+    Parameters
+    ----------
+    temperature : float
+        water temperature in Fahrenheit
+    pressure: float
+        water pressure in psia
+    salinity: float
+        salinity in weight percent total dissolved solids
+
+    Returns
+    -------
+    float
+        density in lb-mass / cu ft
+
+    Examples
+    -------
+    >>> density_water_McCain(400, 3000, 15)
+
+    """
+    b_water = b_water_McCain(temperature, pressure)
+    density_stp = 62.368 + 0.438603 * salinity + 1.60074e-3 * salinity ** 2
+    return density_stp / b_water
+
+
+def viscosity_water_McCain(
+    temperature: float, pressure: float, salinity: float
+) -> float:
+    """
+    Calculates the viscosity for water, Using McCain (1991)
+
+    Parameters
+    ----------
+    temperature : float
+        water temperature in Fahrenheit
+    pressure: float
+        water pressure in psia
+    salinity: float
+        salinity in weight percent total dissolved solids
+
+    Returns
+    -------
+    float
+        viscosity in centipoise
+
+    Examples
+    -------
+    >>> viscosity_water_McCain(400, 3000, 15)
+    0.2627774655403418
+    """
+    A = (
+        109.574
+        - 8.40564 * salinity
+        + 0.313314 * salinity ** 2
+        + 8.72213e-3 * salinity ** 3
+    )
+    B = (
+        1.12166
+        - 2.63951e-2 * salinity
+        + 6.79461e-4 * salinity ** 2
+        + 5.47119e-5 * salinity ** 3
+        - 1.55586e-6 * salinity ** 4
+    )
+    mu_water = (
+        A
+        * temperature ** -B
+        * (0.9994 + 4.0295e-5 * pressure + 3.1062e-9 * pressure ** 2)
+    )
+    return mu_water

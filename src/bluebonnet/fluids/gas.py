@@ -1,6 +1,15 @@
 # gas.py
+import math
+import numpy as np
+from scipy.optimize import minimize
+from scipy.integrate import quad
+import numpy.typing as npt
+from typing import Tuple
+
 # Gas property calculations
-def make_nonhydrocarbon_properties(nitrogen:float, hydrogen_sulfide:float, co2:float, *others) -> npt.ArrayLike:
+def make_nonhydrocarbon_properties(
+    nitrogen: float, hydrogen_sulfide: float, co2: float, *others
+) -> npt.ArrayLike:
     """
     Creates an array of the nonhydrocarbon molecules present
 
@@ -13,7 +22,7 @@ def make_nonhydrocarbon_properties(nitrogen:float, hydrogen_sulfide:float, co2:f
     co2 : float
         compositional fraction of CO2
     *others : list(tuple)
-       list of tuples of (name, compositional fraction, molecular weight, 
+       list of tuples of (name, compositional fraction, molecular weight,
                           critical temperature (in R), critical pressure (psia))
        for other non-hydrocarbon molecules
 
@@ -42,6 +51,7 @@ def make_nonhydrocarbon_properties(nitrogen:float, hydrogen_sulfide:float, co2:f
         ],
     )
     return non_hydrocarbon_properties
+
 
 def z_factor_DAK(
     temperature: float,
@@ -136,7 +146,7 @@ def z_factor_DAK(
     return Z_factor
 
 
-def b_factor_gas_DAK(
+def b_factor_DAK(
     temperature: float,
     pressure: float,
     temperature_pseudocritical: float,
@@ -162,10 +172,10 @@ def b_factor_gas_DAK(
     -------
     float
         b-factor (reservoir barrels / scf)
-    
+
     Examples
     -------
-    >>> b_factor_gas_DAK(400, 100, -102, 649, 60, 14.7)
+    >>> b_factor_DAK(400, 100, -102, 649, 60, 14.7)
     0.04317415921420302
     """
     z_factor = z_factor_DAK(
@@ -180,7 +190,7 @@ def b_factor_gas_DAK(
     return b_factor / 5.615
 
 
-def density_gas_DAK(
+def density_DAK(
     temperature: float,
     pressure: float,
     temperature_pseudocritical: float,
@@ -207,10 +217,10 @@ def density_gas_DAK(
     -------
     float
         density_gas (lb / cubic ft)
-    
+
     Examples
     -------
-    density_gas_DAK(400, 100, -102, 649, 0.65) # returns 0.2143
+    density_DAK(400, 100, -102, 649, 0.65) # returns 0.2143
     """
     MOLECULAR_WEIGHT_AIR = 28.964
     R = 10.73159
@@ -222,7 +232,7 @@ def density_gas_DAK(
     return density_gas
 
 
-def compressibility_gas_DAK(
+def compressibility_DAK(
     temperature: float,
     pressure: float,
     temperature_pseudocritical: float,
@@ -249,7 +259,7 @@ def compressibility_gas_DAK(
 
     Examples
     ------
-    >>> compressibility_gas_DAK(400, 104.7, -102, 649) 
+    >>> compressibility_DAK(400, 104.7, -102, 649)
     0.009576560643021937
     """
     A = np.array(
@@ -294,7 +304,7 @@ def compressibility_gas_DAK(
     return compressibility
 
 
-def viscosity_gas_Sutton(
+def viscosity_Sutton(
     temperature: float,
     pressure: float,
     temperature_pseudocritical: float,
@@ -321,16 +331,16 @@ def viscosity_gas_Sutton(
     -------
     float
         viscosity_gas (centipoise)
-    
+
     Examples
     -------
-    >>> viscosity_gas_Sutton(400, 100, -102, 649, 0.65)
+    >>> viscosity_Sutton(400, 100, -102, 649, 0.65)
     0.01652719692109309
     """
     MOLECULAR_WEIGHT_AIR = 28.964
     temp_reduced = (temperature + 459.67) / (temperature_pseudocritical + 459.67)
     molecular_weight = specific_gravity * MOLECULAR_WEIGHT_AIR
-    rho = density_gas_DAK(
+    rho = density_DAK(
         temperature,
         pressure,
         temperature_pseudocritical,
@@ -356,6 +366,94 @@ def viscosity_gas_Sutton(
     Y = 1.66378 - 4.679e-3 * X
     viscosity = viscosity_lowpressure * math.exp(X * rho ** Y)
     return viscosity
+
+
+def pseudocritical_point_Sutton(
+    specific_gravity: float,
+    non_hydrocarbon_properties: np.ndarray,
+    fluid: str = "wet gas",
+) -> Tuple[float, float]:
+    """
+    Calculates the pseudocritical pressure and temperature from Sutton (2007)
+
+    Parameters
+    ----------
+    specific_gravity : float
+        specific gravity relative to air (molecular weight / molecular weight)
+    non_hydrocarbon_properties: np.ndarray
+        record array of non-hydrocarbon fluid properties
+        **MUST HAVE H2S as second row, CO2 as third row**
+    fluid : string
+        whether the gas is 'dry gas' or 'wet gas'
+
+    Returns
+    -------
+    float
+        temperature_pseudocritical (F)
+    float
+        pressure_pseudocritical (psia)
+
+    Examples
+    ------
+    >>> non_hydrocarbon_properties = make_nonhydrocarbon_properties(0.03, 0.012, 0.018)
+    >>> points_pseudocritical_Sutton(0.65, non_hydrocarbon_properties, "dry gas")
+    (-102.21827232417752, 648.510797253794)
+    >>> non_hydrocarbon_properties = make_nonhydrocarbon_properties(0.05, 0.01, 0.04)
+    >>> points_pseudocritical_Sutton(0.8, non_hydrocarbon_properties, "wet gas")
+    (-72.20351526841193, 653.2582064200534)
+    """
+    if not fluid in ("dry gas", "wet gas"):
+        raise ValueError(f"fluid must be one of ('dry gas','wet gas'), not {fluid}")
+    MOLECULAR_WEIGHT_AIR = 28.964
+    fraction = non_hydrocarbon_properties["fraction"]
+    molecular_weight = non_hydrocarbon_properties["molecular weight"]
+    temp_critical_nonhc = non_hydrocarbon_properties["critical temperature"]
+    pressure_critical_nonhc = non_hydrocarbon_properties["critical pressure"]
+    fraction_hydrocarbon = 1 - non_hydrocarbon_properties["fraction"].sum()
+    specific_gravity_hydrocarbon = (
+        specific_gravity - sum(fraction * molecular_weight) / MOLECULAR_WEIGHT_AIR
+    ) / fraction_hydrocarbon
+    if fluid == "dry gas":
+        temp_critical_hydrocarbon = (
+            120.1
+            + 429 * specific_gravity_hydrocarbon
+            - 62.9 * specific_gravity_hydrocarbon ** 2
+        )
+        pressure_critical_hydrocarbon = (
+            671.1
+            - 14 * specific_gravity_hydrocarbon
+            - 34.3 * specific_gravity_hydrocarbon ** 2
+        )
+    else:
+        temp_critical_hydrocarbon = (
+            164.3
+            + 357.7 * specific_gravity_hydrocarbon
+            - 67.7 * specific_gravity_hydrocarbon ** 2
+        )
+        pressure_critical_hydrocarbon = (
+            744
+            - 125.4 * specific_gravity_hydrocarbon
+            + 5.9 * specific_gravity_hydrocarbon ** 2
+        )
+    temperature_star = fraction_hydrocarbon * temp_critical_hydrocarbon + sum(
+        fraction * temp_critical_nonhc
+    )
+    pressure_star = fraction_hydrocarbon * pressure_critical_hydrocarbon + sum(
+        fraction * pressure_critical_nonhc
+    )
+    # epsilon is the Wichert and Aziz (1970) correction
+    epsilon = (
+        120 * (fraction[2] + fraction[1]) ** 0.9
+        - 120 * (fraction[2] + fraction[1]) ** 1.6
+        + 15 * (math.sqrt(fraction[1]) - fraction[1] ** 4)
+    )
+    temperature_pseudocritical = temperature_star - epsilon
+    pressure_pseudocritical = (
+        pressure_star
+        * (temperature_star - epsilon)
+        / (temperature_star + fraction[1] * (1 - fraction[1]) * epsilon)
+    )
+    return temperature_pseudocritical - 459.67, pressure_pseudocritical
 
 
 def pseudopressure_Hussainy(
@@ -386,7 +484,7 @@ def pseudopressure_Hussainy(
     -------
     float
         pseudopressure (psi^2 / centipoise)
-    
+
     Examples
     -------
     >>> pseudopressure_Hussainy(400, 100, -102, 649, 0.65)
@@ -394,7 +492,7 @@ def pseudopressure_Hussainy(
     """
 
     def integrand(pressure):
-        viscosity = viscosity_gas_Sutton(
+        viscosity = viscosity_Sutton(
             temperature,
             pressure,
             temperature_pseudocritical,
