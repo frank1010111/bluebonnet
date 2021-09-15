@@ -10,7 +10,12 @@ $ pip install bluebonnet
 
 ## Usage
 
-- TODO
+`bluebonnet` has a collection of tools for performing reservoir simulation in tight oil and shale gas reservoirs. The main tools are:
+1. `fluids` for modeling PVT and viscosity of oil, water, and gas;
+2. `flow` for building physics-based production curves; and
+3. `forecast` for fitting and forecasting unconventional production.
+
+Examples can be found inside the docs folder.
 
 ## Contributing
 
