@@ -241,9 +241,9 @@ def test_viscosity_beggs_robinson(oil_properties):
         fluid,
     ) = oil_properties
     if fluid == "black oil" and math.fabs(pressure - 3000) < 1:
-        viscosity_real = pytest.approx(np.nan, rel=1e-3)
+        viscosity_real = pytest.approx(0.5121231, rel=1e-3)
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
-        viscosity_real = pytest.approx(np.nan, rel=1e-3)  # for now until it works
+        viscosity_real = pytest.approx(0.5811379, rel=1e-3)  # for now until it works
     else:
         raise NotImplementedError
     viscosity_br = oil.viscosity_beggs_robinson(

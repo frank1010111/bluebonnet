@@ -70,7 +70,7 @@ def test_mu_o(oil_properties):
         solution_gor_initial=oil_properties.solution_gor_initial,
         salinity=0,
     )
-    oil_mu = fluid_instance.oil_FVF(np.full(2, oil_properties.pressure))
+    oil_mu = fluid_instance.oil_viscosity(np.full(2, oil_properties.pressure))
     assert oil_mu[0] == real_mu
 
 
