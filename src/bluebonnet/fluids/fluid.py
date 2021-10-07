@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
+import scipy as sp
 from collections import namedtuple
 
 from .gas import (
@@ -34,8 +35,9 @@ class Fluid:
     gas_specific_gravity: Gas gravity relative to air
     solution_gor_initial: initial reservoir gas-oil ratio in scf/bbl
     salinity: water salinity in weight percent total dissolved solids
+    water_saturation_initial: initial water saturation (V/V)
 
-    Main methods
+    Methods
     ---------
     water_FVF: Bw
     water_viscosity: $\\mu_w$
@@ -51,6 +53,7 @@ class Fluid:
     gas_specific_gravity: float
     solution_gor_initial: float
     salinity: float = 0.0
+    water_saturation_initial = 0.0
 
     def water_FVF(self, pressure: npt.ArrayLike) -> npt.ArrayLike:
         """
@@ -217,7 +220,7 @@ class Fluid:
 
         Examples
         -------
-        >>> Fluid(200, 35, 0.8, 650)._p_bubblepoint_standing()
+        >>> Fluid(200, 35, 0.8, 650).pressure_bubblepoint()
         2627.2017021875276
         """
         p_bubble = pressure_bubblepoint_Standing(
@@ -227,3 +230,24 @@ class Fluid:
             self.solution_gor_initial,
         )
         return p_bubble
+
+
+def pseudopressure(
+    pressure: npt.NDArray, viscosity: npt.NDArray, z_factor: npt.NDArray
+) -> npt.NDArray:
+    """
+    Calculates the pseudopressure using Al-Hussainy's relation
+
+    Parameters
+    ----------
+    pressure: NDArray, psi
+    viscosity: NDArray, cp
+    z_factor: NDArray, dimensionless
+
+    Returns
+    -------
+    NDArray
+        pseudopressure, psia^2 / cp
+    """
+    pp = 2 * pressure / (viscosity * z_factor)
+    return sp.integrate.cumulative_trapezoid(pp, pressure, initial=0.0)
