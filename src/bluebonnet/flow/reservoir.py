@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
-import scipy as sp
+from scipy import interpolate, sparse, integrate
 import numpy.typing as npt
 from collections import namedtuple
 from bluebonnet.fluids.fluid import Fluid
@@ -8,15 +8,36 @@ from bluebonnet.fluids.gas import pseudopressure_Hussainy
 
 
 class FlowProperties:
-    def __init__(self, df):
+    """
+    Flow properties for the system.
+
+    This is used to translate from scaled pseudopressure to diffusivity and to capture
+    the effect of expansion
+
+    Parameters
+    ----------
+    df: DataFrame with columns for pseudopressure, alpha, So, Sg, Sw
+        pseudopressure: pseudopressure scaled from 0 for frac face, 1 for initial
+            reservoir conditions
+        alpha: hydraulic diffusivity (needn't be scaled)
+    fvf_scale: float formation volume factor at initial conditions divided by FVF at the
+         frac face
+    """
+
+    def __init__(self, df, fvf_scale):
         need_cols = set(["pseudopressure", "alpha"])
         if need_cols.intersection(df.columns) != need_cols:
             raise ValueError(
                 "Need input dataframe to have 'pseudopressure' and 'alpha' columns"
             )
+        if abs(min(df.pseudopressure)) > 1e-6:
+            raise ValueError("Minimum pseudopressure should be 0 (did you rescale?)")
+        if abs(max(df.pseudopressure) - 1.0) > 1e-6:
+            raise ValueError("Maximum pseudopressure should be 1 (did you rescale?)")
         self.df = df
         x = df.pseudopressure
-        self.alpha = sp.interpolate.interp1d(x, df.alpha)
+        self.alpha = interpolate.interp1d(x, df.alpha)
+        self.fvf_scale = fvf_scale
 
     def __repr__(self):
         return df.__repr__()
@@ -26,7 +47,26 @@ FlowPropertiesOnePhase = FlowProperties
 
 
 class FlowPropertiesMultiPhase(FlowProperties):
-    def __init__(self, df):
+    """
+    Flow properties for a multiphase system
+
+    This is used to translate from scaled pseudopressure and saturations to diffusivity
+    and to capture the effect of expansion
+
+    Parameters
+    ----------
+    df: DataFrame with columns for pseudopressure, alpha, So, Sg, Sw
+        pseudopressure: pseudopressure scaled from 0 for frac face, 1 for initial
+            reservoir conditions
+        alpha: hydraulic diffusivity (needn't be scaled)
+        So: oil saturation
+        Sg: gas saturation
+        Sw: water saturation
+    fvf_scale: dict for the Bo,Bg,Bw at initial conditions divided by FVF at the frac
+        face
+    """
+
+    def __init__(self, df, fvf_scale):
         need_cols = set(["pseudopressure", "alpha", "So", "Sg", "Sw"])
         if need_cols.intersection(df.columns) != need_cols:
             raise ValueError(
@@ -35,7 +75,7 @@ class FlowPropertiesMultiPhase(FlowProperties):
             )
         self.df = df
         x = df["pseudopressure", "So", "Sg", "Sw"]
-        self.alpha = sp.interpolate.LinearNDInterpolator(x, df.alpha)
+        self.alpha = interpolate.LinearNDInterpolator(x, df.alpha)
 
 
 @dataclass
@@ -82,7 +122,7 @@ class IdealReservoir:
             mesh_ratio = (time[i + 1] - time[i]) / dx_squared
             b = pseudopressure[i]
             a_matrix = self._build_matrix(b, mesh_ratio)
-            pseudopressure[i + 1], info = sp.sparse.linalg.bicgstab(a_matrix, b)
+            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
         self.pseudopressure = pseudopressure
 
     def recovery_factor(self):
@@ -92,8 +132,8 @@ class IdealReservoir:
         h_inv = self.nx - 1.0
         pp = self.pseudopressure[:, :3]
         dp_dx = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5
-        cumulative = sp.integrate.cumulative_trapezoid(dp_dx, self.time, initial=0)
-        self.recovery = cumulative * self.fvf_scaling()
+        cumulative = integrate.cumulative_trapezoid(dp_dx, self.time, initial=0)
+        self.recovery = cumulative * self.fvf_scale()
         return self.recovery
 
     def _build_matrix(self, pseudopressure: npt.NDArray[np.float64], mesh_ratio: float):
@@ -113,7 +153,7 @@ class IdealReservoir:
             [[0], -changeability[2:-1], [-2 * changeability[-1]]]
         )
         diagonal_upper = np.concatenate([[0, -changeability[1]], -changeability[2:-1]])
-        a_matrix = sp.sparse.diags(
+        a_matrix = sparse.diags(
             [diagonal_low, diagonal_long, diagonal_upper], [-1, 0, 1], format="csr"
         )
         return a_matrix
@@ -124,7 +164,7 @@ class IdealReservoir:
         "Calculate scaled diffusivity"
         return np.ones_like(pseudopressure)
 
-    def fvf_scaling(self):
+    def fvf_scale(self):
         return 1 - self.pressure_fracface / self.pressure_initial
 
 
@@ -136,11 +176,16 @@ class SinglePhaseReservoir(IdealReservoir):
         alpha = self.fluid.alpha
         return alpha(pseudopressure) / alpha(1)
 
-    def fvf_scaling(self):
-        raise NotImplementedError  # TODO: fvf for fracface, initial reservoir
+    def fvf_scale(self):
+        return self.fluid.fvf_scale
 
 
-class MultiPhaseReservoir(IdealReservoir):
+@dataclass
+class MultiPhaseReservoir(SinglePhaseReservoir):
+    So_init: float
+    Sg_init: float
+    Sw_init: float
+
     def simulate(self, time: npt.NDArray[np.float64]):
         """
         Calculate simulation pressure over time
@@ -160,7 +205,7 @@ class MultiPhaseReservoir(IdealReservoir):
             mesh_ratio = (time[i + 1] - time[i]) / dx_squared
             b = pseudopressure[i]
             a_matrix = self._build_matrix(b, mesh_ratio)
-            pseudopressure[i + 1], info = sp.sparse.linalg.bicgstab(a_matrix, b)
+            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
         self.pseudopressure = pseudopressure
 
     def alpha_scaled(
@@ -173,9 +218,6 @@ class MultiPhaseReservoir(IdealReservoir):
         "Calculate scaled diffusivity"
         alpha = self.fluid.alpha
         return alpha(pseudopressure, So, Sg, Sw) / alpha(1)
-
-    def fvf_scaling(self):
-        raise NotImplementedError
 
 
 RelPermParams = namedtuple(
@@ -197,7 +239,7 @@ def relative_permeabilities(
 
     Returns
     -------
-
+    k_rel: numpy record array with k_o, k_w, k_g (aka oil, water gas)
     """
     assert (
         np.abs(sum(v for v in saturations.values()) - 1) < 1e-3
@@ -233,4 +275,5 @@ def relative_permeabilities(
     k_rel = np.array(
         [k_o, k_w, k_g], dtype=[(i, np.float64) for i in ("k_o", "k_w", "k_g")]
     )
+    k_rel[k_rel < 0] = 0  # negative permeability seems bad
     return k_rel
