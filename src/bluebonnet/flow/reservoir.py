@@ -40,7 +40,7 @@ class FlowProperties:
         self.fvf_scale = fvf_scale
 
     def __repr__(self):
-        return df.__repr__()
+        return self.df.__repr__()
 
 
 FlowPropertiesOnePhase = FlowProperties
