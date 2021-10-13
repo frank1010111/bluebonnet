@@ -119,9 +119,11 @@ class IdealReservoir:
         pseudopressure[0, :] = 1
         pseudopressure[0, 0] = 0
         for i in range(time.shape[0] - 1):
-            mesh_ratio = (time[i + 1] - time[i]) / dx_squared
             b = pseudopressure[i]
-            a_matrix = self._build_matrix(b, mesh_ratio)
+            mesh_ratio = (time[i + 1] - time[i]) / dx_squared
+            alpha_scaled = self.alpha_scaled(b)
+            kt_h2 = mesh_ratio * alpha_scaled
+            a_matrix = _build_matrix(kt_h2)
             pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
         self.pseudopressure = pseudopressure
 
@@ -135,28 +137,6 @@ class IdealReservoir:
         cumulative = integrate.cumulative_trapezoid(dp_dx, self.time, initial=0)
         self.recovery = cumulative * self.fvf_scale()
         return self.recovery
-
-    def _build_matrix(self, pseudopressure: npt.NDArray[np.float64], mesh_ratio: float):
-        """
-        Set up A matrix for timestepping
-
-        Parameters
-        ----------
-        pseudopressure: ndarray
-        mesh_ratio: float, dt/dx^2
-        """
-        alpha_scaled = self.alpha_scaled(pseudopressure)
-        changeability = mesh_ratio * alpha_scaled
-        diagonal_long = 1.0 + 2 * changeability
-        diagonal_long[0] = -1.0
-        diagonal_low = np.concatenate(
-            [[0], -changeability[2:-1], [-2 * changeability[-1]]]
-        )
-        diagonal_upper = np.concatenate([[0, -changeability[1]], -changeability[2:-1]])
-        a_matrix = sparse.diags(
-            [diagonal_low, diagonal_long, diagonal_upper], [-1, 0, 1], format="csr"
-        )
-        return a_matrix
 
     def alpha_scaled(
         self, pseudopressure: npt.NDArray[np.float64]
@@ -277,3 +257,21 @@ def relative_permeabilities(
     )
     k_rel[k_rel < 0] = 0  # negative permeability seems bad
     return k_rel
+
+
+def _build_matrix(kt_h2: npt.NDArray[np.float64]):
+    """
+    Set up A matrix for timestepping
+
+    Parameters
+    ----------
+    kt_h2: ndarray, diffusivity * dt / dx^2
+    """
+    diagonal_long = 1.0 + 2 * kt_h2
+    diagonal_long[0] = -1.0
+    diagonal_low = np.concatenate([[0], -kt_h2[2:-1], [-2 * kt_h2[-1]]])
+    diagonal_upper = np.concatenate([[0, -kt_h2[1]], -kt_h2[2:-1]])
+    a_matrix = sparse.diags(
+        [diagonal_low, diagonal_long, diagonal_upper], [-1, 0, 1], format="csr"
+    )
+    return a_matrix
