@@ -27,4 +27,18 @@ Interested in contributing? Check out the contributing guidelines. Please note t
 
 ## Credits
 
+This work was funded in part by an ExxonMobil grant to the University of Texas at Austin, with Michael Marder as PI and Larry Lake as co-PI. The Physics-based scaling curve was developed for shale gas reservoirs by Patzek et al. (2013). It was extended to tight oil by Male (2019). It was extended to two-phase by Ruiz Maraggi et al. (2020).  
 `bluebonnet` was created with [`cookiecutter`](https://cookiecutter.readthedocs.io/en/latest/) and the `py-pkgs-cookiecutter` [template](https://github.com/py-pkgs/py-pkgs-cookiecutter).
+
+## Bibliography
+Papers developing or using this approach include:
+1. Patzek, T. W., Male, F. and Marder, M., 2013. ``Gas production in the Barnett Shale obeys a simple scaling theory,'' Proceedings of the National Academy of Science. https://doi.org/10.1073/pnas.1313380110
+2. Patzek, T. W., Male, F. and Marder, M., 2014. ``A simple model of gas production from hydrofractured horizontal wells in shales,'' AAPG Bulletin v. 98, no. 12. https://doi.org/10.1306/03241412125
+3. Male, F.,  Islam, A.W., Patzek, T.W., Ikonnikova, S.A., Browning, J.R., and Marder, M.P., 2015. ``Analysis of gas production from hydraulically fractured wells in the Haynesville shale using scaling methods.''  Journal of Unconventional Oil and Gas Resources. https://doi.org/10.1016/j.juogr.2015.03.001
+3. Eftekhari, B., Marder, M. and Patzek, T.W., 2018. Field data provide estimates of effective permeability, fracture spacing, well drainage area and incremental production in gas shales. Journal of Natural Gas Science and Engineering, 56, pp.141-151. https://doi.org/10.1016/j.jngse.2018.05.027
+4.  Male, F. 2019, ``Assessing impact of uncertainties in decline curve analysis through hindcasting.'' Journal of Petroleum Science and Engineering, 172, 340-348. https://doi.org/10.1016/j.petrol.2018.09.072
+5. Male, F. 2019, ``Using a segregated flow model to forecast production of oil, gas, and water in shale oil wells.'' Journal of Petroleum Science and Engineering, 180, 48-61. https://doi.org/10.1016/j.petrol.2019.05.010
+5. Patzek, T.W., Saputra, W., Kirati, W. and Marder, M., 2019. ``Generalized extreme value statistics, physical scaling, and forecasts of gas production in the Barnett shale.'' Energy & fuels, 33(12), pp.12154-12169. https://doi.org/10.1021/acs.energyfuels.9b01385
+5. Ruiz Maraggi, L.M., Lake, L.W. and Walsh, M.P., 2020. ``A Two-Phase Non-Linear One-Dimensional Flow Model for Reserves Estimation in Tight Oil and Gas Condensate Reservoirs Using Scaling Principles.'' In SPE Latin American and Caribbean Petroleum Engineering Conference. OnePetro. https://doi.org/10.2118/199032-MS
+5. Ruiz Maraggi, L.M., Lake, L.W. and Walsh, M.P., 2020. ``A Bayesian Framework for Addressing the Uncertainty in Production Forecasts of Tight Oil Reservoirs Using a Physics-Based Two-Phase Flow Model.'' In SPE/AAPG/SEG Latin America Unconventional Resources Technology Conference. OnePetro. https://doi.org/10.15530/urtec-2020-10480
+6. Male, F., Duncan, I.J., 2022, ``The Paradox of Increasing Initial Oil Production but Faster Decline Rates in Fracking the Bakken Shale: Implications for Long Term Productivity of Tight Oil Plays,'' Journal of Petroleum Science and Engineering, https://doi.org/10.1016/j.petrol.2021.109406
