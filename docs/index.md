@@ -4,8 +4,9 @@
 ```{toctree}
 :maxdepth: 1
 :hidden:
-
-example.ipynb
+fluids.ipynb
+flow.ipynb
+forecast.ipynb
 changelog.md
 contributing.md
 conduct.md
