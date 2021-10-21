@@ -1,9 +1,9 @@
 """
-Define a suite a tests for the gas module
+Define a suite a tests for the fluid module
 """
 import pytest
 import numpy as np
-from bluebonnet.fluids.fluid import Fluid
+from bluebonnet.fluids import Fluid
 
 from test_oil import oil_properties
 from test_gas import gas_properties
