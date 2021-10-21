@@ -1,6 +1,7 @@
 from dataclasses import dataclass, astuple
 from typing import Callable, Optional, NamedTuple
 import numpy as np
+from numpy import ndarray
 import numpy.typing as npt
 from scipy.interpolate import interp1d, LinearNDInterpolator
 from scipy.optimize import curve_fit
@@ -12,8 +13,10 @@ class Bounds(NamedTuple):
 
     Parameters
     ----------
-    M: (min, max) for resource in place
-    tau: (min, max) for time-to-BDF
+    M: tuple of floats
+        (min, max) for resource in place
+    tau: tuple of floats
+        (min, max) for time-to-BDF
     """
 
     M: tuple
@@ -82,8 +85,8 @@ class ForecasterOnePhase:
 
     def fit(
         self,
-        time_on_production: npt.NDArray[np.float64],
-        cum_production: npt.NDArray[np.float64],
+        time_on_production: ndarray,
+        cum_production: ndarray,
         tau: Optional[float] = None,
     ):
         """
@@ -124,7 +127,9 @@ class ForecasterOnePhase:
             self.tau_ = tau
 
 
-def _forecast_cum_onephase(rf_curve, time_on_production, M, tau):
+def _forecast_cum_onephase(
+    rf_curve: Callable, time_on_production: ndarray, M: float, tau: float
+) -> ndarray:
     time_scaled = time_on_production / tau
     rf = M * rf_curve(time_scaled)
     return rf

@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
+from numpy import ndarray
+from typing import Union
 import numpy.typing as npt
 import scipy as sp
 from collections import namedtuple
@@ -55,7 +57,7 @@ class Fluid:
     salinity: float = 0.0
     water_saturation_initial = 0.0
 
-    def water_FVF(self, pressure: npt.ArrayLike) -> npt.ArrayLike:
+    def water_FVF(self, pressure: Union[ndarray, float]) -> Union[ndarray, float]:
         """
         Water formation volume factor (B-factor) from McCain
 
@@ -71,7 +73,7 @@ class Fluid:
         b_w = np.array([b_water_McCain(self.temperature, p) for p in pressure])
         return b_w
 
-    def water_viscosity(self, pressure: npt.ArrayLike):
+    def water_viscosity(self, pressure: Union[ndarray, float]):
         """
         Water viscosity from McCain (1991)
 
@@ -89,10 +91,10 @@ class Fluid:
 
     def gas_FVF(
         self,
-        pressure: npt.ArrayLike,
+        pressure: Union[ndarray, float],
         temperature_pseudocritical: float,
         pressure_pseudocritical: float,
-    ) -> npt.ArrayLike:
+    ) -> Union[ndarray, float]:
         """
         Gas formation volume factor (Bg) from Dranchuk and Abou-Kassem (1975)
 
@@ -125,10 +127,10 @@ class Fluid:
 
     def gas_viscosity(
         self,
-        pressure: npt.ArrayLike,
+        pressure: Union[ndarray, float],
         temperature_pseudocritical: float,
         pressure_pseudocritical: float,
-    ) -> npt.ArrayLike:
+    ) -> Union[ndarray, float]:
         """
         Calculates the viscosity for gas using Sutton's Fudamental PVT Calculations (2007)
 
@@ -165,7 +167,7 @@ class Fluid:
         )
         return viscosity
 
-    def oil_FVF(self, pressure: npt.ArrayLike) -> npt.ArrayLike:
+    def oil_FVF(self, pressure: Union[ndarray, float]) -> Union[ndarray, float]:
         """
         Calculates the oil formation volume factor (Bo) using Standing.
 
@@ -188,7 +190,7 @@ class Fluid:
         )
         return fvf_oil
 
-    def oil_viscosity(self, pressure: npt.ArrayLike) -> npt.ArrayLike:
+    def oil_viscosity(self, pressure: Union[ndarray, float]) -> Union[ndarray, float]:
         """
         Calcualtes the oil viscosity using Beggs-Robinson
 

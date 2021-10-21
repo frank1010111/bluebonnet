@@ -1,15 +1,17 @@
 # gas.py
 import math
 import numpy as np
+from numpy import ndarray
 from scipy.optimize import minimize
 from scipy.integrate import quad
 import numpy.typing as npt
-from typing import Tuple
+from typing import Tuple, Dict
+
 
 # Gas property calculations
 def make_nonhydrocarbon_properties(
-    nitrogen: float, hydrogen_sulfide: float, co2: float, *others
-) -> npt.ArrayLike:
+    nitrogen: float, hydrogen_sulfide: float, co2: float, *others: Dict[str, float]
+) -> ndarray:
     """
     Creates an array of the nonhydrocarbon molecules present
 
@@ -112,7 +114,7 @@ def z_factor_DAK(
     C[3] = A[9] / (temp_reduced ** 3)
     C[4] = A[9] * A[10] / (temp_reduced ** 3)
 
-    def calculate_error_fraction(rho):
+    def calculate_error_fraction(rho: ndarray):
         rho = rho[0]
         B = math.exp(-A[10] * rho ** 2)
         F_rho = (

@@ -1,16 +1,18 @@
 import math
 import numpy as np
+from numpy import ndarray
+from typing import Union, Optional
 import numpy.typing as npt
 from .gas import b_factor_DAK
 
 
 def b_o_Standing(
     temperature: float,
-    pressure: npt.ArrayLike,
+    pressure: Union[ndarray, float],
     api_gravity: float,
     gas_specific_gravity: float,
     solution_gor_initial: float,
-) -> npt.ArrayLike:
+) -> Union[ndarray, float]:
     """
     Calculates the oil formation volume factor (Bo) using Standing.
 
@@ -128,8 +130,8 @@ def b_o_bubblepoint_Standing(
     temperature: float,
     api_gravity: float,
     gas_specific_gravity: float,
-    solution_gor_initial: npt.ArrayLike,
-) -> npt.ArrayLike:
+    solution_gor_initial: Union[ndarray, float],
+) -> Union[ndarray, float]:
     """
     Calculates the oil formation volume factor (Bo) at the bubble point using Standing.
 
@@ -209,11 +211,11 @@ def db_o_dgor_Standing(
 
 def solution_gor_Standing(
     temperature: float,
-    pressure: npt.ArrayLike,
+    pressure: Union[ndarray, float],
     api_gravity: float,
     gas_specific_gravity: float,
     solution_gor_initial: float,
-) -> float:
+) -> Union[ndarray, float]:
     """
     Calculates the solution GOR partition using Standing.
 
@@ -246,7 +248,7 @@ def solution_gor_Standing(
         temperature, api_gravity, gas_specific_gravity, solution_gor_initial
     )
 
-    def gor_belowbubble(pressure: npt.ArrayLike) -> npt.ArrayLike:
+    def gor_belowbubble(pressure: Union[ndarray, float]) -> Union[ndarray, float]:
         gor = gas_specific_gravity * (
             (pressure / 18.2 + 1.4)
             * 10 ** (0.0125 * api_gravity - 0.00091 * temperature)
@@ -368,11 +370,11 @@ def oil_compressibility_undersat_Standing(
 
 def oil_compressibility_undersat_Spivey(
     temperature: float,
-    pressure: npt.ArrayLike,
+    pressure: Union[ndarray, float],
     api_gravity: float,
     gas_specific_gravity: float,
     solution_gor_initial: float,
-) -> npt.ArrayLike:
+) -> Union[ndarray, float]:
     """
     Calculates the oil compressibility (c_o) using Spivey.
 
@@ -420,7 +422,8 @@ def oil_compressibility_undersat_Spivey(
                 reduced_pressure,
                 solution_gor_initial,
                 temperature,
-            ]
+            ],
+            dtype="f8",
         )
     else:
         X = np.log(
@@ -537,7 +540,7 @@ def oil_compressibility_Standing(
             temperature, api_gravity, gas_specific_gravity, solution_gor
         )
         compressibility = (b_g - dBo_dGOR) * dGOR_dpressure / b_o_bubblepoint
-        return compressibility
+    return compressibility
 
 
 def density_Standing(
@@ -636,7 +639,9 @@ def viscosity_beggs_robinson(
     return mu_o
 
 
-def _mu_dead_to_live_br(mu_dead, solution_gor_initial):
+def _mu_dead_to_live_br(
+    mu_dead: Union[ndarray, float], solution_gor_initial: Union[ndarray, float]
+) -> Union[ndarray, float]:
     mu_live = (
         10.715
         * (solution_gor_initial + 100) ** -0.515
