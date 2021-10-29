@@ -5,8 +5,8 @@ import pytest
 from itertools import product
 import numpy as np
 from scipy.optimize import curve_fit
-from bluebonnet.fluids.fluid import Fluid
-from bluebonnet.flow.reservoir import (
+from bluebonnet.fluids import Fluid
+from bluebonnet.flow import (
     FlowProperties,
     FlowPropertiesMultiPhase,
     IdealReservoir,
