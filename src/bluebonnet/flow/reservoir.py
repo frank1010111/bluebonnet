@@ -2,80 +2,11 @@ from dataclasses import dataclass
 import numpy as np
 from scipy import interpolate, sparse, integrate
 import numpy.typing as npt
+from numpy import ndarray
+from typing import Any, Union, Iterable, Mapping, Optional, Callable
 from collections import namedtuple
 from bluebonnet.fluids.fluid import Fluid
-from bluebonnet.fluids.gas import pseudopressure_Hussainy
-
-
-class FlowProperties:
-    """
-    Flow properties for the system.
-
-    This is used to translate from scaled pseudopressure to diffusivity and to capture
-    the effect of expansion
-
-    Parameters
-    ----------
-    df: DataFrame with columns for pseudopressure, alpha, So, Sg, Sw
-        pseudopressure: pseudopressure scaled from 0 for frac face, 1 for initial
-            reservoir conditions
-        alpha: hydraulic diffusivity (needn't be scaled)
-    fvf_scale: float formation volume factor at initial conditions divided by FVF at the
-         frac face
-    """
-
-    def __init__(self, df, fvf_scale):
-        need_cols = set(["pseudopressure", "alpha"])
-        if need_cols.intersection(df.columns) != need_cols:
-            raise ValueError(
-                "Need input dataframe to have 'pseudopressure' and 'alpha' columns"
-            )
-        if abs(min(df.pseudopressure)) > 1e-6:
-            raise ValueError("Minimum pseudopressure should be 0 (did you rescale?)")
-        if abs(max(df.pseudopressure) - 1.0) > 1e-6:
-            raise ValueError("Maximum pseudopressure should be 1 (did you rescale?)")
-        self.df = df
-        x = df.pseudopressure
-        self.alpha = interpolate.interp1d(x, df.alpha)
-        self.fvf_scale = fvf_scale
-
-    def __repr__(self):
-        return self.df.__repr__()
-
-
-FlowPropertiesOnePhase = FlowProperties
-
-
-class FlowPropertiesMultiPhase(FlowProperties):
-    """
-    Flow properties for a multiphase system
-
-    This is used to translate from scaled pseudopressure and saturations to diffusivity
-    and to capture the effect of expansion
-
-    Parameters
-    ----------
-    df: DataFrame with columns for pseudopressure, alpha, So, Sg, Sw
-        pseudopressure: pseudopressure scaled from 0 for frac face, 1 for initial
-            reservoir conditions
-        alpha: hydraulic diffusivity (needn't be scaled)
-        So: oil saturation
-        Sg: gas saturation
-        Sw: water saturation
-    fvf_scale: dict for the Bo,Bg,Bw at initial conditions divided by FVF at the frac
-        face
-    """
-
-    def __init__(self, df, fvf_scale):
-        need_cols = set(["pseudopressure", "alpha", "So", "Sg", "Sw"])
-        if need_cols.intersection(df.columns) != need_cols:
-            raise ValueError(
-                "Need input dataframe to have 'pseudopressure', 'compressibility',"
-                " and 'alpha' columns"
-            )
-        self.df = df
-        x = df["pseudopressure", "So", "Sg", "Sw"]
-        self.alpha = interpolate.LinearNDInterpolator(x, df.alpha)
+from .flowproperties import FlowProperties
 
 
 @dataclass
@@ -85,15 +16,19 @@ class IdealReservoir:
 
     Parameters
     ----------
-    nx: number of spatial nodes
-    pressure_fracface: drawdown pressure at x=0 (psi)
-    pressure_initial: reservoir pressure before production (psi)
-    fluid: reservoir fluid PVT/flow properties
+    nx : int
+        number of spatial nodes
+    pressure_fracface : float
+        drawdown pressure at x=0 (psi)
+    pressure_initial : float
+        reservoir pressure before production (psi)
+    fluid : FlowProperties
+        reservoir fluid PVT/flow properties
 
     Methods
     ----------
-    simulate: calculate pressure over time
-    recovery_factor:
+    simulate : calculate pressure over time
+    recovery_factor : calculate recovery factor over time
     """
 
     nx: int
@@ -104,13 +39,14 @@ class IdealReservoir:
     def __post_init___(self):
         "Last initialization steps"
 
-    def simulate(self, time: npt.NDArray[np.float64]):
+    def simulate(self, time: ndarray):
         """
         Calculate simulation pressure over time
 
         Parameters
         ----------
-        time: array of times to solve for pressure
+        time : ndarray
+            times to solve for pressure
         """
         self.time = time
         x = np.linspace(0, 1, self.nx)
@@ -127,10 +63,28 @@ class IdealReservoir:
             pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
         self.pseudopressure = pseudopressure
 
-    def recovery_factor(self):
-        assert hasattr(self, "time") and hasattr(self, "pseudopressure"), (
-            "Need to run simulate before getting recovery factor",
-        )
+    def recovery_factor(self, time: Optional[ndarray] = None) -> ndarray:
+        """Calculate recovery factor over time
+
+        If time has is not specified, requires that `simulate` has been run
+
+        Parameters
+        ----------
+        time : ndarray, Optional
+            times to calculate recovery factor at
+
+        Returns
+        -------
+        recovery : ndarray
+            recovery factor over time
+        """
+        if time is None:
+            try:
+                time = self.time
+            except AttributeError:
+                raise RuntimeError(
+                    "Need to run simulate before calculating recovery factor",
+                )
         h_inv = self.nx - 1.0
         pp = self.pseudopressure[:, :3]
         dp_dx = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5
@@ -138,9 +92,28 @@ class IdealReservoir:
         self.recovery = cumulative * self.fvf_scale()
         return self.recovery
 
-    def alpha_scaled(
-        self, pseudopressure: npt.NDArray[np.float64]
-    ) -> npt.NDArray[np.float64]:
+    def recovery_factor_interpolator(self) -> Callable:
+        """Generates a function to get recovery factor from time
+
+        Requires that `recovery_factor` has been run
+
+        Returns
+        -------
+        scipy interpolator object that takes in time and spits out recovery factor
+        """
+        try:
+            time = self.time
+            recovery = self.recovery
+        except AttributeError:
+            raise RuntimeError(
+                "Need to run recovery_factor",
+            )
+        interpolator = interpolate.interp1d(
+            time, recovery, bounds_error=False, fill_value=(0, recovery[-1])
+        )
+        return interpolator
+
+    def alpha_scaled(self, pseudopressure: ndarray) -> ndarray:
         "Calculate scaled diffusivity"
         return np.ones_like(pseudopressure)
 
@@ -149,9 +122,7 @@ class IdealReservoir:
 
 
 class SinglePhaseReservoir(IdealReservoir):
-    def alpha_scaled(
-        self, pseudopressure: npt.NDArray[np.float64]
-    ) -> npt.NDArray[np.float64]:
+    def alpha_scaled(self, pseudopressure: ndarray) -> ndarray:
         "Calculate scaled diffusivity"
         alpha = self.fluid.alpha
         return alpha(pseudopressure) / alpha(1)
@@ -161,111 +132,116 @@ class SinglePhaseReservoir(IdealReservoir):
 
 
 @dataclass
+class TwoPhaseReservoir(SinglePhaseReservoir):
+    """Oil-gas reservoir simulation
+
+    References
+    ----------
+    Ruiz Maraggi, L.M., Lake, L.W. and Walsh, M.P., 2020. "A Two-Phase Non-Linear One-
+        Dimensional Flow Model for Reserves Estimation in Tight Oil and Gas
+        Condensate Reservoirs Using Scaling Principles." In SPE Latin American and
+        Caribbean Petroleum Engineering Conference. OnePetro.
+        https://doi.org/10.2118/199032-MS
+    """
+
+    Sw_init: float
+
+    def simulate(self, time: ndarray):
+        """Calculate simulation pressure over time
+
+        Parameters
+        ----------
+        time : ndarray
+            times to solve for pressure
+        """
+        super().simulate()
+
+
+@dataclass
 class MultiPhaseReservoir(SinglePhaseReservoir):
     So_init: float
     Sg_init: float
     Sw_init: float
 
-    def simulate(self, time: npt.NDArray[np.float64]):
-        """
-        Calculate simulation pressure over time
+    def simulate(self, time: ndarray):
+        """Calculate simulation pressure over time
 
         Parameters
         ----------
-        time: array of times to solve for pressure
+        time : ndarray
+            times to solve for pressure
         """
         raise NotImplementedError  # TODO: saturation changes
-        self.time = time
+
         x = np.linspace(0, 1, self.nx)
         dx_squared = (x[1] - x[0]) ** 2
         pseudopressure = np.empty((len(time), self.nx))
         pseudopressure[0, :] = 1
         pseudopressure[0, 0] = 0
+        sat_names = ("So", "Sg", "Sw")
+        saturations = np.empty(
+            (len(time), self.nx),
+            dtype=[(s, np.float64) for s in sat_names],
+        )
         for i in range(time.shape[0] - 1):
-            mesh_ratio = (time[i + 1] - time[i]) / dx_squared
             b = pseudopressure[i]
-            a_matrix = self._build_matrix(b, mesh_ratio)
+            sat = saturations[i]
+            dt = time[i + 1] - time[i]
+            mesh_ratio = dt / dx_squared
+            alpha_scaled = self.alpha_scaled(b, sat)
+            kt_h2 = mesh_ratio * alpha_scaled
+            a_matrix = _build_matrix(kt_h2)
             pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
+            saturations[i + 1] = self._step_saturation(sat, b, pseudopressure[i + 1])
+        self.time = time
         self.pseudopressure = pseudopressure
 
     def alpha_scaled(
         self,
-        pseudopressure: npt.NDArray[np.float64],
-        So: npt.NDArray[np.float64],
-        Sg: npt.NDArray[np.float64],
-        Sw: npt.NDArray[np.float64],
-    ) -> npt.NDArray[np.float64]:
-        "Calculate scaled diffusivity"
+        pseudopressure: ndarray,
+        saturation: ndarray,
+    ) -> ndarray:
+        """
+        Calculate scaled diffusivity given pseudopressure and saturations
+
+        Parameters
+        ----------
+        pseudopressure : ndarray
+            scaled pseudopressure
+        saturaion : ndarray
+            record array with So, Sg, Sw records
+
+        Returns
+        -------
+        alpha : ndarray
+            scaled diffusivity
+        """
         alpha = self.fluid.alpha
-        return alpha(pseudopressure, So, Sg, Sw) / alpha(1)
+        s = saturation
+        return alpha(pseudopressure, s["So"], s["Sg"], s["Sw"]) / alpha(1)
+
+    def _step_saturation(
+        self, saturation: ndarray, ppressure_old: ndarray, ppressure_new: ndarray
+    ) -> ndarray:
+        "Step to new saturation"
+        return NotImplementedError
 
 
-RelPermParams = namedtuple(
-    "RelPermParams", "n_o n_g n_w S_or S_wc S_gc k_ro_max k_rw_max k_rg_max"
-)
-
-
-def relative_permeabilities(
-    saturations: npt.NDArray,
-    params: RelPermParams,
-) -> npt.NDArray:
-    """
-    Brooks-Corey power-law relative permeability
-
-    Parameters
-    ----------
-    saturations: numpy record array with columns for So, Sg, Sw
-    params: RelPermParams with Corey exponents, residual saturations, and max relative permeabilities
-
-    Returns
-    -------
-    k_rel: numpy record array with k_o, k_w, k_g (aka oil, water gas)
-    """
-    assert (
-        np.abs(sum(v for v in saturations.values()) - 1) < 1e-3
-    ), "Saturations must sum to 1"
-    assert max(params.n_o, params.n_g, params.n_w) <= 6, "Exponents must be less than 6"
-    assert min(params.n_o, params.n_g, params.n_w) >= 1, "Exponents must be at least 1"
-    assert (
-        min(params.S_or, params.S_wc, params.S_gc) >= 0
-    ), "Critical saturations must be at least 0"
-    assert (
-        max(params.S_or, params.S_wc, params.S_gc) <= 1
-    ), "Critical saturations must be less than 1"
-    assert (
-        min(params.k_ro_max, params.k_rw_max, params.k_rg_max) >= 0
-    ), "Max relative permeability must be at least 0"
-    assert (
-        max(params.k_ro_max, params.k_rw_max, params.k_rg_max) <= 1
-    ), "Max relative permeability must be less than 1"
-
-    denominator = 1 - params.S_or - params.S_wc - params.S_gc
-    k_o = (
-        params.k_ro_max
-        * ((saturations["So"] - params.S_or) / denominator) ** params.n_o
-    )
-    k_w = (
-        params.k_rw_max
-        * ((saturations["Sw"] - params.S_wc) / denominator) ** params.n_w
-    )
-    k_g = (
-        params.k_rg_max
-        * ((saturations["Sg"] - params.S_gr) / denominator) ** params.n_g
-    )
-    k_rel = np.array(
-        [k_o, k_w, k_g], dtype=[(i, np.float64) for i in ("k_o", "k_w", "k_g")]
-    )
-    k_rel[k_rel < 0] = 0  # negative permeability seems bad
-    return k_rel
-
-
-def _build_matrix(kt_h2: npt.NDArray[np.float64]):
+def _build_matrix(kt_h2: ndarray) -> sparse.spmatrix:
     """
     Set up A matrix for timestepping
 
+    Follows :math: `A x = b` -> :math: `x = A \ b`
+
     Parameters
     ----------
-    kt_h2: ndarray, diffusivity * dt / dx^2
+    kt_h2: ndarray
+        diffusivity * dt / dx^2
+
+    Returns
+    -------
+    a_matrix: sp.sparse.matrix
+        The A matrix
     """
     diagonal_long = 1.0 + 2 * kt_h2
     diagonal_long[0] = -1.0
