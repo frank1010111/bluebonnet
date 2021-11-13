@@ -4,11 +4,13 @@ __version__ = version("bluebonnet")
 from .reservoir import (
     IdealReservoir,
     SinglePhaseReservoir,
+    SinglePhaseReservoirMarder,
     MultiPhaseReservoir,
 )
 
 from .flowproperties import (
     FlowProperties,
+    FlowPropertiesMarder,
     FlowPropertiesOnePhase,
     FlowPropertiesTwoPhase,
     FlowPropertiesMultiPhase,

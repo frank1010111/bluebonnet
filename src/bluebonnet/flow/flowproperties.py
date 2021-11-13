@@ -42,6 +42,38 @@ class FlowProperties:
 
     def __repr__(self):
         return self.df.__repr__()
+    
+class FlowPropertiesMarder(FlowProperties):
+    """
+    Flow properties for the system.
+
+    This is used to translate from scaled pseudopressure to diffusivity and to capture
+    the effect of expansion
+
+    Parameters
+    ----------
+    df : Mapping
+        has accessors for pseudopressure, alpha
+        pseudopressure: pseudopressure in psi^2/centipoise: NOT SCALED
+        alpha: hydraulic diffusivity: NOT SCALED
+    """
+
+    def __init__(self, df: Mapping[str, ndarray],Pi):
+        need_cols = {"pseudopressure","Cg","P","Viscosity","Z-Factor"}
+        if need_cols.intersection(df) != need_cols:
+            raise ValueError("Need input df to have 'pseudopressure','Cg','P','Viscosity' and 'Z-Factor'")
+        df=df.assign(m_scale=1/2*df.Cg*df.P*df.Viscosity*df['Z-Factor']/df.P**2)
+        df=df.assign(m_initial_scaled=df.pseudopressure*df.m_scale)
+        df=df.assign(alpha= 1/(df.Cg * df.Viscosity))
+        m_initial_scaled_func=interp1d(df.P,df.m_initial_scaled)
+        self.m_scale_func=interp1d(df.P,df.m_scale)
+        self.ms=self.m_scale_func(Pi)
+        
+        df=df.assign(m_scaled=df["pseudopressure"]*self.ms)
+        self.m_scaled_func=interp1d(df.P,df.m_scaled)
+        self.mi=self.m_scaled_func(Pi)
+        self.alpha_func = interp1d(df.m_scaled, df["alpha"])
+        self.df = df
 
 
 FlowPropertiesOnePhase = FlowProperties
