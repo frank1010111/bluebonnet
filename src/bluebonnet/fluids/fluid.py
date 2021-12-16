@@ -235,8 +235,8 @@ class Fluid:
 
 
 def pseudopressure(
-    pressure: npt.NDArray, viscosity: npt.NDArray, z_factor: npt.NDArray
-) -> npt.NDArray:
+    pressure: ndarray, viscosity: ndarray, z_factor: ndarray
+) -> ndarray:
     """
     Calculates the pseudopressure using Al-Hussainy's relation
 

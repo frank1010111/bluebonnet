@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 from scipy import interpolate, sparse, integrate
+from scipy.special import erf
 import numpy.typing as npt
 from numpy import ndarray
 from typing import Any, Union, Iterable, Mapping, Optional, Callable
@@ -161,9 +162,18 @@ class SinglePhaseReservoirMarder(IdealReservoir):
                     "Need to run simulate before calculating recovery factor",
                 )
         h_inv = self.nx
-        pp = self.pseudopressure[:, :3]
-        dp_dx = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5
+        pp = self.pseudopressure[:, :6]
+        mf=self.fluid.m_scaled_func(self.pressure_fracface)
+     
+        dp_dx = (-pp[:,1] + 4 * pp[:, 0] - 3 * mf) * h_inv * 0.5
+        #dp_dx = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5
+        #dp_dx = (-pp[:, 3] + 4 * pp[:, 2] - 3 *  pp[:, 1]) * h_inv * 0.5
+
+        #dp_dx = (  pp[:, 0]-mf) * h_inv
+        #print(dp_dx)
+
         cumulative = integrate.cumulative_trapezoid(dp_dx, self.time, initial=0)
+        self.rate=dp_dx
         self.recovery = cumulative
         return self.recovery
 
@@ -184,7 +194,8 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         The A matrix
         """
         diagonal_long = 1.0 + 2 * kt_h2
-        diagonal_low = np.concatenate([-kt_h2[0:-2], [-2 * kt_h2[-1]]]) #Zero slope boundary coundition
+        diagonal_long[-1]-=kt_h2[-1]
+        diagonal_low = np.concatenate([-kt_h2[0:-1]]) #Zero slope boundary coundition
         diagonal_upper = -kt_h2[1:]
         a_matrix = sparse.diags(
             [diagonal_low, diagonal_long, diagonal_upper], [-1, 0, 1], format="csr"
@@ -204,9 +215,13 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         x = np.linspace(1/self.nx, 1, self.nx) #This leaves 0 alone for the boundary condition
         dx_squared = (x[1] - x[0]) ** 2
         pseudopressure = np.empty((len(time), self.nx))
-        pseudopressure[0, :] = self.fluid.mi*.99999 #This is defined in flowproperties.FlowPropertiesMarder.__init__
         Pf=self.pressure_fracface
+        mi=self.fluid.mi
         mf=self.fluid.m_scaled_func(Pf)
+        mix=mf+(mi-mf)*erf(x*self.nx*2)*.999
+        pseudopressure[0, :] = mix #This is defined in flowproperties.FlowPropertiesMarder.__init__
+        
+
         print(mf)
         for i in range(time.shape[0] - 1):
             b = copy.deepcopy(pseudopressure[i]) #Make a copy. Slicing did not work!
@@ -221,6 +236,7 @@ class SinglePhaseReservoirMarder(IdealReservoir):
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = self.build_matrix(kt_h2)
             pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
+
         self.pseudopressure = pseudopressure
 
 
