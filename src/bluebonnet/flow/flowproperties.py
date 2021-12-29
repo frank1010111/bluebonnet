@@ -74,6 +74,7 @@ class FlowPropertiesMarder(FlowProperties):
         self.mi=self.m_scaled_func(Pi)
         self.alpha_func = interp1d(df.m_scaled, df["alpha"])
         self.df = df
+        
 
 
 FlowPropertiesOnePhase = FlowProperties

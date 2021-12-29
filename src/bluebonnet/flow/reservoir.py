@@ -126,7 +126,7 @@ class IdealReservoir:
 class SinglePhaseReservoir(IdealReservoir):
     def alpha_scaled(self, pseudopressure: ndarray) -> ndarray:
         "Calculate scaled diffusivity"
-        alpha = self.fluid.alpha_func
+        alpha = self.fluid.alpha
         return alpha(pseudopressure) / alpha(1)
 
     def fvf_scale(self):
@@ -165,8 +165,10 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         pp = self.pseudopressure[:, :6]
         mf=self.fluid.m_scaled_func(self.pressure_fracface)
      
-        dp_dx = (-pp[:,1] + 4 * pp[:, 0] - 3 * mf) * h_inv * 0.5
-        #dp_dx = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5
+        #dp_dx = (-pp[:,1] + 4 * pp[:, 0] - 3 * mf) * h_inv * 0.5 #This form seems better, but it's not.
+        #Something is wrong with the slope of the final point.
+        #
+        dp_dx = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5
         #dp_dx = (-pp[:, 3] + 4 * pp[:, 2] - 3 *  pp[:, 1]) * h_inv * 0.5
 
         #dp_dx = (  pp[:, 0]-mf) * h_inv
@@ -194,9 +196,9 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         The A matrix
         """
         diagonal_long = 1.0 + 2 * kt_h2
-        diagonal_long[-1]-=kt_h2[-1]
-        diagonal_low = np.concatenate([-kt_h2[0:-1]]) #Zero slope boundary coundition
-        diagonal_upper = -kt_h2[1:]
+        diagonal_long[-1]-=kt_h2[-1] #Zero slope boundary coundition
+        diagonal_low = -kt_h2[1:]
+        diagonal_upper = -kt_h2[0:-1]
         a_matrix = sparse.diags(
             [diagonal_low, diagonal_long, diagonal_upper], [-1, 0, 1], format="csr"
             )
@@ -218,11 +220,54 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         Pf=self.pressure_fracface
         mi=self.fluid.mi
         mf=self.fluid.m_scaled_func(Pf)
-        mix=mf+(mi-mf)*erf(x*self.nx*2)*.999
+        mix=mf+(mi-mf)*erf(x*self.nx*200)
+        mix[0]=mi
+        pseudopressure[0, :] = mix #This is defined in flowproperties.FlowPropertiesMarder.__init__
+        print("Most current version.")
+        
+        print(mi,mf)
+        for i in range(time.shape[0] - 1):
+            b = copy.deepcopy(pseudopressure[i]) #Make a copy. Slicing did not work!
+            b=np.minimum(b,mix) #Prevent from going out of interpolation range
+            mesh_ratio = (time[i + 1] - time[i]) / dx_squared
+            try:
+                alpha_scaled = self.alpha_scaled(b)
+            except:
+                print('mi=',mi,'  mf=',mf)
+                print(b)
+                cc=qqqq
+            #print(pseudopressure[i][0],'a')
+
+            b[0]=b[0]+self.alpha_scaled(mf)*mf*mesh_ratio #This enforces the boundary condition at 0
+            #print(pseudopressure[i][0],'b')
+
+            kt_h2 = mesh_ratio * alpha_scaled
+            a_matrix = self.build_matrix(kt_h2)
+            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
+
+        self.pseudopressure = pseudopressure
+
+    
+    def simulate2(self, time: ndarray):
+        """
+        Calculate simulation pressure over time
+
+        Parameters
+        ----------
+        time : ndarray
+            times to solve for pressure
+        """
+        self.time = time
+        x = np.linspace(1/self.nx, 1, self.nx) #This leaves 0 alone for the boundary condition
+        dx_squared = (x[1] - x[0]) ** 2
+        pseudopressure = np.empty((len(time), self.nx))
+        Pf=self.pressure_fracface
+        mi=self.fluid.mi
+        mf=self.fluid.m_scaled_func(Pf)
+        mix=mf+(mi-mf)*erf(x*self.nx*200)*.999999999
+        mix[0]=mf
         pseudopressure[0, :] = mix #This is defined in flowproperties.FlowPropertiesMarder.__init__
         
-
-        print(mf)
         for i in range(time.shape[0] - 1):
             b = copy.deepcopy(pseudopressure[i]) #Make a copy. Slicing did not work!
             mesh_ratio = (time[i + 1] - time[i]) / dx_squared
@@ -234,7 +279,7 @@ class SinglePhaseReservoirMarder(IdealReservoir):
             #print(pseudopressure[i][0],'b')
 
             kt_h2 = mesh_ratio * alpha_scaled
-            a_matrix = self.build_matrix(kt_h2)
+            a_matrix = _build_matrix(kt_h2)
             pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
 
         self.pseudopressure = pseudopressure
