@@ -204,7 +204,7 @@ class SinglePhaseReservoirMarder(IdealReservoir):
             )
         return a_matrix
     
-    def simulate(self, time: ndarray):
+    def simulate(self, time: ndarray,PressureTime=[]):
         """
         Calculate simulation pressure over time
 
@@ -217,13 +217,18 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         x = np.linspace(1/self.nx, 1, self.nx) #This leaves 0 alone for the boundary condition
         dx_squared = (x[1] - x[0]) ** 2
         pseudopressure = np.empty((len(time), self.nx))
-        Pf=self.pressure_fracface
+        if(len(PressureTime)==0):
+            Pf=self.pressure_fracface
+        else:
+            if len(PressureTime)!=len(time):
+                raise ValueError("Pressure time series does not match time variable: {:} vs {:}".format(len(PressureTime),len(time)))
+            Pf=PressureTime[0]
         mi=self.fluid.mi
         mf=self.fluid.m_scaled_func(Pf)
         mix=mf+(mi-mf)*erf(x*self.nx*200)
         mix[0]=mi
         pseudopressure[0, :] = mix #This is defined in flowproperties.FlowPropertiesMarder.__init__
-        print("Most current version.")
+        print("Now has time-varying pressure option.")
         
         print(mi,mf)
         for i in range(time.shape[0] - 1):
@@ -237,7 +242,10 @@ class SinglePhaseReservoirMarder(IdealReservoir):
                 print(b)
                 cc=qqqq
             #print(pseudopressure[i][0],'a')
-
+            if (len(PressureTime)>0):
+                Pf=PressureTime[i]
+                mf=self.fluid.m_scaled_func(Pf)
+            
             b[0]=b[0]+self.alpha_scaled(mf)*mf*mesh_ratio #This enforces the boundary condition at 0
             #print(pseudopressure[i][0],'b')
 
