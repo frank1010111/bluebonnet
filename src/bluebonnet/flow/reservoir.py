@@ -228,9 +228,7 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         mix=mf+(mi-mf)*erf(x*self.nx*200)
         mix[0]=mi
         pseudopressure[0, :] = mix #This is defined in flowproperties.FlowPropertiesMarder.__init__
-        print("Now has time-varying pressure option.")
         
-        print(mi,mf)
         for i in range(time.shape[0] - 1):
             b = copy.deepcopy(pseudopressure[i]) #Make a copy. Slicing did not work!
             b=np.minimum(b,mix) #Prevent from going out of interpolation range
