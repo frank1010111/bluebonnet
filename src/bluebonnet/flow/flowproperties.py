@@ -63,9 +63,9 @@ class FlowPropertiesMarder(FlowProperties):
         if need_cols.intersection(df) != need_cols:
             raise ValueError("Need input df to have 'pseudopressure','Cg','P','Viscosity' and 'Z-Factor'")
         df=df.assign(m_scale=1/2*df.Cg*df.P*df.Viscosity*df['Z-Factor']/df.P**2)
-        #df=df.assign(m_initial_scaled=df.pseudopressure*df.m_scale)
+
         df=df.assign(alpha= 1/(df.Cg * df.Viscosity))
-        #m_initial_scaled_func=interp1d(df.P,df.m_initial_scaled)
+
         self.m_scale_func=interp1d(df.P,df.m_scale)
         self.ms=self.m_scale_func(Pi)
         

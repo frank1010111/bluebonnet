@@ -4,6 +4,7 @@ from numpy import ndarray
 from typing import Union
 import numpy.typing as npt
 import scipy as sp
+import pandas as pd
 from collections import namedtuple
 
 from .gas import (
@@ -12,6 +13,7 @@ from .gas import (
     b_factor_DAK,
     density_DAK,
     compressibility_DAK,
+    pseudocritical_point_Sutton,
     viscosity_Sutton,
     pseudopressure_Hussainy,
 )
@@ -24,6 +26,57 @@ PseudocriticalPoint = namedtuple(
     "PseudocriticalPoint", ["temperature_pseudocritical", "pressure_pseudocritical"]
 )
 
+def BuildPVT(FieldValues,GasDryness,maximum_pressure=14000):
+
+    non_hydrocarbon_properties=make_nonhydrocarbon_properties(
+        float(FieldValues['N2']),
+        float(FieldValues['H2S']),
+        float(FieldValues['CO2']))
+
+    (Tc,Pc)=pseudocritical_point_Sutton(
+        float(FieldValues['Gas Specific Gravity']),
+        non_hydrocarbon_properties,
+        GasDryness)
+
+    Pressure=np.arange(0,maximum_pressure,10.0)
+    Pressure[0]=0.001
+
+    T=np.zeros(len(Pressure))+float(FieldValues['Reservoir Temperature (deg F)'])
+
+    Z=np.array( [
+        z_factor_DAK(
+            float(FieldValues['Reservoir Temperature (deg F)']),
+            p,
+            Tc,
+            Pc)
+        for p in Pressure])
+
+    density=np.array([density_DAK(
+        float(FieldValues['Reservoir Temperature (deg F)']),
+        p,
+        Tc,
+        Pc,
+        float(FieldValues['Gas Specific Gravity']))
+    for p in Pressure])
+  
+    viscosity = np.array([
+        viscosity_Sutton(
+                    float(FieldValues['Reservoir Temperature (deg F)']),
+                    p,
+                    Tc,
+                    Pc,
+                    float(FieldValues['Gas Specific Gravity']))
+        for p in Pressure ])
+
+    compressibility = np.array([
+        compressibility_DAK(
+            float(FieldValues['Reservoir Temperature (deg F)']),
+            p,
+            Tc,
+            Pc)
+        for p in Pressure])
+    pvt_gas=pd.DataFrame(data={'T':T,'P':Pressure,'Density':density,'Z-Factor':Z,'Cg':compressibility,'Viscosity':viscosity})
+    return(pvt_gas)
 
 @dataclass
 class Fluid:
