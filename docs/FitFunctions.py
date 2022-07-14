@@ -34,6 +34,29 @@ def obfun(params, Days, Gas, pvt_gas, PressureTime):
     # print('rms    ',sqrt((((M*Model-C))**2).mean()))
     return M * Model - Gas
 
+def obfunNP(params, Days, Gas, pvt_gas,Pf):
+    tau = params["tau"].value
+    M = params["M"].value
+    Pi = params["Pi"].value
+    # t0=params['t0'].value
+    # t0=0
+    t = Days / tau
+    t0 = time()
+    flow_properties = FlowProperties(pvt_gas, Pi)
+    res_realgasM = SinglePhaseReservoirMarder(80, Pf, Pi, flow_propertiesM)
+    res_realgasM.simulate(t, pressure_fracface=PressureTime)
+    rf2M = res_realgasM.recovery_factor()
+    print(
+        "Simulation took {:5.2g} s; tau is {:7.5g}, Pi is {:7.5g} and M is {:7.5g}".format(
+            time() - t0, tau, Pi, M
+        )
+    )
+    Model = rf2M
+    # print ('M is',M, 'Model is', Model,'and C is',C)
+    # print ('M is',M,' tau is ',tau)
+    # print('rms    ',sqrt((((M*Model-C))**2).mean()))
+    return M * Model - Gas
+
 
 def CheckRefrack(Rates, Months):
     Sqrt = 1.0 / sqrt(arange(1, Months + 1, 1))

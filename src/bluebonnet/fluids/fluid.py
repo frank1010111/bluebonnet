@@ -6,6 +6,7 @@ import numpy.typing as npt
 import scipy as sp
 import pandas as pd
 from collections import namedtuple
+from scipy.integrate import cumtrapz
 
 from .gas import (
     make_nonhydrocarbon_properties,
@@ -27,6 +28,9 @@ PseudocriticalPoint = namedtuple(
 )
 
 def BuildPVT(FieldValues,GasDryness,maximum_pressure=14000):
+    """
+    FieldValues must contain 'N2','H2S','CO2', 'Gas Specific Gravity','Reservoir Temperature (deg F)'
+    """
 
     non_hydrocarbon_properties=make_nonhydrocarbon_properties(
         float(FieldValues['N2']),
@@ -76,6 +80,10 @@ def BuildPVT(FieldValues,GasDryness,maximum_pressure=14000):
             Pc)
         for p in Pressure])
     pvt_gas=pd.DataFrame(data={'T':T,'P':Pressure,'Density':density,'Z-Factor':Z,'Cg':compressibility,'Viscosity':viscosity})
+    ms=2*cumtrapz(pvt_gas.P/(pvt_gas.Viscosity*pvt_gas["Z-Factor"]),pvt_gas.P)
+    ms=np.concatenate(([0],ms))
+    pvt_gas['pseudopressure']=ms
+    
     return(pvt_gas)
 
 @dataclass
