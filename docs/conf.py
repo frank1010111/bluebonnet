@@ -6,9 +6,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u"bluebonnet"
-copyright = u"2021, Frank Male"
-author = u"Frank Male"
+project = "bluebonnet"
+copyright = "2021, Frank Male"
+author = "Frank Male"
 
 # -- General configuration ---------------------------------------------------
 
@@ -22,6 +22,13 @@ extensions = [
     "sphinx.ext.viewcode",
 ]
 autoapi_dirs = ["../src"]
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "show-module-summary",
+    "special-members",
+]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
