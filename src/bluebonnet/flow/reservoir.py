@@ -111,11 +111,15 @@ class IdealReservoir:
         """
         try:
             time = self.time
-            recovery = self.recovery
         except AttributeError:
             raise RuntimeError(
-                "Need to run recovery_factor",
+                "Need to run simulate",
             )
+        try:
+            recovery = self.recovery
+        except AttributeError:
+            recovery = self.recovery_factor(time)
+
         interpolator = interpolate.interp1d(
             time, recovery, bounds_error=False, fill_value=(0, recovery[-1])
         )
