@@ -13,7 +13,6 @@ from typing import Callable
 import numpy as np
 from numpy import ndarray
 from scipy import integrate, interpolate, sparse
-from scipy.special import erf
 
 from bluebonnet.flow.flowproperties import FlowProperties
 
@@ -69,7 +68,7 @@ class IdealReservoir:
             alpha_scaled = self.alpha_scaled(b)
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
-            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
+            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b)
         self.pseudopressure = pseudopressure
 
     def recovery_factor(self, time: ndarray | None = None) -> ndarray:
@@ -141,7 +140,7 @@ class SinglePhaseReservoir(IdealReservoir):
     def alpha_scaled(self, pseudopressure: ndarray) -> ndarray:
         """Calculate scaled diffusivity."""
         alpha = self.fluid.alpha
-        return alpha(pseudopressure) / alpha(1)
+        return alpha(pseudopressure) / alpha(self.fluid.m_i)
 
     def fvf_scale(self) -> float:
         """Scaling for formation volume factor.
@@ -149,7 +148,7 @@ class SinglePhaseReservoir(IdealReservoir):
         Returns:
             float: FVF
         """
-        return self.fluid.fvf_scale
+        return 1
 
 
 class SinglePhaseReservoirMarder(IdealReservoir):
@@ -157,9 +156,8 @@ class SinglePhaseReservoirMarder(IdealReservoir):
 
     def alpha_scaled(self, m_scaled: ndarray) -> ndarray:
         """Calculate scaled diffusivity."""
-        alpha = self.fluid.alpha_func
-        mi = self.fluid.mi
-        return alpha(m_scaled) / alpha(mi)
+        alpha = self.fluid.alpha
+        return alpha(m_scaled) / alpha(self.fluid.m_i)
 
     def recovery_factor(self, time: ndarray | None = None) -> ndarray:
         """Calculate recovery factor over time.
@@ -169,7 +167,7 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         Parameters
         ----------
         time : ndarray, Optional
-            times to calculate recovery factor at
+            times to calculate recovery factor at. If None, use times from simulate
 
         Returns
         -------
@@ -202,125 +200,62 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         self.recovery = cumulative
         return self.recovery
 
-    def build_matrix(self, kt_h2: ndarray) -> sparse.spmatrix:
-        r"""
-        Set up A matrix for timestepping.
-
-        Boundary conditions are in b, not in A.
-        Follows :math: `A x = b` -> :math: `x = A \ b`
-
-        Parameters
-        ----------
-        kt_h2: ndarray
-            diffusivity * dt / dx^2
-
-        Returns
-        -------
-        a_matrix: sp.sparse.matrix
-            The A matrix
-        """
-        diagonal_long = 1.0 + 2 * kt_h2
-        diagonal_long[-1] -= kt_h2[-1]  # Zero slope boundary condition
-        diagonal_low = -kt_h2[1:]
-        diagonal_upper = -kt_h2[0:-1]
-        a_matrix = sparse.diags(
-            [diagonal_low, diagonal_long, diagonal_upper], [-1, 0, 1], format="csr"
-        )
-        return a_matrix
-
-    def simulate(self, time: ndarray, pressure_fracface: ndarray[float] | None = None):
+    def simulate(
+        self, time: ndarray[float], pressure_fracface: ndarray[float] | None = None
+    ):
         """Calculate simulation pressure over time.
 
-        Args:
-            time (ndarray): times to solve for pressure
-            pressure_fracface (Iterable[float] | None, optional):
-                pressure at frac-face over time. Defaults to None.
+        Args
+        ----
+        time : ndarray
+            times to solve for pressure
+        pressure_fracface : Iterable[float] | None, optional
+            pressure at frac-face over time. Defaults to None, which is no change
 
-        Raises:
-            ValueError: wrong length changing pressure at frac-face
+        Raises
+        ------
+        ValueError: wrong length changing pressure at frac-face
         """
         self.time = time
-        x = np.linspace(
-            1 / self.nx, 1, self.nx
-        )  # This leaves 0 alone for the boundary condition
-        dx_squared = (x[1] - x[0]) ** 2
+        dx_squared = (1 / self.nx) ** 2
         pseudopressure = np.empty((len(time), self.nx))
         if pressure_fracface is None:
-            Pf = self.pressure_fracface
+            p_f = self.pressure_fracface
         else:
             if len(pressure_fracface) != len(time):
                 raise ValueError(
-                    "Pressure time series does not match time variable: {:} vs {:}".format(
-                        len(pressure_fracface), len(time)
-                    )
+                    "Pressure time series does not match time variable:"
+                    f" {len(pressure_fracface)} versus {len(time)}"
                 )
-            Pf = pressure_fracface[0]
-        mi = self.fluid.mi
-        mf = self.fluid.m_scaled_func(Pf)
-        mix = mf + (mi - mf) * erf(x * self.nx * 200)
-        mix[0] = mi
-        pseudopressure[
-            0, :
-        ] = mix  # This is defined in flowproperties.FlowPropertiesMarder.__init__
+            p_f = pressure_fracface[0]
+        m_i = self.fluid.m_i
+        m_f = self.fluid.m_scaled_func(p_f)
+        pseudopressure_initial = m_f
+        pseudopressure_initial[0] = m_i
+        pseudopressure[0, :] = pseudopressure_initial
 
-        for i in range(time.shape[0] - 1):
+        for i in range(len(time) - 1):
             b = copy.deepcopy(pseudopressure[i])  # Make a copy. Slicing did not work!
-            b = np.minimum(b, mix)  # Prevent from going out of interpolation range
+            b = np.minimum(b, m_i)  # Prevent from going out of interpolation range
             mesh_ratio = (time[i + 1] - time[i]) / dx_squared
             try:
                 alpha_scaled = self.alpha_scaled(b)
             except ValueError:
-                raise ValueError(f"scaling failed where mi={mi}  mf={mf}")
+                raise ValueError(
+                    f"scaling failed where m_initial={m_i}  m_fracface={m_f}"
+                )
                 # print(b)
             if pressure_fracface is not None:
-                Pf = pressure_fracface[i]
-                mf = self.fluid.m_scaled_func(Pf)
+                p_f = pressure_fracface[i]
+                m_f = self.fluid.m_scaled_func(p_f)
 
             b[0] = (
-                b[0] + self.alpha_scaled(mf) * mf * mesh_ratio
+                b[0] + self.alpha_scaled(m_f) * m_f * mesh_ratio
             )  # This enforces the boundary condition at 0
             # print(pseudopressure[i][0],'b')
 
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = self.build_matrix(kt_h2)
-            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
-
-        self.pseudopressure = pseudopressure
-
-    def simulate2(self, time: ndarray):
-        """
-        Calculate simulation pressure over time.
-
-        Parameters
-        ----------
-        time : ndarray
-            times to solve for pressure
-        """
-        self.time = time
-        x = np.linspace(
-            1 / self.nx, 1, self.nx
-        )  # This leaves 0 alone for the boundary condition
-        dx_squared = (x[1] - x[0]) ** 2
-        pseudopressure = np.empty((len(time), self.nx))
-        Pf = self.pressure_fracface
-        mi = self.fluid.mi
-        mf = self.fluid.m_scaled_func(Pf)
-        mix = mf + (mi - mf) * erf(x * self.nx * 200) * 0.999999999
-        mix[0] = mf
-        pseudopressure[
-            0, :
-        ] = mix  # mix is defined in flowproperties.FlowPropertiesMarder.__init__
-
-        for i in range(time.shape[0] - 1):
-            # Make a copy. Slicing did not work!
-            b = copy.deepcopy(pseudopressure[i])
-            mesh_ratio = (time[i + 1] - time[i]) / dx_squared
-            alpha_scaled = self.alpha_scaled(b)
-            # Enforce the boundary condition at 0
-            b[0] = b[0] + self.alpha_scaled(mf) * mf * mesh_ratio
-
-            kt_h2 = mesh_ratio * alpha_scaled
-            a_matrix = _build_matrix(kt_h2)
             pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
 
         self.pseudopressure = pseudopressure

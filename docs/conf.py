@@ -4,8 +4,9 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Project information -----------------------------------------------------
+from __future__ import annotations
 
+# -- Project information -----------------------------------------------------
 project = "bluebonnet"
 copyright = "2021, Frank Male"
 author = "Frank Male"
