@@ -3,7 +3,8 @@ name = "bluebonnet"
 version = "0.1.0"
 description = "Scaling solutions for production analysis from unconventional oil and gas wells"
 authors = [
-    { name = "Frank Male", email = "frank.male@psu.edu" }
+    { name = "Frank Male", email = "frank.male@psu.edu" },
+    { name = "Michael Marder", email = "marder@chaos.utexas.edu"}
 ]
 license =  {file = "LICENSE" }
 classifiers = [
@@ -44,6 +45,7 @@ docs = [
 test = [
     "pytest >=6.2",
     "pytest-cov >=2.12.1",
+    "pytest-xdist >=2.4",
 ]
 
 

@@ -96,7 +96,7 @@ class FlowProperties:
             )
             m_scale_func = interp1d(pvt_props["pressure"], pseudopressure_scaling)
             m_scaling_factor = m_scale_func(p_i)
-            pvt_props["alpha"] = 1 / (
+            pvt_props["alpha"] = 1 / (  # mypy: ignore
                 pvt_props["compressibility"] * pvt_props["viscosity"]
             )
         pvt_props["m-scaled"] = pvt_props["pseudopressure"] * m_scaling_factor
