@@ -6,11 +6,11 @@ difference methods.
 
 from __future__ import annotations
 
-import copy
 from dataclasses import dataclass
 from typing import Callable
 
 import numpy as np
+import numpy.typing as npt
 from numpy import ndarray
 from scipy import integrate, interpolate, sparse
 
@@ -26,7 +26,7 @@ class IdealReservoir:
     ----------
     nx : int
         number of spatial nodes
-    pressure_fracface : float
+    pressure_fracface : float | NDArray
         drawdown pressure at x=0 (psi)
     pressure_initial : float
         reservoir pressure before production (psi)
@@ -40,7 +40,7 @@ class IdealReservoir:
     """
 
     nx: int
-    pressure_fracface: float
+    pressure_fracface: float | npt.NDArray
     pressure_initial: float
     fluid: FlowProperties
 
@@ -60,8 +60,7 @@ class IdealReservoir:
         x = np.linspace(0, 1, self.nx)
         dx_squared = (x[1] - x[0]) ** 2
         pseudopressure = np.empty((len(time), self.nx))
-        pseudopressure[0, :] = 1
-        pseudopressure[0, 0] = 0
+        pseudopressure[0, :] = 1.0
         for i in range(time.shape[0] - 1):
             b = pseudopressure[i]
             mesh_ratio = (time[i + 1] - time[i]) / dx_squared
@@ -154,56 +153,6 @@ class SinglePhaseReservoir(IdealReservoir):
         """
         return 1
 
-
-class SinglePhaseReservoirMarder(IdealReservoir):
-    """Single-phase real fluid reservoir."""
-
-    def alpha_scaled(self, m_scaled: ndarray) -> ndarray:
-        """Calculate scaled diffusivity."""
-        alpha = self.fluid.alpha
-        return alpha(m_scaled) / alpha(self.fluid.m_i)
-
-    def recovery_factor(self, time: ndarray | None = None) -> ndarray:
-        """Calculate recovery factor over time.
-
-        If time has is not specified, requires that `simulate` has been run
-
-        Parameters
-        ----------
-        time : ndarray, Optional
-            times to calculate recovery factor at. If None, use times from simulate
-
-        Returns
-        -------
-        recovery : ndarray
-            recovery factor over time
-        """
-        if time is None:
-            try:
-                time = self.time
-            except AttributeError:
-                raise RuntimeError(
-                    "Need to run simulate before calculating recovery factor",
-                )
-        h_inv = self.nx
-        pp = self.pseudopressure[:, :6]
-        # mf = self.fluid.m_scaled_func(self.pressure_fracface)
-
-        # This form seems better, but it's not.
-        # dp_dx = (-pp[:,1] + 4 * pp[:, 0] - 3 * mf) * h_inv * 0.5
-        # Something is wrong with the slope of the final point.
-        #
-        dp_dx = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5
-        # dp_dx = (-pp[:, 3] + 4 * pp[:, 2] - 3 *  pp[:, 1]) * h_inv * 0.5
-
-        # dp_dx = (  pp[:, 0]-mf) * h_inv
-        # print(dp_dx)
-
-        cumulative = integrate.cumulative_trapezoid(dp_dx, self.time, initial=0)
-        self.rate = dp_dx
-        self.recovery = cumulative
-        return self.recovery
-
     def simulate(
         self, time: ndarray[float], pressure_fracface: ndarray[float] | None = None
     ):
@@ -224,44 +173,34 @@ class SinglePhaseReservoirMarder(IdealReservoir):
         dx_squared = (1 / self.nx) ** 2
         pseudopressure = np.empty((len(time), self.nx))
         if pressure_fracface is None:
-            p_f = self.pressure_fracface
+            pressure_fracface = np.full(len(time), self.pressure_fracface)
         else:
             if len(pressure_fracface) != len(time):
                 raise ValueError(
                     "Pressure time series does not match time variable:"
                     f" {len(pressure_fracface)} versus {len(time)}"
                 )
-            p_f = pressure_fracface[0]
+            self.pressure_fracface = pressure_fracface
         m_i = self.fluid.m_i
-        m_f = self.fluid.m_scaled_func(p_f)
-        pseudopressure_initial = m_f
-        pseudopressure_initial[0] = m_i
+        m_f = self.fluid.m_scaled_func(pressure_fracface)
+        pseudopressure_initial = np.full(self.nx, m_i)
+        pseudopressure_initial[0] = m_f[0]
         pseudopressure[0, :] = pseudopressure_initial
 
         for i in range(len(time) - 1):
-            b = copy.deepcopy(pseudopressure[i])  # Make a copy. Slicing did not work!
-            b = np.minimum(b, m_i)  # Prevent from going out of interpolation range
             mesh_ratio = (time[i + 1] - time[i]) / dx_squared
+            b = np.minimum(pseudopressure[i].copy(), m_i)
+            # Enforce the boundary condition at x=0
+            b[0] = m_f[i] + self.alpha_scaled(m_f[i]) * m_f[i] * mesh_ratio
             try:
                 alpha_scaled = self.alpha_scaled(b)
             except ValueError:
                 raise ValueError(
                     f"scaling failed where m_initial={m_i}  m_fracface={m_f}"
                 )
-                # print(b)
-            if pressure_fracface is not None:
-                p_f = pressure_fracface[i]
-                m_f = self.fluid.m_scaled_func(p_f)
-
-            b[0] = (
-                b[0] + self.alpha_scaled(m_f) * m_f * mesh_ratio
-            )  # This enforces the boundary condition at 0
-            # print(pseudopressure[i][0],'b')
-
             kt_h2 = mesh_ratio * alpha_scaled
-            a_matrix = self.build_matrix(kt_h2)
-            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
-
+            a_matrix = _build_matrix(kt_h2)
+            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b)
         self.pseudopressure = pseudopressure
 
 
@@ -389,9 +328,12 @@ def _build_matrix(kt_h2: ndarray) -> sparse.spmatrix:
         The A matrix
     """
     diagonal_long = 1.0 + 2 * kt_h2
-    diagonal_long[0] = -1.0
-    diagonal_low = np.concatenate([[0], -kt_h2[2:-1], [-2 * kt_h2[-1]]])
-    diagonal_upper = np.concatenate([[0, -kt_h2[1]], -kt_h2[2:-1]])
+    # diagonal_long[0] = -1.0
+    # diagonal_low = np.concatenate([[0], -kt_h2[2:-1], [-2 * kt_h2[-1]]])
+    # diagonal_upper = np.concatenate([[0, -kt_h2[1]], -kt_h2[2:-1]])
+    diagonal_long[-1] = 1.0 + kt_h2[-1]
+    diagonal_low = -kt_h2[1:]
+    diagonal_upper = -kt_h2[0:-1]
     a_matrix = sparse.diags(
         [diagonal_low, diagonal_long, diagonal_upper], [-1, 0, 1], format="csr"
     )

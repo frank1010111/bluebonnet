@@ -13,5 +13,4 @@ from bluebonnet.flow.reservoir import (
     IdealReservoir,
     MultiPhaseReservoir,
     SinglePhaseReservoir,
-    SinglePhaseReservoirMarder,
 )
