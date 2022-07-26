@@ -52,7 +52,7 @@ Ready to contribute? Here's how to set up `bluebonnet` for local development.
 3. Use `git` (or similar) to create a branch for local development and make your changes:
 
     ```console
-    it checkout -b name-of-your-bugfix-or-feature
+    git checkout -b name-of-your-bugfix-or-feature
     ```
 
 4. When you're done making changes, check that your changes conform to any code formatting requirements and pass any tests.
