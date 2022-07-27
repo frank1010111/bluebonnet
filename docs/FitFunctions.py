@@ -7,7 +7,8 @@ from lmfit import (Minimizer, Parameters, conf_interval, minimize, printfuncs,
                    report_errors)
 from scipy import arange, array, sqrt
 
-from bluebonnet.flow import FlowPropertiesMarder, SinglePhaseReservoirMarder
+#from bluebonnet.flow import FlowPropertiesMarder, SinglePhaseReservoirMarder
+from bluebonnet.flow import FlowProperties, SinglePhaseReservoir
 
 
 def obfun(params, Days, Gas, pvt_gas, PressureTime):

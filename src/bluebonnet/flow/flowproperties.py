@@ -81,8 +81,9 @@ class FlowProperties:
             raise ValueError("Need pvt_props to have: " + ", ".join(need_cols_short))
         if "alpha" in pvt_props:
             m_scale_func = interp1d(
-                pvt_props["pressure"], 1 / pvt_props["pseudopressure"]
-            )
+                pvt_props["pressure"], 1 / pvt_props["pseudopressure"] 
+                )
+            print("WARNING!!! SCALING PSEUDOPRESSURE BY VALUE AT P_INITIAL")
             m_scaling_factor = m_scale_func(p_i)
         else:
             pseudopressure_scaling = (
