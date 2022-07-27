@@ -141,3 +141,6 @@ dmypy.json
 # MacOS
 .DS_Store.vscode/
 **/.DS_Store
+
+# external data
+data/*.csv
