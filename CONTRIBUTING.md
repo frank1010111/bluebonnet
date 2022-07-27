@@ -53,7 +53,7 @@ Ready to contribute? Here's how to set up `bluebonnet` for local development.
    changes:
 
    ```console
-   it checkout -b name-of-your-bugfix-or-feature
+   git checkout -b name-of-your-bugfix-or-feature
    ```
 
 4. When you're done making changes, check that your changes conform to any code
