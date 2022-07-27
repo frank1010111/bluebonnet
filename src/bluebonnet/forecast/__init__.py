@@ -13,6 +13,14 @@ from importlib.metadata import version
 __version__ = version("bluebonnet")
 
 from bluebonnet.forecast.forecast import Bounds, ForecasterOnePhase
-from bluebonnet.forecast.forecast_pressure import fit_production_pressure
+from bluebonnet.forecast.forecast_pressure import (
+    fit_production_pressure,
+    plot_production_comparison,
+)
 
-__all__ = ["Bounds", "ForecasterOnePhase", "fit_production_pressure"]
+__all__ = [
+    "Bounds",
+    "ForecasterOnePhase",
+    "fit_production_pressure",
+    "plot_production_comparison",
+]
