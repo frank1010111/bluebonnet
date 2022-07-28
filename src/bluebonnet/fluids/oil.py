@@ -1,20 +1,23 @@
+"""Oil PVT properties."""
+
+from __future__ import annotations
+
 import math
+
 import numpy as np
-from numpy import ndarray
-from typing import Union, Optional
-import numpy.typing as npt
-from .gas import b_factor_DAK
+from numpy.typing import NDArray
+
+from bluebonnet.fluids.gas import b_factor_DAK
 
 
 def b_o_Standing(
     temperature: float,
-    pressure: Union[ndarray, float],
+    pressure: NDArray | float,
     api_gravity: float,
     gas_specific_gravity: float,
     solution_gor_initial: float,
-) -> Union[ndarray, float]:
-    """
-    Calculates the oil formation volume factor (Bo) using Standing.
+) -> NDArray | float:
+    """Calculate the oil formation volume factor (Bo) using Standing.
 
     Parameters
     ----------
@@ -94,8 +97,7 @@ def pressure_bubblepoint_Standing(
     gas_specific_gravity: float,
     solution_gor_initial: float,
 ) -> float:
-    """
-    Calculates the bubble point pressure using Standing.
+    """Calculate the bubble point pressure using Standing.
 
     Parameters
     ----------
@@ -130,10 +132,9 @@ def b_o_bubblepoint_Standing(
     temperature: float,
     api_gravity: float,
     gas_specific_gravity: float,
-    solution_gor_initial: Union[ndarray, float],
-) -> Union[ndarray, float]:
-    """
-    Calculates the oil formation volume factor (Bo) at the bubble point using Standing.
+    solution_gor_initial: NDArray | float,
+) -> NDArray | float:
+    """Calculate the oil formation volume factor (Bo) at the bubble point using Standing.
 
     Parameters
     ----------
@@ -143,12 +144,12 @@ def b_o_bubblepoint_Standing(
         Oil gravity in degrees API.
     gas_specific_gravity : float
         Gas gravity relative to air.
-    solution_gor_initial : ndarray
+    solution_gor_initial : NDArray
         Initial gas:oil ratio in scf/bbl.
 
     Returns
     -------
-    ndarray
+    NDArray
         B_o (rb/stb)
 
     Example
@@ -175,9 +176,7 @@ def db_o_dgor_Standing(
     gas_specific_gravity: float,
     solution_gor_initial: float,
 ) -> float:
-    """
-    Calculates the derivative of the oil formation volume factor with respect to solution
-        GOR at the bubble point
+    """Calculate the derivative of Bo per solution GOR at the bubble point.
 
     Parameters
     ----------
@@ -187,12 +186,12 @@ def db_o_dgor_Standing(
         Oil gravity in degrees API.
     gas_specific_gravity : float
         Gas gravity relative to air.
-    solution_gor_initial : ndarray
+    solution_gor_initial : NDArray
         Initial gas:oil ratio in scf/bbl.
 
     Returns
     -------
-    ndarray
+    NDArray
         B_o (rb/stb)
 
     Example
@@ -211,19 +210,18 @@ def db_o_dgor_Standing(
 
 def solution_gor_Standing(
     temperature: float,
-    pressure: Union[ndarray, float],
+    pressure: NDArray | float,
     api_gravity: float,
     gas_specific_gravity: float,
     solution_gor_initial: float,
-) -> Union[ndarray, float]:
-    """
-    Calculates the solution GOR partition using Standing.
+) -> NDArray | float:
+    """Calculate the solution GOR partition using Standing.
 
     Parameters
     ----------
     temperature : float
         reservoir temperature in Fahrenheit.
-    pressure : float
+    pressure : float or array
         reservoir pressure (psia)
     api_gravity : float
         Oil gravity in degrees API.
@@ -248,7 +246,7 @@ def solution_gor_Standing(
         temperature, api_gravity, gas_specific_gravity, solution_gor_initial
     )
 
-    def gor_belowbubble(pressure: Union[ndarray, float]) -> Union[ndarray, float]:
+    def gor_belowbubble(pressure: NDArray | float) -> NDArray | float:
         gor = gas_specific_gravity * (
             (pressure / 18.2 + 1.4)
             * 10 ** (0.0125 * api_gravity - 0.00091 * temperature)
@@ -275,8 +273,7 @@ def dgor_dpressure_Standing(
     gas_specific_gravity: float,
     solution_gor_initial: float,
 ) -> float:
-    """
-    Calculates the instantaneous change in GOR with pressure using Standing.
+    """Calculate the instantaneous change in GOR with pressure using Standing.
 
     Parameters
     ----------
@@ -325,8 +322,7 @@ def oil_compressibility_undersat_Standing(
     gas_specific_gravity: float,
     solution_gor_initial: float,
 ) -> float:
-    """
-    Calculates the oil compressibility (c_o) using Standing.
+    """Calculate the oil compressibility (c_o) using Standing.
 
     Parameters
     ----------
@@ -370,19 +366,18 @@ def oil_compressibility_undersat_Standing(
 
 def oil_compressibility_undersat_Spivey(
     temperature: float,
-    pressure: Union[ndarray, float],
+    pressure: NDArray | float,
     api_gravity: float,
     gas_specific_gravity: float,
     solution_gor_initial: float,
-) -> Union[ndarray, float]:
-    """
-    Calculates the oil compressibility (c_o) using Spivey.
+) -> NDArray | float:
+    """Calculate the oil compressibility (c_o) using Spivey.
 
     Parameters
     ----------
     temperature : float
         reservoir temperature in Fahrenheit.
-    pressure : float
+    pressure : float or array
         reservoir pressure (psia)
     api_gravity : float
         Oil gravity in degrees API.
@@ -400,7 +395,6 @@ def oil_compressibility_undersat_Spivey(
     >>> oil_compressibility_undersat_Spivey(200, 3_000, 35, 0.8, 650)
     9.177554347361075e-06
     """
-
     pressure_bubblepoint = pressure_bubblepoint_Standing(
         temperature, api_gravity, gas_specific_gravity, solution_gor_initial
     )
@@ -439,8 +433,8 @@ def oil_compressibility_undersat_Spivey(
                 for rp in reduced_pressure
             ]
         )
-    z = np.sum(C0) + X @ C1 + (X ** 2) @ C2
-    compressibility_bubblepoint = np.exp(2.434 + 0.475 * z + 0.048 * z ** 2)
+    z = np.sum(C0) + X @ C1 + (X**2) @ C2
+    compressibility_bubblepoint = np.exp(2.434 + 0.475 * z + 0.048 * z**2)
     compressibility_derivative = (-0.608 + 0.1822 * np.log(reduced_pressure)) / pressure
     compressibility_2nd_derivative = (
         compressibility_bubblepoint * (0.475 + 0.096 * z) * compressibility_derivative
@@ -463,8 +457,7 @@ def oil_compressibility_Standing(
     temperature_standard: float = 60,
     pressure_standard: float = 14.7,
 ) -> float:
-    """
-    Calculates the oil formation volume factor (Bo) using Standing.
+    """Calculate the oil formation volume factor (Bo) using Standing.
 
     Parameters
     ----------
@@ -550,8 +543,7 @@ def density_Standing(
     gas_specific_gravity: float,
     solution_gor_initial: float,
 ) -> float:
-    """
-    Calculates the oil density using Standing.
+    """Calculate the oil density using Standing.
 
     Parameters
     ----------
@@ -596,8 +588,7 @@ def viscosity_beggs_robinson(
     gas_specific_gravity: float,
     solution_gor_initial: float,
 ) -> float:
-    """
-    Calcualtes the oil viscosity using Beggs-Robinson
+    r"""Calculate the oil viscosity using Beggs-Robinson.
 
     Parameters
     ----------
@@ -614,7 +605,7 @@ def viscosity_beggs_robinson(
 
     Returns
     -------
-    ndarray
+    NDArray
         $\\mu_o$, the oil viscosity
     """
     pressure_bubblepoint = pressure_bubblepoint_Standing(
@@ -625,23 +616,23 @@ def viscosity_beggs_robinson(
     )
     if pressure >= pressure_bubblepoint:
         mu_o_dead = (
-            10 ** (10 ** (3.0324 - 0.02023 * api_gravity) * temperature ** -1.163) - 1
+            10 ** (10 ** (3.0324 - 0.02023 * api_gravity) * temperature**-1.163) - 1
         )
         mu_o_live = _mu_dead_to_live_br(mu_o_dead, solution_gor_initial)
         mu_o = mu_o_live * (pressure / pressure_bubblepoint) ** (
-            2.6 * pressure ** 1.187 * np.exp(-11.513 - 8.98e-5 * pressure)
+            2.6 * pressure**1.187 * np.exp(-11.513 - 8.98e-5 * pressure)
         )
     else:
         mu_o_dead = (
-            10 ** (10 ** (3.0324 - 0.02023 * api_gravity) * temperature ** -1.163) - 1
+            10 ** (10 ** (3.0324 - 0.02023 * api_gravity) * temperature**-1.163) - 1
         )
         mu_o = _mu_dead_to_live_br(mu_o_dead, solution_gor)
     return mu_o
 
 
 def _mu_dead_to_live_br(
-    mu_dead: Union[ndarray, float], solution_gor_initial: Union[ndarray, float]
-) -> Union[ndarray, float]:
+    mu_dead: NDArray | float, solution_gor_initial: NDArray | float
+) -> NDArray | float:
     mu_live = (
         10.715
         * (solution_gor_initial + 100) ** -0.515
