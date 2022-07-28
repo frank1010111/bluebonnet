@@ -14,3 +14,15 @@ from bluebonnet.flow.reservoir import (
     MultiPhaseReservoir,
     SinglePhaseReservoir,
 )
+
+__all__ = [
+    "FlowProperties",
+    "FlowPropertiesMultiPhase",
+    "FlowPropertiesOnePhase",
+    "FlowPropertiesTwoPhase",
+    "RelPermParams",
+    "relative_permeabilities",
+    "IdealReservoir",
+    "MultiPhaseReservoir",
+    "SinglePhaseReservoir",
+]

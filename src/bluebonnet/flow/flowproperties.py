@@ -7,6 +7,7 @@ in order to aid the reservoir simulators in the `reservoir` module.
 from __future__ import annotations
 
 import copy
+import warnings
 from collections import namedtuple
 from typing import Mapping
 
@@ -81,9 +82,9 @@ class FlowProperties:
             raise ValueError("Need pvt_props to have: " + ", ".join(need_cols_short))
         if "alpha" in pvt_props:
             m_scale_func = interp1d(
-                pvt_props["pressure"], 1 / pvt_props["pseudopressure"] 
-                )
-            print("WARNING!!! SCALING PSEUDOPRESSURE BY VALUE AT P_INITIAL")
+                pvt_props["pressure"], 1 / pvt_props["pseudopressure"]
+            )
+            warnings.warn("WARNING!!! SCALING PSEUDOPRESSURE BY VALUE AT P_INITIAL")
             m_scaling_factor = m_scale_func(p_i)
         else:
             pseudopressure_scaling = (
