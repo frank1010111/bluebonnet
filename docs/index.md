@@ -1,4 +1,5 @@
 ```{include} ../README.md
+
 ```
 
 ```{toctree}
@@ -11,4 +12,5 @@ changelog.md
 contributing.md
 conduct.md
 autoapi/index
+background.md
 ```
