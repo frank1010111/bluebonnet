@@ -120,14 +120,14 @@ def BuildPVT(
     pvt_gas = pd.DataFrame(
         data={
             "T": T,
-            "P": Pressure,
+            "pressure": Pressure,
             "Density": density,
-            "Z-Factor": Z,
-            "Cg": compressibility,
-            "Viscosity": viscosity,
+            "z-factor": Z,
+            "compressibility": compressibility,
+            "viscosity": viscosity,
         }
     )
-    ms = 2 * cumtrapz(pvt_gas.P / (pvt_gas.Viscosity * pvt_gas["Z-Factor"]), pvt_gas.P)
+    ms = 2 * cumtrapz(pvt_gas.pressure / (pvt_gas.viscosity * pvt_gas["z-factor"]), pvt_gas.pressure)
     ms = np.concatenate(([0], ms))
     pvt_gas["pseudopressure"] = ms
 
