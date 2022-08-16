@@ -1,15 +1,18 @@
-from dataclasses import dataclass, astuple
-from typing import Callable, Optional, NamedTuple
+"""Fit and forecast production from hydrofractured reservoirs."""
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Callable
+
 import numpy as np
-from numpy import ndarray
 import numpy.typing as npt
-from scipy.interpolate import interp1d, LinearNDInterpolator
+from numpy import ndarray
 from scipy.optimize import curve_fit
 
 
-class Bounds(NamedTuple):
-    """
-    Sets the upper and lower limits for the fitting curve
+@dataclass(frozen=True)
+class Bounds:
+    """Set the upper and lower limits for the fitting curve.
 
     Parameters
     ----------
@@ -19,30 +22,31 @@ class Bounds(NamedTuple):
         (min, max) for time-to-BDF
     """
 
-    M: tuple
-    tau: tuple
+    M: tuple[float, float]
+    tau: tuple[float, float]
 
-    def __post_init___(self):  # TODO: make validation work automatically
-        if len(M) != 2:
+    def __post_init___(self):
+        """Validate bounds."""
+        if len(self.M) != 2:
             raise ValueError("M must be two elements")
-        if len(tau) != 2:
+        if len(self.tau) != 2:
             raise ValueError("tau must be two elements")
-        if M[0] >= M[1]:
-            raise ValueError(f"{M[0]=} must be greater than {M[1]=}")
-        if tau[0] >= tau[1]:
-            raise ValueError(f"{tau[0]=} must be greater than {tau[1]=}")
+        if self.M[0] >= self.M[1]:
+            raise ValueError(f"{self.M[0]=} must be greater than {self.M[1]=}")
+        if self.tau[0] >= self.tau[1]:
+            raise ValueError(f"{self.tau[0]=} must be greater than {self.tau[1]=}")
 
     def fit_bounds(self):
+        """Return bounds for forecaster instance fits."""
         return ((self.M[0], self.tau[0]), (self.M[1], self.tau[1]))
 
 
-_default_bounds = Bounds((0, np.inf), (1e-10, np.inf))
+_default_bounds = Bounds(M=(0, np.inf), tau=(1e-10, np.inf))
 
 
 @dataclass
 class ForecasterOnePhase:
-    """
-    Forecaster for production decline models
+    """Forecaster for production decline models.
 
     Parameters
     ----------
@@ -63,11 +67,10 @@ class ForecasterOnePhase:
     def forecast_cum(
         self,
         time_on_production: npt.NDArray[np.float64],
-        M: Optional[float] = None,
-        tau: Optional[float] = None,
+        M: float | None = None,
+        tau: float | None = None,
     ):
-        """
-        forecast cumulative production
+        """Forecast cumulative production.
 
         Parameters
         ----------
@@ -87,10 +90,9 @@ class ForecasterOnePhase:
         self,
         time_on_production: ndarray,
         cum_production: ndarray,
-        tau: Optional[float] = None,
+        tau: float | None = None,
     ):
-        """
-        fit well production to the physics-based scaling model
+        """Fit well production to the physics-based scaling model.
 
         Parameters
         ----------
@@ -103,13 +105,15 @@ class ForecasterOnePhase:
         if tau is None:
             p0 = (cum_production[-1] * 2, time_on_production[-1] * 5)
             bounds = self.bounds.fit_bounds()
-            forecast = lambda top, M, tau: _forecast_cum_onephase(
+            forecast = lambda top, M, tau: _forecast_cum_onephase(  # noqa: E731
                 self.rf_curve, top, M, tau
             )
         else:
             p0 = (cum_production[-1] * 2,)
             bounds = self.bounds.M
-            forecast = lambda top, M: _forecast_cum_onephase(self.rf_curve, top, M, tau)
+            forecast = lambda top, M: _forecast_cum_onephase(  # noqa: BLK,E731
+                self.rf_curve, top, M, tau
+            )
 
         fit, covariance = curve_fit(
             forecast,
