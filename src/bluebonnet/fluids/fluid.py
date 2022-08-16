@@ -32,16 +32,16 @@ TEMPERATURE_STANDARD = 60
 
 
 def build_pvt_gas(
-    gas_values: Mapping, gas_dryness: str, maximum_pressure: float = 14000
+    gas_values: Mapping, gas_dryness: str, maximum_pressure: float = 14_000
 ) -> pd.DataFrame:
     """Build a table of PVT properties for use in the flow module.
 
     Parameters
     -----------
-    FieldValues : Mapping
+    gas_values : Mapping
         FieldValues must contain 'N2','H2S','CO2', 'Gas Specific Gravity',
         'Reservoir Temperature (deg F)'
-    GasDryness : str
+    gas_dryness : str
         One of 'wet gas' or 'dry gas'
     maximum_pressure : float
         initial reservoir pressure to calculate up to.
@@ -59,8 +59,7 @@ def build_pvt_gas(
         non_hydrocarbon_properties,
         gas_dryness,
     )
-    pressure = np.arange(0, maximum_pressure, 10.0)
-    pressure[0] = 0.001
+    pressure = np.arange(10.0, maximum_pressure, 10.0)
     temperature = gas_values["Reservoir Temperature (deg F)"]
     z_factor = np.array(
         [z_factor_DAK(temperature, p, temperature_pc, pressure_pc) for p in pressure]
@@ -106,7 +105,9 @@ def build_pvt_gas(
         }
     )
     pseudopressure = 2 * cumtrapz(
-        pvt_gas.P / (pvt_gas.Viscosity * pvt_gas["Z-Factor"]), pvt_gas.P, initial=0
+        pvt_gas["pressure"] / (pvt_gas["viscosity"] * pvt_gas["z-factor"]),
+        pvt_gas["pressure"],
+        initial=0.0,
     )
     pvt_gas["pseudopressure"] = pseudopressure
     return pvt_gas
