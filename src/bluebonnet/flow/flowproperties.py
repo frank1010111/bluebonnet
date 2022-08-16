@@ -84,7 +84,9 @@ class FlowProperties:
             m_scale_func = interp1d(
                 pvt_props["pressure"], 1 / pvt_props["pseudopressure"]
             )
-            warnings.warn("WARNING!!! SCALING PSEUDOPRESSURE BY VALUE AT P_INITIAL")
+            warnings.warn(
+                "warning: scaling pseudopressure, using default hydraulic diffusivity"
+            )
             m_scaling_factor = m_scale_func(p_i)
         else:
             pseudopressure_scaling = (
