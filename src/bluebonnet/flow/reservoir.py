@@ -1,24 +1,32 @@
+"""reservoir: scaling solutions for hydrofractured wells.
+
+This module calculates the scaling curves, using flow properties and finite
+difference methods.
+"""
+
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Callable
+
 import numpy as np
-from scipy import interpolate, sparse, integrate
 import numpy.typing as npt
 from numpy import ndarray
-from typing import Any, Union, Iterable, Mapping, Optional, Callable
-from collections import namedtuple
-from bluebonnet.fluids.fluid import Fluid
-from .flowproperties import FlowProperties
+from scipy import integrate, interpolate, sparse
+
+from bluebonnet.flow.flowproperties import FlowProperties
 
 
 @dataclass
 class IdealReservoir:
     """
-    Class for building scaling solutions of production from hydrofractured wells
+    Class for building scaling solutions of production from hydrofractured wells.
 
     Parameters
     ----------
     nx : int
         number of spatial nodes
-    pressure_fracface : float
+    pressure_fracface : float | NDArray
         drawdown pressure at x=0 (psi)
     pressure_initial : float
         reservoir pressure before production (psi)
@@ -32,16 +40,16 @@ class IdealReservoir:
     """
 
     nx: int
-    pressure_fracface: float
+    pressure_fracface: float | npt.NDArray
     pressure_initial: float
     fluid: FlowProperties
 
     def __post_init___(self):
-        "Last initialization steps"
+        """Last initialization steps."""
 
     def simulate(self, time: ndarray):
         """
-        Calculate simulation pressure over time
+        Calculate simulation pressure over time.
 
         Parameters
         ----------
@@ -52,19 +60,18 @@ class IdealReservoir:
         x = np.linspace(0, 1, self.nx)
         dx_squared = (x[1] - x[0]) ** 2
         pseudopressure = np.empty((len(time), self.nx))
-        pseudopressure[0, :] = 1
-        pseudopressure[0, 0] = 0
+        pseudopressure[0, :] = 1.0
         for i in range(time.shape[0] - 1):
             b = pseudopressure[i]
             mesh_ratio = (time[i + 1] - time[i]) / dx_squared
             alpha_scaled = self.alpha_scaled(b)
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
-            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
+            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b)
         self.pseudopressure = pseudopressure
 
-    def recovery_factor(self, time: Optional[ndarray] = None) -> ndarray:
-        """Calculate recovery factor over time
+    def recovery_factor(self, time: ndarray | None = None) -> ndarray:
+        """Calculate recovery factor over time.
 
         If time has is not specified, requires that `simulate` has been run
 
@@ -93,7 +100,7 @@ class IdealReservoir:
         return self.recovery
 
     def recovery_factor_interpolator(self) -> Callable:
-        """Generates a function to get recovery factor from time
+        """Generate a function to get recovery factor from time.
 
         Requires that `recovery_factor` has been run
 
@@ -103,37 +110,103 @@ class IdealReservoir:
         """
         try:
             time = self.time
-            recovery = self.recovery
         except AttributeError:
             raise RuntimeError(
-                "Need to run recovery_factor",
+                "Need to run simulate",
             )
+        try:
+            recovery = self.recovery
+        except AttributeError:
+            recovery = self.recovery_factor(time)
+
         interpolator = interpolate.interp1d(
             time, recovery, bounds_error=False, fill_value=(0, recovery[-1])
         )
         return interpolator
 
     def alpha_scaled(self, pseudopressure: ndarray) -> ndarray:
-        "Calculate scaled diffusivity"
+        """Calculate scaled diffusivity."""
         return np.ones_like(pseudopressure)
 
-    def fvf_scale(self):
+    def fvf_scale(self) -> float:
+        """Scaling for formation volume factor.
+
+        Returns:
+            float: FVF
+        """
         return 1 - self.pressure_fracface / self.pressure_initial
 
 
 class SinglePhaseReservoir(IdealReservoir):
-    def alpha_scaled(self, pseudopressure: ndarray) -> ndarray:
-        "Calculate scaled diffusivity"
-        alpha = self.fluid.alpha
-        return alpha(pseudopressure) / alpha(1)
+    """Single-phase real fluid reservoir."""
 
-    def fvf_scale(self):
-        return self.fluid.fvf_scale
+    def alpha_scaled(self, pseudopressure: ndarray) -> ndarray:
+        """Calculate scaled diffusivity."""
+        alpha = self.fluid.alpha
+        return alpha(pseudopressure) / alpha(self.fluid.m_i)
+
+    def fvf_scale(self) -> float:
+        """Scaling for formation volume factor.
+
+        Returns:
+            float: FVF
+        """
+        return 1
+
+    def simulate(
+        self, time: ndarray[float], pressure_fracface: ndarray[float] | None = None
+    ):
+        """Calculate simulation pressure over time.
+
+        Args
+        ----
+        time : ndarray
+            times to solve for pressure
+        pressure_fracface : Iterable[float] | None, optional
+            pressure at frac-face over time. Defaults to None, which is no change
+
+        Raises
+        ------
+        ValueError: wrong length changing pressure at frac-face
+        """
+        self.time = time
+        dx_squared = (1 / self.nx) ** 2
+        pseudopressure = np.empty((len(time), self.nx))
+        if pressure_fracface is None:
+            pressure_fracface = np.full(len(time), self.pressure_fracface)
+        else:
+            if len(pressure_fracface) != len(time):
+                raise ValueError(
+                    "Pressure time series does not match time variable:"
+                    f" {len(pressure_fracface)} versus {len(time)}"
+                )
+            self.pressure_fracface = pressure_fracface
+        m_i = self.fluid.m_i
+        m_f = self.fluid.m_scaled_func(pressure_fracface)
+        pseudopressure_initial = np.full(self.nx, m_i)
+        pseudopressure_initial[0] = m_f[0]
+        pseudopressure[0, :] = pseudopressure_initial
+
+        for i in range(len(time) - 1):
+            mesh_ratio = (time[i + 1] - time[i]) / dx_squared
+            b = np.minimum(pseudopressure[i].copy(), m_i)
+            # Enforce the boundary condition at x=0
+            b[0] = m_f[i] + self.alpha_scaled(m_f[i]) * m_f[i] * mesh_ratio
+            try:
+                alpha_scaled = self.alpha_scaled(b)
+            except ValueError:
+                raise ValueError(
+                    f"scaling failed where m_initial={m_i}  m_fracface={m_f}"
+                )
+            kt_h2 = mesh_ratio * alpha_scaled
+            a_matrix = _build_matrix(kt_h2)
+            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b)
+        self.pseudopressure = pseudopressure
 
 
 @dataclass
 class TwoPhaseReservoir(SinglePhaseReservoir):
-    """Oil-gas reservoir simulation
+    """Oil-gas reservoir simulation.
 
     References
     ----------
@@ -147,24 +220,26 @@ class TwoPhaseReservoir(SinglePhaseReservoir):
     Sw_init: float
 
     def simulate(self, time: ndarray):
-        """Calculate simulation pressure over time
+        """Calculate simulation pressure over time.
 
         Parameters
         ----------
         time : ndarray
             times to solve for pressure
         """
-        super().simulate()
+        super().simulate(time)
 
 
 @dataclass
 class MultiPhaseReservoir(SinglePhaseReservoir):
+    """Reservoir with three phases: oil, gas, and water all flowing."""
+
     So_init: float
     Sg_init: float
     Sw_init: float
 
     def simulate(self, time: ndarray):
-        """Calculate simulation pressure over time
+        """Calculate simulation pressure over time.
 
         Parameters
         ----------
@@ -202,7 +277,7 @@ class MultiPhaseReservoir(SinglePhaseReservoir):
         saturation: ndarray,
     ) -> ndarray:
         """
-        Calculate scaled diffusivity given pseudopressure and saturations
+        Calculate scaled diffusivity given pseudopressure and saturations.
 
         Parameters
         ----------
@@ -223,13 +298,22 @@ class MultiPhaseReservoir(SinglePhaseReservoir):
     def _step_saturation(
         self, saturation: ndarray, ppressure_old: ndarray, ppressure_new: ndarray
     ) -> ndarray:
-        "Step to new saturation"
+        """Calculate new saturation.
+
+        Args:
+            saturation (ndarray): old saturation
+            ppressure_old (ndarray): old pressure
+            ppressure_new (ndarray): new pressure
+
+        Returns:
+            ndarray: new saturation
+        """
         return NotImplementedError
 
 
 def _build_matrix(kt_h2: ndarray) -> sparse.spmatrix:
-    """
-    Set up A matrix for timestepping
+    r"""
+    Set up A matrix for timestepping.
 
     Follows :math: `A x = b` -> :math: `x = A \ b`
 
@@ -244,9 +328,12 @@ def _build_matrix(kt_h2: ndarray) -> sparse.spmatrix:
         The A matrix
     """
     diagonal_long = 1.0 + 2 * kt_h2
-    diagonal_long[0] = -1.0
-    diagonal_low = np.concatenate([[0], -kt_h2[2:-1], [-2 * kt_h2[-1]]])
-    diagonal_upper = np.concatenate([[0, -kt_h2[1]], -kt_h2[2:-1]])
+    # diagonal_long[0] = -1.0
+    # diagonal_low = np.concatenate([[0], -kt_h2[2:-1], [-2 * kt_h2[-1]]])
+    # diagonal_upper = np.concatenate([[0, -kt_h2[1]], -kt_h2[2:-1]])
+    diagonal_long[-1] = 1.0 + kt_h2[-1]
+    diagonal_low = -kt_h2[1:]
+    diagonal_upper = -kt_h2[0:-1]
     a_matrix = sparse.diags(
         [diagonal_low, diagonal_long, diagonal_upper], [-1, 0, 1], format="csr"
     )

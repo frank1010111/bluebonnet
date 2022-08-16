@@ -1,14 +1,16 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+"""Configuration file for the Sphinx documentation builder.
+
+This file only contains a selection of the most common options. For a full
+list see the documentation:
+https://www.sphinx-doc.org/en/master/usage/configuration.html
+"""
+
+from __future__ import annotations
 
 # -- Project information -----------------------------------------------------
-
-project = u"bluebonnet"
-copyright = u"2021, Frank Male"
-author = u"Frank Male"
+project = "bluebonnet"
+copyright = "2021, Frank Male"
+author = "Frank Male"
 
 # -- General configuration ---------------------------------------------------
 
@@ -22,6 +24,13 @@ extensions = [
     "sphinx.ext.viewcode",
 ]
 autoapi_dirs = ["../src"]
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "show-module-summary",
+    "special-members",
+]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

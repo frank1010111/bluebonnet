@@ -1,17 +1,30 @@
-from importlib.metadata import version
+"""Flow, pressure changes, and production from hydraulically fractured reservoirs."""
+from __future__ import annotations
 
-__version__ = version("bluebonnet")
-from .reservoir import (
-    IdealReservoir,
-    SinglePhaseReservoir,
-    MultiPhaseReservoir,
-)
-
-from .flowproperties import (
+from bluebonnet.flow.flowproperties import (
     FlowProperties,
+    FlowPropertiesMultiPhase,
     FlowPropertiesOnePhase,
     FlowPropertiesTwoPhase,
-    FlowPropertiesMultiPhase,
     RelPermParams,
     relative_permeabilities,
 )
+from bluebonnet.flow.reservoir import (
+    IdealReservoir,
+    MultiPhaseReservoir,
+    SinglePhaseReservoir,
+    TwoPhaseReservoir,
+)
+
+__all__ = [
+    "FlowProperties",
+    "FlowPropertiesMultiPhase",
+    "FlowPropertiesOnePhase",
+    "FlowPropertiesTwoPhase",
+    "RelPermParams",
+    "relative_permeabilities",
+    "IdealReservoir",
+    "MultiPhaseReservoir",
+    "SinglePhaseReservoir",
+    "TwoPhaseReservoir",
+]

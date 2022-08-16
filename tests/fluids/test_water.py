@@ -1,9 +1,11 @@
-# -*- coding: utf-8 -*-
 """
 Define a suite a tests for the gas module
 """
-import pytest
+from __future__ import annotations
+
 from collections import namedtuple
+
+import pytest
 
 from bluebonnet.fluids import water
 

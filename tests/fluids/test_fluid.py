@@ -1,13 +1,15 @@
 """
 Define a suite a tests for the fluid module
 """
-import pytest
-import numpy as np
-from bluebonnet.fluids import Fluid
+from __future__ import annotations
 
-from test_oil import oil_properties
+import numpy as np
+import pytest
 from test_gas import gas_properties
+from test_oil import oil_properties
 from test_water import water_properties
+
+from bluebonnet.fluids import Fluid
 
 
 @pytest.fixture()

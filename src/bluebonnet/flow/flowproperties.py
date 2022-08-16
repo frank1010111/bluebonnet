@@ -1,47 +1,120 @@
-import numpy as np
-from scipy.interpolate import interp1d, LinearNDInterpolator
-from scipy import integrate
-import numpy.typing as npt
-from numpy import ndarray
-from typing import Any, Union, Iterable, Mapping, Optional, Callable
-from collections import namedtuple
+"""Flow properties for reservoir fluids.
 
-# from bluebonnet.fluids.gas import pseudopressure_Hussainy
+Pressure (or pseudo-pressure) changes affect all sorts of things. This
+module includes structures for storing these pressure-dependent properties
+in order to aid the reservoir simulators in the `reservoir` module.
+"""
+from __future__ import annotations
+
+import copy
+import warnings
+from collections import namedtuple
+from typing import Mapping
+
+import numpy as np
+from numpy import ndarray
+from scipy.interpolate import LinearNDInterpolator, interp1d
 
 
 class FlowProperties:
-    """
+    r"""
     Flow properties for the system.
 
     This is used to translate from scaled pseudopressure to diffusivity and to capture
     the effect of expansion
 
-    Parameters
+    Attributes
     ----------
-    df : Mapping
-        has accessors for pseudopressure, alpha
-        pseudopressure: pseudopressure scaled from 0 for frac face, 1 for initial
-            reservoir conditions
-        alpha: hydraulic diffusivity (needn't be scaled)
-    fvf_scale : float
-        formation volume factor scale for recovery factor
+    pvt_props : Mapping
+
+        has accessors for pseudopressure, alpha, compressibility, viscosity, z-factor
+
+        pseudopressure: pseudopressure in psi^2/centipoise
+
+        pressure: pore pressure
+
+        alpha: hydraulic diffusivity
+
+        compressibility: total compressibility
+
+        viscosity: dynamic viscosity :math:`\mu`
+
+        z-factor: compressibility factor, :math:`Z = p/\rho R T`
+
+        m-scaled: pseudopressure scaled by initial pseudopressure
+
+    m_i : float
+        pseudopressure that corresponds to initial reservoir pressure
+    m_scaled_func: function
+        calculates scaled pseudopressure from pressure
+    alpha_func : function
+        calculated hydraulic diffusivity from scaled pseudopressure
     """
 
-    def __init__(self, df: Mapping[str, ndarray], fvf_scale: float = 1):
-        need_cols = {"pseudopressure", "alpha"}
-        if need_cols.intersection(df) != need_cols:
-            raise ValueError("Need input df to have 'pseudopressure' and 'alpha'")
-        # if abs(min(df["pseudopressure"])) > 1e-6:
-        #     raise ValueError("Minimum pseudopressure should be 0 (did you rescale?)")
-        # if abs(max(df["pseudopressure"]) - 1.0) > 1e-6:
-        #     raise ValueError("Maximum pseudopressure should be 1 (did you rescale?)")
-        self.df = df
-        x = df["pseudopressure"]
-        self.alpha = interp1d(x, df["alpha"])
-        self.fvf_scale = fvf_scale
+    def __init__(self, pvt_props: Mapping[str, ndarray], p_i: float):
+        """Wrap table of flow properties with useful methods.
+
+        If alpha is not in the table, calculates hydraulic diffusivity as a function of
+        compressibility and viscosity.
+
+        Parameters
+        -----------
+        pvt_props : Mapping
+            has accessors for pseudopressure, alpha (optional), compressibility, viscosity,
+            z-factor
+
+        p_i : float
+            Initial reservoir pressure
+        """
+        pvt_props = copy.copy(pvt_props)
+        need_cols_long = {
+            "pseudopressure",
+            "compressibility",
+            "pressure",
+            "viscosity",
+            "z-factor",
+        }
+        need_cols_short = {"pressure", "pseudopressure", "alpha"}
+        if (
+            need_cols_long.intersection(pvt_props) != need_cols_long
+            and need_cols_short.intersection(pvt_props) != need_cols_short
+        ):
+            raise ValueError("Need pvt_props to have: " + ", ".join(need_cols_short))
+        if "alpha" in pvt_props:
+            m_scale_func = interp1d(
+                pvt_props["pressure"], 1 / pvt_props["pseudopressure"]
+            )
+            warnings.warn("WARNING!!! SCALING PSEUDOPRESSURE BY VALUE AT P_INITIAL")
+            m_scaling_factor = m_scale_func(p_i)
+        else:
+            pseudopressure_scaling = (
+                1
+                / 2
+                * pvt_props["compressibility"]
+                * pvt_props["pressure"]
+                * pvt_props["viscosity"]
+                * pvt_props["z-factor"]
+                / pvt_props["pressure"] ** 2
+            )
+            m_scale_func = interp1d(pvt_props["pressure"], pseudopressure_scaling)
+            m_scaling_factor = m_scale_func(p_i)
+            pvt_props["alpha"] = 1 / (  # mypy: ignore
+                pvt_props["compressibility"] * pvt_props["viscosity"]
+            )
+        pvt_props["m-scaled"] = pvt_props["pseudopressure"] * m_scaling_factor
+        self.m_scaled_func = interp1d(pvt_props["pressure"], pvt_props["m-scaled"])
+        self.m_i = self.m_scaled_func(p_i)
+        self.alpha = interp1d(
+            pvt_props["m-scaled"],
+            pvt_props["alpha"],
+            fill_value=(min(pvt_props["alpha"]), max(pvt_props["alpha"])),
+            bounds_error=False,
+        )
+        self.pvt_props = pvt_props
 
     def __repr__(self):
-        return self.df.__repr__()
+        """Representation."""
+        return self.pvt_props.__repr__()
 
 
 FlowPropertiesOnePhase = FlowProperties
@@ -66,14 +139,14 @@ class FlowPropertiesTwoPhase(FlowProperties):
     @classmethod
     def from_table(
         cls,
-        df_pvt: Mapping,
-        df_kr: Mapping,
+        pvt_props: Mapping,
+        kr_props: Mapping,
         reference_densities: dict,
         phi: float,
         Sw: float,
-        fvf_scale: float,
+        p_i: float,
     ):
-        """Create FlowProperties from tables
+        """Create FlowProperties from tables.
 
         Using fluid properties from a PVT table and a relative permeability table,
         builds an interpolator for alpha from pseudopressure
@@ -110,25 +183,32 @@ class FlowPropertiesTwoPhase(FlowProperties):
             "So",
         }
         need_cols_kr = {"So", "Sg", "Sw", "kro", "krg", "krw"}
-        if need_cols_pvt.intersection(df_pvt) != need_cols_pvt:
+        if need_cols_pvt.intersection(pvt_props) != need_cols_pvt:
             raise ValueError(f"df_pvt needs all of {need_cols_pvt}")
-        if need_cols_kr.intersection(df_kr) != need_cols_kr:
+        if need_cols_kr.intersection(kr_props) != need_cols_kr:
             raise ValueError(f"df_kr needs all of {need_cols_kr}")
         pvt = {
-            prop: interp1d(df_pvt["pressure"], df_pvt[prop], fill_value="extrapolate")
+            prop: interp1d(
+                pvt_props["pressure"], pvt_props[prop], fill_value="extrapolate"
+            )
             for prop in need_cols_pvt
         }
         pvt.update(reference_densities)
         # pvt.update({"rho_o0": rho_o0, "rho_g0": rho_g0, "rho_w0": rho_w0})
         kr = {
-            fluid: interp1d(df_kr["So"], df_kr[fluid])
+            fluid: interp1d(kr_props["So"], kr_props[fluid])
             for fluid in ("kro", "krg", "krw")
         }
         alpha_calc = alpha_multiphase(
-            df_pvt["pressure"], df_pvt["So"], phi, Sw, pvt, kr
+            pvt_props["pressure"], pvt_props["So"], phi, Sw, pvt, kr
         )
         object = cls(
-            {"pseudopressure": df_pvt["pseudopressure"], "alpha": alpha_calc}, fvf_scale
+            {
+                "pressure": pvt_props["pressure"],
+                "pseudopressure": pvt_props["pseudopressure"],
+                "alpha": alpha_calc,
+            },
+            p_i,
         )
         object.pvt = pvt
         object.kr = kr
@@ -137,13 +217,51 @@ class FlowPropertiesTwoPhase(FlowProperties):
 
 def alpha_multiphase(
     pressure: ndarray, So: ndarray, phi: float, Sw: float, pvt: dict, kr: dict
-):
+) -> ndarray:
+    """Calculate hydraulic diffusivity for a multiphase (two or three phase) system.
+
+    Args:
+        pressure (ndarray): absolute pressure for the cells
+        So (ndarray): Oil saturation for the cells
+        phi (float): porosity (assumed constant), in range from 0 to 1
+        Sw (float): Water saturation (assumed constant)
+        pvt (dict): PVT properties including
+            `rho_x0`: density at reference pressure
+            `mu_x`: viscosity (function of pressure)
+            `Bx`: formation volume factor (function of pressure)
+            for the x-components o (oil), g (gas), w (water)
+            `Rv`, `Rs`: dissolved and free gas (functions of pressure)
+        kr (dict): relative permeability for x-phases (o, g, w)
+            `krx`: relative permeability (function of So)
+
+    Returns:
+        ndarray: total hydraulic diffusivity
+    """
     lambda_combined = lambda_combined_func(pressure, So, pvt, kr)
     compressibility_combined = compressibility_combined_func(pressure, So, phi, Sw, pvt)
     return lambda_combined / compressibility_combined
 
 
-def lambda_combined_func(pressure: ndarray, So: ndarray, pvt: dict, kr: dict):
+def lambda_combined_func(
+    pressure: ndarray, So: ndarray, pvt: dict, kr: dict
+) -> ndarray:
+    """Calculate mobility for three phase system.
+
+    Args:
+        pressure (ndarray): reservoir pressure for the cells
+        So (ndarray): oil saturation (varies from 0-1) for the cells
+        pvt (dict): PVT properties including
+            `rho_x0`: density at reference pressure
+            `mu_x`: viscosity (function of pressure)
+            `Bx`: formation volume factor (function of pressure)
+            for the x-components o (oil), g (gas), w (water)
+            `Rv`, `Rs`: dissolved and free gas (functions of pressure)
+        kr (dict): relative permeability for x-phases (o, g, w)
+            `krx`: relative permeability (function of So)
+
+    Returns:
+        ndarray: mobility for the cells
+    """
     lambda_oil = pvt["rho_o0"] * (
         pvt["Rv"](pressure)
         * kr["krg"](So)
@@ -163,8 +281,26 @@ def lambda_combined_func(pressure: ndarray, So: ndarray, pvt: dict, kr: dict):
 
 
 def compressibility_combined_func(
-    pressure: ndarray, So: ndarray, phi: float, Sw: Union[float, ndarray], pvt: dict
-):
+    pressure: ndarray, So: ndarray, phi: float, Sw: float | ndarray, pvt: dict
+) -> ndarray:
+    """Calculate three-phase compressibility.
+
+    Args:
+        pressure (ndarray): reservoir pressure for the cells
+        So (ndarray): oil saturation (varies from 0-1) for the cells
+        pvt (dict): PVT properties including
+            `rho_x0`: density at reference pressure
+            `mu_x`: viscosity (function of pressure)
+            `Bx`: formation volume factor (function of pressure)
+            for the x-components o (oil), g (gas), w (water)
+            `Rv`, `Rs`: dissolved and free gas (functions of pressure)
+        kr (dict): relative permeability for x-phases (o, g, w)
+            `krx`: relative permeability (function of So)
+
+
+    Returns:
+        ndarray: Total fluid compressibility
+    """
     Sg = 1 - So - Sw
     oil_cp = (
         phi
@@ -196,7 +332,7 @@ def compressibility_combined_func(
 
 class FlowPropertiesMultiPhase(FlowProperties):
     """
-    Flow properties for a multiphase system
+    Flow properties for a multiphase system.
 
     This is used to translate from scaled pseudopressure and saturations to diffusivity
     and to capture the effect of expansion
@@ -215,7 +351,15 @@ class FlowPropertiesMultiPhase(FlowProperties):
         includes Bo,Bg,Bw at initial conditions divided by FVF at the frac face
     """
 
-    def __init__(self: Mapping[str, ndarray], fvf_scale: float):
+    def __init__(self, df: Mapping[str, ndarray]):
+        """Wrap table of pressure-dependent flow properties.
+
+        Args:
+            df (Mapping[str, ndarray]): table, including pseudopressure, So, Sg, Sw
+
+        Raises:
+            ValueError: Table columns are missing
+        """
         need_cols = {"pseudopressure", "alpha", "So", "Sg", "Sw"}
         if need_cols.intersection(df.columns) != need_cols:
             raise ValueError(
@@ -224,7 +368,7 @@ class FlowPropertiesMultiPhase(FlowProperties):
             )
         self.df = df
         x = df["pseudopressure", "So", "Sg", "Sw"]
-        self.alpha = interpolate.LinearNDInterpolator(x, df.alpha)
+        self.alpha = LinearNDInterpolator(x, df.alpha)
 
 
 RelPermParams = namedtuple(
@@ -236,8 +380,7 @@ def relative_permeabilities(
     saturations: ndarray,
     params: RelPermParams,
 ) -> ndarray:
-    """
-    Brooks-Corey power-law relative permeability
+    """Brooks-Corey power-law relative permeability.
 
     Parameters
     ----------
