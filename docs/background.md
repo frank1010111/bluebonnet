@@ -19,7 +19,7 @@ we simplify things with the pseudopressure transform,
 
 $$
 m = \int_{p_{ref}}^p \frac{p}{\mu z}dp
-$$ 
+$$
 
 With a few scaling factors, such as $\tilde x = x/d$ to redefine the distance,
 $\tilde t= t/\tau$ for time, and $\tilde m = m / m_i$, things simplify.
@@ -36,12 +36,14 @@ the initial reservoir pressure.
 
 The full system of equations is
 
-$$\begin{cases}
+$$
+\begin{cases}
 \frac{\partial \tilde m}{\partial \tilde t} &= \frac{\alpha}{\alpha_i}\frac{\partial^2 \tilde m}{\partial \tilde x^2} \\
 \tilde m(\tilde x, \tilde t = 0) &= \tilde m_i \\
 \tilde m(\tilde x=0, \tilde t) &= \tilde m_f \\
 \partial\tilde m/\partial \tilde x |_{\tilde x=1} &= 0
-\end{cases}$$
+\end{cases}
+$$
 
 After solving the system of equations, production can be calculated by applying
 Darcy's law at the fracture face.
@@ -56,14 +58,16 @@ Now, if fluid saturation only varies with pressure, this equation is all that
 needs to be solved. The hydraulic diffusivity equation for a multiphase system
 is $\alpha=\lambda / c$, where
 
-$$\begin{align}
+$$
+\begin{align}
 \lambda &= k \left( R_v\frac{k_{rg}}{\mu_g b_g} + \frac{k_{ro}}{\mu_o b_o}\right)\left(\rho_{o,std} + \rho_{g,std} R + \rho_{w,std} W\right)\\
 c &= \frac{\partial}{\partial p}\left\\{\phi\left[
     \rho_{o,std}\left(R_v\frac{S_g}{b_g} + \frac{S_o}{b_o}\right)
     + \rho_{g,std}\left(R_s\frac{S_o}{b_o} + \frac{S_g}{b_o}\right)
     + \rho_{w,std}\frac{S_w}{b_w}\right\\}
 \right]
-\end{align}$$
+\end{align}
+$$
 
 where $\rho_{j,std}$ is the density of phase $j$ at standard temperature and
 pressure, $k_{rj}$ is the relative permeability of phase $j$, $b_j$ is the
@@ -74,41 +78,51 @@ the gas, and $R_s$ is the volume of gas dissolved in the oil.
 
 Next, full three phases. For water, mass conservation looks like
 
-$$\begin{equation}
+$$
+\begin{equation}
 \frac{\partial}{\partial t} \left( \rho_{w,std} \phi \frac{S_w}{b_w}\right) = \frac{\partial}{\partial x}\left( \rho_{w,std} k \frac{k_{rw}}{\mu_w b_w} \frac{\partial p}{\partial x}\right)
-\end{equation}$$
+\end{equation}
+$$
 
 Oil and gas are a bit more complicated, because of miscibility. For natural gas,
 the mass conservation equation is
 
-$$\begin{equation}
+$$
+\begin{equation}
 \frac{\partial}{\partial t} \left[ \rho_{g,std} \phi \left(R_s\frac{S_o}{b_o} + \frac{S_g}{b_g}\right)\right]
 = \frac{\partial}{\partial x}\left[
     \rho_{g,std} k \left(R_s\frac{k_{ro}}{\mu_o b_o} +\frac{k_{rg}}{\mu_g b_g} \frac{\partial p}{\partial x}\right)\right]
-\end{equation}$$
+\end{equation}
+$$
 
 and for oil
 
-$$\begin{equation}
+$$
+\begin{equation}
 \frac{\partial}{\partial t} \left[ \rho_{o,std} \phi \left(R_v\frac{S_g}{b_g} + \frac{S_o}{b_o}\right)\right]
 = \frac{\partial}{\partial x}\left[
     \rho_{o,std} k \left(R_v\frac{k_{rg}}{\mu_g b_g} +\frac{k_{ro}}{\mu_o b_o} \frac{\partial p}{\partial x}\right)\right]
-\end{equation}$$
+\end{equation}
+$$
 
 <!--\label{oil-sat} -->
 
 The saturation path gets quite complicated. Let's start defining things.
 
-$$\begin{align}
+$$
+\begin{align}
 b &= R_s S_o / b_o + S_g / b_g \\
 a &= R_s\frac{k_{ro}}{\mu_o b_o} + \frac{k_{rg}}{\mu_g b_g}
-\end{align}$$
+\end{align}
+$$
 
 Thus, gas saturation follows
 
-$$\begin{equation}
+$$
+\begin{equation}
 \frac{\partial b}{\partial t} = \frac{k}{\phi} \frac{\partial}{\partial x}\left( a \frac{\partial p}{\partial x}\right)
-\end{equation}$$
+\end{equation}
+$$
 
 Oil saturation follows
 
@@ -122,19 +136,23 @@ $$
 
 For water,
 
-$$\begin{align}
+$$
+\begin{align}
 \xi &= S_w/b_w \\
 \gamma &= \frac{k_{rw}}{\mu_w b_w} \\
 \frac{\partial \xi}{\partial t} &= \frac{k}{\phi} \frac{\partial}{\partial x}\left( \gamma \frac{\partial p}{\partial x}\right)
-\end{align}$$
+\end{align}
+$$
 
 Next, perform a Boltzman Transform with these convenient partial derivatives
 
-$$\begin{align}
+$$
+\begin{align}
 \eta &= x\sqrt{\frac{\phi}{kt}}\\
 \frac{\partial\eta}{\partial x} &= \sqrt{\frac{\phi}{kt}}\\
 \frac{\partial\eta}{\partial t} &= -\frac{x}{2t}\sqrt{\frac{\phi}{kt}}
-\end{align}$$
+\end{align}
+$$
 
 The saturation equations can be rewritten
 
@@ -149,9 +167,10 @@ $$
 where the total derivative for component $Y\in\{a,b,\alpha,\beta,\xi,\gamma\}$
 is
 
-$$\begin{equation}
-\frac{dY}{d\eta} = \frac{\partial Y}{\partial p}\frac{\partial p}{\partial \eta} + 
-\frac{\partial Y}{\partial S_w}\frac{\partial S_w}{\partial \eta} + 
+$$
+\begin{equation}
+\frac{dY}{d\eta} = \frac{\partial Y}{\partial p}\frac{\partial p}{\partial \eta} +
+\frac{\partial Y}{\partial S_w}\frac{\partial S_w}{\partial \eta} +
 \frac{\partial Y}{\partial S_g}\frac{\partial S_g}{\partial \eta}
-\end{equation}$$
-
+\end{equation}
+$$
