@@ -43,9 +43,12 @@ def _obj_function(
     tau = params["tau"].value
     resource_in_place = params["M"].value
     pressure_initial = params["p_initial"].value
-    #pressure_fracface = pressure_initial
-    print(" tau is {:7.5g}, pressure_initial is {:7.5g} and M is {:7.5g}".format(
-             tau, pressure_initial, resource_in_place))
+    # pressure_fracface = pressure_initial
+    print(
+        " tau is {:7.5g}, pressure_initial is {:7.5g} and M is {:7.5g}".format(
+            tau, pressure_initial, resource_in_place
+        )
+    )
     t = days / tau
     flow_propertiesM = FlowProperties(pvt_table, pressure_initial)
     res_realgasM = SinglePhaseReservoir(
@@ -74,7 +77,7 @@ def fit_production_pressure(
     prod_data : pd.DataFrame
         contains columns 'Days', 'Gas', and 'Pressure'
     pvt_table : pd.DataFrame
-        information on equation of state, for example from BuildPVT
+        information on equation of state, for example from build_pvt_gas
     pressure_initial : float
         guess for initial reservoir pressure
     filter_window_size : int or None
@@ -103,7 +106,7 @@ def fit_production_pressure(
     else:
         prod_data = prod_data[["Days", "Gas", "Pressure"]]
 
-    time =np.arange(0,len(prod_data["Days"]))
+    time = np.arange(0, len(prod_data["Days"]))
     pressure_fracface = np.array(prod_data["Pressure"])
 
     # with noisy data, sometimes a boxcar filter is beneficial
@@ -115,9 +118,14 @@ def fit_production_pressure(
 
     if params is None:
         params = Parameters()
-        params.add("tau", value=1000.0, min=30.0, max=time[len(time)-1] * 2)  # units: days
         params.add(
-            "M", value=cumulative_prod[-1], min=cumulative_prod[len(cumulative_prod)-2], max=inplace_max
+            "tau", value=1000.0, min=30.0, max=time[len(time) - 1] * 2
+        )  # units: days
+        params.add(
+            "M",
+            value=cumulative_prod[-1],
+            min=cumulative_prod[len(cumulative_prod) - 2],
+            max=inplace_max,
         )
         params.add(
             "p_initial",
@@ -150,7 +158,7 @@ def plot_production_comparison(
     prod_data : pd.DataFrame
         contains columns 'Days', 'Gas', and 'Pressure'
     pvt_table : pd.DataFrame
-        information on equation of state, for example from BuildPVT
+        information on equation of state, for example from build_pvt_gas
     pressure_initial : float
         guess for initial reservoir pressure
     filter_window_size : int or None
@@ -189,7 +197,7 @@ def plot_production_comparison(
     resource_in_place = params["M"].value
     tau = params["tau"].value
     pressure_initial = params["p_initial"].value
-    #pressure_fracface = pressure_initial
+    # pressure_fracface = pressure_initial
 
     flow_propertiesM = FlowProperties(pvt_table, pressure_initial)
     res_realgasM = SinglePhaseReservoir(
@@ -199,7 +207,7 @@ def plot_production_comparison(
     # print(f"{tau=:7.5g}, {pressure_initial=:7.5g} and M={resource_in_place:8.5g}")
 
     rf2M = res_realgasM.recovery_factor()
-    plt.rcParams['text.usetex'] = True
+    plt.rcParams["text.usetex"] = True
     fig, (ax1, ax2) = plt.subplots(2, 1)
     fig.set_size_inches(5, 6)
     ax1.plot(

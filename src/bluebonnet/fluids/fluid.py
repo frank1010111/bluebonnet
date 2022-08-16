@@ -41,8 +41,8 @@ class PseudocriticalPoint:
     "pseudocritical pressure in psia"
 
 
-def BuildPVT(
-    FieldValues: Mapping, GasDryness: str, maximum_pressure: float = 14000
+def build_pvt_gas(
+    gas_values: Mapping, gas_dryness: str, maximum_pressure: float = 14000
 ) -> pd.DataFrame:
     """Build a table of PVT properties for use in the flow module.
 
@@ -62,74 +62,69 @@ def BuildPVT(
         pvt_table
     """
     non_hydrocarbon_properties = make_nonhydrocarbon_properties(
-        float(FieldValues["N2"]), float(FieldValues["H2S"]), float(FieldValues["CO2"])
+        gas_values["N2"], gas_values["H2S"], gas_values["CO2"]
     )
 
-    (Tc, Pc) = pseudocritical_point_Sutton(
-        float(FieldValues["Gas Specific Gravity"]),
+    temperature_pc, pressure_pc = pseudocritical_point_Sutton(
+        gas_values["Gas Specific Gravity"],
         non_hydrocarbon_properties,
-        GasDryness,
+        gas_dryness,
     )
 
-    Pressure = np.arange(0, maximum_pressure, 10.0)
-    Pressure[0] = 0.001
+    pressure = np.arange(0, maximum_pressure, 10.0)
+    pressure[0] = 0.001
+    temperature = gas_values["Reservoir Temperature (deg F)"]
 
-    T = np.zeros(len(Pressure)) + float(FieldValues["Reservoir Temperature (deg F)"])
-
-    Z = np.array(
-        [
-            z_factor_DAK(float(FieldValues["Reservoir Temperature (deg F)"]), p, Tc, Pc)
-            for p in Pressure
-        ]
+    z_factor = np.array(
+        [z_factor_DAK(temperature, p, temperature_pc, pressure_pc) for p in pressure]
     )
 
     density = np.array(
         [
             density_DAK(
-                float(FieldValues["Reservoir Temperature (deg F)"]),
+                temperature,
                 p,
-                Tc,
-                Pc,
-                float(FieldValues["Gas Specific Gravity"]),
+                temperature_pc,
+                pressure_pc,
+                float(gas_values["Gas Specific Gravity"]),
             )
-            for p in Pressure
+            for p in pressure
         ]
     )
 
     viscosity = np.array(
         [
             viscosity_Sutton(
-                float(FieldValues["Reservoir Temperature (deg F)"]),
+                temperature,
                 p,
-                Tc,
-                Pc,
-                float(FieldValues["Gas Specific Gravity"]),
+                temperature_pc,
+                pressure_pc,
+                float(gas_values["Gas Specific Gravity"]),
             )
-            for p in Pressure
+            for p in pressure
         ]
     )
 
     compressibility = np.array(
         [
-            compressibility_DAK(
-                float(FieldValues["Reservoir Temperature (deg F)"]), p, Tc, Pc
-            )
-            for p in Pressure
+            compressibility_DAK(temperature, p, temperature_pc, pressure_pc)
+            for p in pressure
         ]
     )
     pvt_gas = pd.DataFrame(
         data={
-            "T": T,
-            "P": Pressure,
+            "T": np.full_like(pressure, temperature),
+            "P": pressure,
             "Density": density,
-            "Z-Factor": Z,
+            "Z-Factor": z_factor,
             "Cg": compressibility,
             "Viscosity": viscosity,
         }
     )
-    ms = 2 * cumtrapz(pvt_gas.P / (pvt_gas.Viscosity * pvt_gas["Z-Factor"]), pvt_gas.P)
-    ms = np.concatenate(([0], ms))
-    pvt_gas["pseudopressure"] = ms
+    pseudopressure = 2 * cumtrapz(
+        pvt_gas.P / (pvt_gas.Viscosity * pvt_gas["Z-Factor"]), pvt_gas.P, initial=0
+    )
+    pvt_gas["pseudopressure"] = pseudopressure
 
     return pvt_gas
 
