@@ -1,11 +1,13 @@
-# -*- coding: utf-8 -*-
 """
 Define a suite a tests for the oil module
 """
-import pytest
+from __future__ import annotations
+
 import math
-import numpy as np
 from collections import namedtuple
+
+import numpy as np
+import pytest
 
 from bluebonnet.fluids import oil
 
