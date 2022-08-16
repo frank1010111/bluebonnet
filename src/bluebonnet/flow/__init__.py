@@ -13,6 +13,7 @@ from bluebonnet.flow.reservoir import (
     IdealReservoir,
     MultiPhaseReservoir,
     SinglePhaseReservoir,
+    TwoPhaseReservoir,
 )
 
 __all__ = [
@@ -25,4 +26,5 @@ __all__ = [
     "IdealReservoir",
     "MultiPhaseReservoir",
     "SinglePhaseReservoir",
+    "TwoPhaseReservoir",
 ]
