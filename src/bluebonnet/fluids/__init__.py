@@ -6,10 +6,10 @@ saturation pressure, viscosity, and the pseudopressure transform.
 """
 from __future__ import annotations
 
-from bluebonnet.fluids.fluid import Fluid, build_pvt_gas_gas, pseudopressure
+from bluebonnet.fluids.fluid import Fluid, build_pvt_gas, pseudopressure
 
 __all__ = [
-    "build_pvt_gas_gas",
+    "build_pvt_gas",
     "Fluid",
     "pseudopressure",
 ]
