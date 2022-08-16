@@ -44,11 +44,11 @@ def _obj_function(
     resource_in_place = params["M"].value
     pressure_initial = params["p_initial"].value
     # pressure_fracface = pressure_initial
-    print(
-        " tau is {:7.5g}, pressure_initial is {:7.5g} and M is {:7.5g}".format(
-            tau, pressure_initial, resource_in_place
-        )
-    )
+    # print(
+    #     " tau is {:7.5g}, pressure_initial is {:7.5g} and M is {:7.5g}".format(
+    #         tau, pressure_initial, resource_in_place
+    #     )
+    # )
     t = days / tau
     flow_propertiesM = FlowProperties(pvt_table, pressure_initial)
     res_realgasM = SinglePhaseReservoir(
@@ -204,7 +204,6 @@ def plot_production_comparison(
         80, pressure_fracface, pressure_initial, flow_propertiesM
     )
     res_realgasM.simulate(time / tau, pressure_fracface=pressure_fracface)
-    # print(f"{tau=:7.5g}, {pressure_initial=:7.5g} and M={resource_in_place:8.5g}")
 
     rf2M = res_realgasM.recovery_factor()
     plt.rcParams["text.usetex"] = True
