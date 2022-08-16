@@ -206,14 +206,13 @@ def plot_production_comparison(
     res_realgasM.simulate(time / tau, pressure_fracface=pressure_fracface)
 
     rf2M = res_realgasM.recovery_factor()
-    plt.rcParams["text.usetex"] = True
     fig, (ax1, ax2) = plt.subplots(2, 1)
     fig.set_size_inches(5, 6)
     ax1.plot(
         time / tau,
         rf2M,
         "--",
-        label=rf"Production; $\tau=${tau:7.5g}, $\mathcal M=${resource_in_place:7.5g}",
+        label=f"Production; tau={tau:7.5g}, M={resource_in_place:7.5g}",
     )
     ax1.plot(time / tau, cumulative_prod / resource_in_place, label=well_name)
     ax1.legend()
