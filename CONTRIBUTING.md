@@ -43,6 +43,14 @@ If you are proposing a feature:
 Ready to contribute? Here's how to set up `bluebonnet` for local development.
 
 1. Download a copy of `bluebonnet` locally.
+
+   ```console
+   git clone https://github.com/frank1010111/bluebonnet.git
+   git lfs install
+   ```
+
+   You can install [git-lfs here](https://git-lfs.github.com/)
+
 2. Install `bluebonnet` using `pip`:
 
    ```console
