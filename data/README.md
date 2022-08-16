@@ -7,3 +7,7 @@ Production data is in the RTA dataset, along with information about the
 reservoir properties and well trajectories.
 
 Examples using this data are provided in the docs.
+
+For illustration purposes, we include SPE Data Repository: Data Set: 1, Well
+Number: 20. From URL:
+<https://www.spe.org/datasets/dataset_1/csv_files/dataset_1_well_20/>

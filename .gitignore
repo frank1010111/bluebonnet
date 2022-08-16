@@ -142,5 +142,6 @@ dmypy.json
 .DS_Store.vscode/
 **/.DS_Store
 
-# external data
-data/*.csv
+# SPE files
+data/production_data.csv
+data/well_data.csv
