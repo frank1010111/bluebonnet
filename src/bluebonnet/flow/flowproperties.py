@@ -13,6 +13,7 @@ from typing import Mapping
 
 import numpy as np
 from numpy import ndarray
+from scipy.integrate import cumulative_trapezoid
 from scipy.interpolate import LinearNDInterpolator, interp1d
 
 
@@ -204,14 +205,19 @@ class FlowPropertiesTwoPhase(FlowProperties):
         alpha_calc = alpha_multiphase(
             pvt_props["pressure"], pvt_props["So"], phi, Sw, pvt, kr
         )
-        object = cls(
-            {
-                "pressure": pvt_props["pressure"],
-                "pseudopressure": pvt_props["pseudopressure"],
-                "alpha": alpha_calc,
-            },
-            p_i,
+        pseudopressure = pseudopressure_threephase(
+            pvt_props["pressure"], pvt_props["So"], Sw, pvt, kr
         )
+        with warnings.catch_warnings():
+            object = cls(
+                {
+                    "pressure": pvt_props["pressure"],
+                    "pseudopressure": pseudopressure,
+                    "alpha": alpha_calc,
+                },
+                p_i,
+            )
+
         object.pvt = pvt
         object.kr = kr
         return object
@@ -330,6 +336,48 @@ def compressibility_combined_func(
         * (Sw / pvt["Bw"](pressure + 0.5) - Sw / pvt["Bw"](pressure - 0.5))
     )
     return oil_cp + gas_cp + water_cp
+
+
+def pseudopressure_threephase(
+    pressure: ndarray, So: ndarray, Sw: float | ndarray, pvt: dict, kr: dict
+) -> ndarray:
+    """Calculate pseudopressure over pressure for three-phase fluid.
+
+    Args:
+        pressure (ndarray): reservoir pressure for the cells
+        So (ndarray): oil saturation (varies from 0-1) for the cells
+        pvt (dict): PVT properties including
+            `rho_x0`: density at reference pressure
+            `mu_x`: viscosity (function of pressure)
+            `Bx`: formation volume factor (function of pressure)
+            for the x-components o (oil), g (gas), w (water)
+            `Rv`, `Rs`: dissolved and free gas (functions of pressure)
+        kr (dict): relative permeability for x-phases (o, g, w)
+            `krx`: relative permeability (function of So)
+
+    Returns:
+    -------
+        ndarray: pseudopressure
+    """
+    lambda_oil = pvt["rho_o0"] * (
+        pvt["Rv"](pressure)
+        * kr["krg"](So)
+        / (pvt["mu_g"](pressure) * pvt["Bg"](pressure))
+        + kr["kro"](So) / (pvt["mu_o"](pressure) * pvt["Bo"](pressure))
+    )
+    lambda_gas = pvt["rho_g0"] * (
+        pvt["Rs"](pressure)
+        * kr["kro"](So)
+        / (pvt["mu_o"](pressure) * pvt["Bo"](pressure))
+        + kr["krg"](So) / (pvt["mu_g"](pressure) * pvt["Bg"](pressure))
+    )
+    lambda_water = pvt["rho_w0"] * (
+        kr["krw"](So) / (pvt["mu_w"](pressure) * pvt["Bw"](pressure))
+    )
+    integrand = lambda_oil + lambda_gas + lambda_water
+    integrand_interp = interp1d(pressure, integrand)
+    pseudopressure = cumulative_trapezoid(pressure, integrand_interp, initial=0)
+    return pseudopressure
 
 
 class FlowPropertiesMultiPhase(FlowProperties):
