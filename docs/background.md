@@ -60,11 +60,11 @@ is $\alpha=\lambda / c$, where
 
 $$
 \begin{align}
-\lambda &= k \left( R_v\frac{k_{rg}}{\mu_g b_g} + \frac{k_{ro}}{\mu_o b_o}\right)\left(\rho_{o,std} + \rho_{g,std} R + \rho_{w,std} W\right)\\
-c &= \frac{\partial}{\partial p}\left\\{\phi\left[
-    \rho_{o,std}\left(R_v\frac{S_g}{b_g} + \frac{S_o}{b_o}\right)
-    + \rho_{g,std}\left(R_s\frac{S_o}{b_o} + \frac{S_g}{b_o}\right)
-    + \rho_{w,std}\frac{S_w}{b_w}\right\\}
+\lambda &= k \left( R_v\frac{k_{rg}}{\mu_g b_g} + \frac{k_{ro}}{\mu_o b_o}\right)\left(\frac{\rho_{o,std}}{\rho_{ref}} + \frac{\rho_{g,std}}{\rho_{ref}} R + \frac{\rho_{w,std}}{\rho_{ref}} W\right)\\
+c &= \frac{\partial}{\partial p}\left[\phi\left[
+    \frac{\rho_{o,std}}{\rho_{ref}} \left(R_v\frac{S_g}{b_g} + \frac{S_o}{b_o}\right)
+    + \frac{\rho_{g,std}}{\rho_{ref}} \left(R_s\frac{S_o}{b_o} + \frac{S_g}{b_o}\right)
+    +\frac{\rho_{w,std}}{\rho_{ref}}\frac{S_w}{b_w}\right]
 \right]
 \end{align}
 $$
@@ -74,13 +74,23 @@ pressure, $k_{rj}$ is the relative permeability of phase $j$, $b_j$ is the
 formation volume factor of phase $j$, $R_v$ is the volume of oil dissolved into
 the gas, and $R_s$ is the volume of gas dissolved in the oil.
 
+A multiphase pseudopressure also looks a little different.
+
+$$
+m = \int_{p_ref}^p k\left[
+    \frac{\rho_{o,std}}{\rho_{ref}} \left(R_v\frac{k_{rg}}{\mu_g b_g} + \frac{k_{ro}}{\mu_o b_o}\right)
+    + \frac{\rho_{g,std}}{\rho_{ref}} \left(R_s \frac{k_{ro}}{\mu_o b_o} + \frac{k_{rg}}{\mu_g b_g}\right)
+    + \frac{\rho_{w,std}}{\rho_{ref}} \frac{k_{rw}}{\mu_w b_w}
+\right] dp'
+$$
+
 ## Full three-phase flow (not yet implemented)
 
 Next, full three phases. For water, mass conservation looks like
 
 $$
 \begin{equation}
-\frac{\partial}{\partial t} \left( \rho_{w,std} \phi \frac{S_w}{b_w}\right) = \frac{\partial}{\partial x}\left( \rho_{w,std} k \frac{k_{rw}}{\mu_w b_w} \frac{\partial p}{\partial x}\right)
+\frac{\partial}{\partial t} \left( \frac{\rho_{w,std}}{\rho_{ref}} \phi \frac{S_w}{b_w}\right) = \frac{\partial}{\partial x}\left( \frac{\rho_{w,std}}{\rho_{ref}} k \frac{k_{rw}}{\mu_w b_w} \frac{\partial p}{\partial x}\right)
 \end{equation}
 $$
 
@@ -89,9 +99,9 @@ the mass conservation equation is
 
 $$
 \begin{equation}
-\frac{\partial}{\partial t} \left[ \rho_{g,std} \phi \left(R_s\frac{S_o}{b_o} + \frac{S_g}{b_g}\right)\right]
+\frac{\partial}{\partial t} \left[ \frac{\rho_{g,std}}{\rho_{ref}} \phi \left(R_s\frac{S_o}{b_o} + \frac{S_g}{b_g}\right)\right]
 = \frac{\partial}{\partial x}\left[
-    \rho_{g,std} k \left(R_s\frac{k_{ro}}{\mu_o b_o} +\frac{k_{rg}}{\mu_g b_g} \frac{\partial p}{\partial x}\right)\right]
+    \frac{\rho_{g,std}}{\rho_{ref}} k \left(R_s\frac{k_{ro}}{\mu_o b_o} +\frac{k_{rg}}{\mu_g b_g} \frac{\partial p}{\partial x}\right)\right]
 \end{equation}
 $$
 
@@ -99,9 +109,9 @@ and for oil
 
 $$
 \begin{equation}
-\frac{\partial}{\partial t} \left[ \rho_{o,std} \phi \left(R_v\frac{S_g}{b_g} + \frac{S_o}{b_o}\right)\right]
+\frac{\partial}{\partial t} \left[ \frac{\rho_{o,std}}{\rho_{ref}} \phi \left(R_v\frac{S_g}{b_g} + \frac{S_o}{b_o}\right)\right]
 = \frac{\partial}{\partial x}\left[
-    \rho_{o,std} k \left(R_v\frac{k_{rg}}{\mu_g b_g} +\frac{k_{ro}}{\mu_o b_o} \frac{\partial p}{\partial x}\right)\right]
+    \frac{\rho_{o,std}}{\rho_{ref}} k \left(R_v\frac{k_{rg}}{\mu_g b_g} +\frac{k_{ro}}{\mu_o b_o} \frac{\partial p}{\partial x}\right)\right]
 \end{equation}
 $$
 
