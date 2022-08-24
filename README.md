@@ -111,3 +111,6 @@ Papers developing or using this approach include:
    Implications for Long Term Productivity of Tight Oil Plays," Journal of
    Petroleum Science and Engineering,
    https://doi.org/10.1016/j.petrol.2021.109406
+1. Ruiz Maraggi, L.M., 2022. Production analysis and forecasting of shale
+   reservoirs using simple mechanistic and statistical modeling (Doctoral
+   dissertation). http://dx.doi.org/10.26153/tsw/42112
