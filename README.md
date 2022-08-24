@@ -23,9 +23,10 @@ Examples can be found inside the docs folder.
 
 ## Contributing
 
-Interested in contributing? Check out the contributing guidelines. Please note
-that this project is released with a Code of Conduct. By contributing to this
-project, you agree to abide by its terms.
+Interested in contributing? Check out the
+[contributing guidelines](CONTRIBUTING.md). Please note that this project is
+released with a Code of Conduct. By contributing to this project, you agree to
+abide by its terms.
 
 ### Contributor Hall of Fame
 
@@ -65,6 +66,9 @@ Papers developing or using this approach include:
    wells in the Haynesville shale using scaling methods." Journal of
    Unconventional Oil and Gas Resources.
    https://doi.org/10.1016/j.juogr.2015.03.001
+1. Male, F., 2015. Application of a one dimensional nonlinear model to flow in
+   hydrofractured shale gas wells using scaling solutions (Doctoral
+   dissertation). https://repositories.lib.utexas.edu/handle/2152/46706
 1. Eftekhari, B., Marder, M. and Patzek, T.W., 2018. Field data provide
    estimates of effective permeability, fracture spacing, well drainage area and
    incremental production in gas shales. Journal of Natural Gas Science and
@@ -98,8 +102,8 @@ Papers developing or using this approach include:
    Forecasts of Shale Gas Wells." Paper presented at the SPE Canadian Energy
    Technology Conference, Calgary, Alberta, Canada, March 2022. doi:
    https://doi.org/10.2118/208967-MS
-1. Ruiz Maraggi, L.M., Lake, L.W. and Walsh, M.P., 2022, March. Deconvolution
-   Overcomes the Limitations of Rate Normalization and Material Balance Time in
+1. Ruiz Maraggi, L.M., Lake, L.W. and Walsh, M.P., 2022. Deconvolution Overcomes
+   the Limitations of Rate Normalization and Material Balance Time in
    Rate-Transient Analysis of Unconventional Reservoirs. In SPE Canadian Energy
    Technology Conference. OnePetro.
 1. Male, F., Duncan, I.J., 2022, "The Paradox of Increasing Initial Oil
