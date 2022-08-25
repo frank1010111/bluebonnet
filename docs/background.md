@@ -60,7 +60,16 @@ is $\alpha=\lambda / c$, where
 
 $$
 \begin{align}
-\lambda &= k \left( R_v\frac{k_{rg}}{\mu_g b_g} + \frac{k_{ro}}{\mu_o b_o}\right)\left(\frac{\rho_{o,std}}{\rho_{ref}} + \frac{\rho_{g,std}}{\rho_{ref}} R + \frac{\rho_{w,std}}{\rho_{ref}} W\right)\\
+% \lambda &= k \left( R_v\frac{k_{rg}}{\mu_g b_g} + \frac{k_{ro}}{\mu_o b_o}\right)\left(\frac{\rho_{o,std}}{\rho_{ref}} + \frac{\rho_{g,std}}{\rho_{ref}} R + \frac{\rho_{w,std}}{\rho_{ref}} W\right)\\
+% R &= \frac{\frac{k_{rg}}{\mu_g B_g}+R_s\frac{k_{ro}}{\mu_o B_o}}{R_v\frac{k_{rg}}{\mu_g B_g}+\frac{k_{ro}}{\mu_o B_o}}
+% \qquad\qquad\qquad
+% W = \frac{k_{rw}/\left(\mu_w b_w\right)}{R_v\frac{k_{rg}}{\mu_g b_g} + \frac{k_ro}{\mu_o b_o}}
+% \\
+\lambda &= \frac{k}{\rho_{ref}}\left[
+    \left(R_v\frac{k_{rg}}{\mu_g b_g} + \frac{k_{ro}}{\mu_o b_o} \right)\rho_{o,std}
+    + \left(\frac{k_{rg}}{\mu_g B_g}+R_s\frac{k_{ro}}{\mu_o B_o} \right)\rho_{g,std}
+    + \frac{k_{rw}}{\mu_w b_w}\rho_{w,std}\right]
+\\
 c &= \frac{\partial}{\partial p}\left[\phi\left[
     \frac{\rho_{o,std}}{\rho_{ref}} \left(R_v\frac{S_g}{b_g} + \frac{S_o}{b_o}\right)
     + \frac{\rho_{g,std}}{\rho_{ref}} \left(R_s\frac{S_o}{b_o} + \frac{S_g}{b_o}\right)
@@ -117,70 +126,39 @@ $$
 
 <!--\label{oil-sat} -->
 
-The saturation path gets quite complicated. Let's start defining things.
+The saturation path gets quite complicated.
+[Walsh and Lake (2003)](https://www.elsevier.com/books/a-generalized-approach-to-primary-hydrocarbon-recovery-of-petroleum-exploration-and-production/walsh/978-0-444-50683-2)
+use an unsteady-state method for calculating the saturation path during primary
+recovery. The differential equation is
 
 $$
 \begin{align}
-b &= R_s S_o / b_o + S_g / b_g \\
-a &= R_s\frac{k_{ro}}{\mu_o b_o} + \frac{k_{rg}}{\mu_g b_g}
+\frac{d p}{d S} =
+% numerator
+\frac{\left(\frac{k{rg}}{\mu_g B_g} +R_s\frac{k{ro}}{\mu_o B_o}\right) \dfrac{\partial \left(R_v\frac{S_g}{B_g} +\frac{S_o}{B_o} \right) }{\partial p}
+-\left(R_v\frac{k_{rg}}{\mu_g B_g}+\frac{k_{ro}}{\mu_o B_o}\right)
+\dfrac{\partial \left(\frac{S_g}{B_g} +R_s\frac{S_o}{B_o} \right)}{\partial p}}
+% denominator
+{\left(R_v\frac{k_{rg}}{\mu_g B_g} +\frac{k{ro}}{\mu_o B_o}\right)
+\dfrac{\partial \left(\frac{S_g}{B_g}+R_s\frac{S_o}{B_o} \right)}{\partial S}
+-\left(\frac{k{rg}}{\mu_g B_g} +R_s\frac{k{ro}}{\mu_o B_o}\right)
+\dfrac{\partial \left(R_v\frac{S_g}{B_g}+\frac{S_o}{B_o} \right) }{\partial S}}
 \end{align}
 $$
 
-Thus, gas saturation follows
+A few other options include an analytical approximation
+([Tabatabaie and Pooladi-Darvish, 2017](https://doi.org/10.2118/180932-PA))
 
 $$
 \begin{equation}
-\frac{\partial b}{\partial t} = \frac{k}{\phi} \frac{\partial}{\partial x}\left( a \frac{\partial p}{\partial x}\right)
+ So = S_{o,i}+\left(\mu_oB_g\dfrac{\partial R_s}{\partial p}\right){p_{bubble}}\int^{p}{p_{bubble}}\frac{1}{\mu_oB_o}dp'
 \end{equation}
 $$
 
-Oil saturation follows
-
-$$
-\begin{align}
-\beta &= R_v S_g / b_g + S_o / b_o \\
-\alpha &= R_v\frac{k_{rg}}{\mu_g b_g} + \frac{k_{ro}}{\mu_o b_o} \\
-\frac{\partial \beta}{\partial t} &= \frac{k}{\phi} \frac{\partial}{\partial x}\left( \alpha \frac{\partial p}{\partial x}\right)
-\end{align}
-$$
-
-For water,
-
-$$
-\begin{align}
-\xi &= S_w/b_w \\
-\gamma &= \frac{k_{rw}}{\mu_w b_w} \\
-\frac{\partial \xi}{\partial t} &= \frac{k}{\phi} \frac{\partial}{\partial x}\left( \gamma \frac{\partial p}{\partial x}\right)
-\end{align}
-$$
-
-Next, perform a Boltzman Transform with these convenient partial derivatives
-
-$$
-\begin{align}
-\eta &= x\sqrt{\frac{\phi}{kt}}\\
-\frac{\partial\eta}{\partial x} &= \sqrt{\frac{\phi}{kt}}\\
-\frac{\partial\eta}{\partial t} &= -\frac{x}{2t}\sqrt{\frac{\phi}{kt}}
-\end{align}
-$$
-
-The saturation equations can be rewritten
-
-$$
-\begin{align}
--\frac\eta2 \frac{db}{d\eta} &= \frac{da}{d\eta}\frac{dp}{d\eta} + a \frac{d^2p}{d\eta^2} \\
--\frac\eta2 \frac{d\beta}{d\eta} &= \frac{d\alpha}{d\eta}\frac{dp}{d\eta} + /alpha \frac{d^2p}{d\eta^2} \\
--\frac\eta2 \frac{d\xi}{d\eta} &= \frac{d\gamma}{d\eta}\frac{dp}{d\eta} + \gamma \frac{d^2p}{d\eta^2} \\
-\end{align}
-$$
-
-where the total derivative for component $Y\in\{a,b,\alpha,\beta,\xi,\gamma\}$
-is
+and the Constant Composition Expansion Method (CCE)
 
 $$
 \begin{equation}
-\frac{dY}{d\eta} = \frac{\partial Y}{\partial p}\frac{\partial p}{\partial \eta} +
-\frac{\partial Y}{\partial S_w}\frac{\partial S_w}{\partial \eta} +
-\frac{\partial Y}{\partial S_g}\frac{\partial S_g}{\partial \eta}
+So = 1/\left[{1+\frac{b_g}{b_o}\left(R_{s,i} -R_s\right)}\right]
 \end{equation}
 $$
