@@ -209,6 +209,7 @@ class FlowPropertiesTwoPhase(FlowProperties):
             pvt_props["pressure"], pvt_props["So"], Sw, pvt, kr
         )
         with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
             object = cls(
                 {
                     "pressure": pvt_props["pressure"],
@@ -217,7 +218,6 @@ class FlowPropertiesTwoPhase(FlowProperties):
                 },
                 p_i,
             )
-
         object.pvt = pvt
         object.kr = kr
         return object
@@ -375,8 +375,7 @@ def pseudopressure_threephase(
         kr["krw"](So) / (pvt["mu_w"](pressure) * pvt["Bw"](pressure))
     )
     integrand = lambda_oil + lambda_gas + lambda_water
-    integrand_interp = interp1d(pressure, integrand)
-    pseudopressure = cumulative_trapezoid(pressure, integrand_interp, initial=0)
+    pseudopressure = cumulative_trapezoid(pressure, integrand, initial=0)
     return pseudopressure
 
 
@@ -418,7 +417,7 @@ class FlowPropertiesMultiPhase(FlowProperties):
             )
         self.df = df
         x = df["pseudopressure", "So", "Sg", "Sw"]
-        self.alpha = LinearNDInterpolator(x, df.alpha)
+        self.alpha = LinearNDInterpolator(x, df["alpha"])
 
 
 RelPermParams = namedtuple(
