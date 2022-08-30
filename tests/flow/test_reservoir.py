@@ -1,6 +1,4 @@
-"""
-Define a suite a tests for the reservoir module
-"""
+"""Define a suite a tests for the reservoir module."""
 from __future__ import annotations
 
 from itertools import product
@@ -11,13 +9,10 @@ from scipy.optimize import curve_fit
 
 from bluebonnet.flow import (
     FlowProperties,
-    FlowPropertiesMultiPhase,
     IdealReservoir,
     MultiPhaseReservoir,
     SinglePhaseReservoir,
-    relative_permeabilities,
 )
-from bluebonnet.fluids import Fluid
 
 nx = (20, 50)
 nt = (100, 10_000)
@@ -66,7 +61,6 @@ class TestRun:
             reservoir = Reservoir(nx, pf, pi, fluid, So, Sg, Sw)
         else:
             reservoir = Reservoir(nx, pf, pi, fluid)
-        time = np.linspace(0, np.sqrt(end_t), nt) ** 2
         with pytest.raises(RuntimeError):
             # make sure you can't run recovery_factor before simulate
             reservoir.recovery_factor()
@@ -85,7 +79,10 @@ class TestRun:
                 mask = (time > 0.02) & (time < 0.3)
             time_log = np.log(time[mask])
             rf_log = np.log(rf[mask])
-            curve = lambda t, intercept, slope: intercept + t * slope
+
+            def curve(time, intercept, slope):
+                return intercept + time * slope
+
             (intercept, slope), _ = curve_fit(curve, time_log, rf_log, p0=[0, 1])
             return slope
 
@@ -109,7 +106,10 @@ class TestRun:
                 mask = (time > 0.02) & (time < 0.2)
             time_log = np.log(time[mask])
             rf_log = np.log(rf[mask])
-            curve = lambda t, intercept, slope: intercept + t * slope
+
+            def curve(time, intercept, slope):
+                return intercept + time * slope
+
             (intercept, slope), _ = curve_fit(curve, time_log, rf_log, p0=[0, 1])
             return slope
 

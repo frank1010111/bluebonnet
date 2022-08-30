@@ -1,13 +1,8 @@
-"""
-Define a suite a tests for the fluid module
-"""
+"""Define a suite a tests for the fluid module."""
 from __future__ import annotations
 
 import numpy as np
 import pytest
-from test_gas import gas_properties
-from test_oil import oil_properties
-from test_water import water_properties
 
 from bluebonnet.fluids import Fluid
 

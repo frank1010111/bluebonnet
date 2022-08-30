@@ -1,12 +1,9 @@
-"""
-Define a suite a tests for the oil module
-"""
+"""Define a suite a tests for the oil module."""
 from __future__ import annotations
 
 import math
 from collections import namedtuple
 
-import numpy as np
 import pytest
 
 from bluebonnet.fluids import oil
@@ -40,7 +37,7 @@ def oil_properties(request):
 
 
 def test_bubblepoint_pressure_Standing(oil_properties):
-    "Test Standing bubblepoint pressure calculation"
+    """Test Standing bubblepoint pressure calculation."""
     (
         temperature,
         pressure,
@@ -57,7 +54,7 @@ def test_bubblepoint_pressure_Standing(oil_properties):
 
 
 def test_solution_gor_Standing(oil_properties):
-    "Test Standing calculation of solution gas:oil raio"
+    """Test Standing calculation of solution gas:oil raio."""
     (
         temperature,
         pressure,
@@ -79,7 +76,7 @@ def test_solution_gor_Standing(oil_properties):
 
 
 def test_dgor_dpressure_Standing(oil_properties):
-    "Test whether Standing gets change in GOR over pressure right"
+    """Test whether Standing gets change in GOR over pressure right."""
     (
         temperature,
         pressure,
@@ -101,7 +98,7 @@ def test_dgor_dpressure_Standing(oil_properties):
 
 
 def test_B_o_bubblepoint_Standing(oil_properties):
-    "Test Standing bubblepoint formation volume factor"
+    """Test Standing bubblepoint formation volume factor."""
     (
         temperature,
         pressure,
@@ -118,7 +115,7 @@ def test_B_o_bubblepoint_Standing(oil_properties):
 
 
 def test_oil_compressibility_undersat_Standing(oil_properties):
-    "Test Standing oil compressibility for undersaturated oil"
+    """Test Standing oil compressibility for undersaturated oil."""
     (
         temperature,
         pressure,
@@ -138,7 +135,7 @@ def test_oil_compressibility_undersat_Standing(oil_properties):
 
 
 def test_oil_compressibility_undersat_Spivey(oil_properties):
-    "Test Spivey's oil compressibility for undersaturated oil"
+    """Test Spivey's oil compressibility for undersaturated oil."""
     (
         temperature,
         pressure,
@@ -158,7 +155,7 @@ def test_oil_compressibility_undersat_Spivey(oil_properties):
 
 
 def test_B_o_Standing(oil_properties):
-    "Test Standing's formation volume factor (all saturations) for oil"
+    """Test Standing's formation volume factor (all saturations) for oil."""
     (
         temperature,
         pressure,
@@ -180,7 +177,7 @@ def test_B_o_Standing(oil_properties):
 
 
 def test_oil_compressibility_Standing(oil_properties):
-    "Test Standing's oil compressibility (all saturations)"
+    """Test Standing's oil compressibility (all saturations)."""
     (
         temperature,
         pressure,
@@ -210,7 +207,7 @@ def test_oil_compressibility_Standing(oil_properties):
 
 
 def test_oil_density_Standing(oil_properties):
-    "Test Standing's density (depends on solution GOR, b_o)"
+    """Test Standing's density (depends on solution GOR, b_o)."""
     (
         temperature,
         pressure,
@@ -233,7 +230,7 @@ def test_oil_density_Standing(oil_properties):
 
 
 def test_viscosity_beggs_robinson(oil_properties):
-    "Test Beggs-Robinson viscosity (depends on solution GOR, bubble point)"
+    """Test Beggs-Robinson viscosity (depends on solution GOR, bubble point)."""
     (
         temperature,
         pressure,
