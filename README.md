@@ -2,12 +2,14 @@
 
 Scaling solutions for production analysis from unconventional oil and gas wells
 
+![bluebonnets in bloom](docs/bluebonnets.jpg)
+
 ## Installation
 
-After downloading, from the root directory, run
+Run the command
 
 ```bash
-$ pip install .
+$ pip install git+https://github.com/frank1010111/bluebonnet.git
 ```
 
 ## Usage
@@ -24,9 +26,9 @@ Examples can be found inside the docs folder.
 ## Contributing
 
 Interested in contributing? Check out the
-[contributing guidelines](CONTRIBUTING.md). Please note that this project is
-released with a Code of Conduct. By contributing to this project, you agree to
-abide by its terms.
+[contributing guidelines](CONTRIBUTING.md) to get started. Please note that this
+project is released with a Code of Conduct. By contributing to this project, you
+agree to abide by its terms.
 
 ### Contributor Hall of Fame
 
