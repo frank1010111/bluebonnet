@@ -1,6 +1,4 @@
-"""
-Define a suite a tests for the gas module
-"""
+"""Define a suite a tests for the gas module."""
 from __future__ import annotations
 
 from collections import namedtuple
@@ -43,7 +41,7 @@ def gas_properties(request):
 
 
 def test_make_nonhydrocarbon_properties():
-    "Test creation of non-hydrocarbon molecular properties"
+    """Test creation of non-hydrocarbon molecular properties."""
     nitrogen = 0.03
     hydrogen_sulfide = 0.012
     co2 = 0.018
@@ -79,7 +77,7 @@ def test_make_nonhydrocarbon_properties():
 
 
 def test_pseudocritical_points_Sutton(gas_properties):
-    "Test Sutton pseudocritical pressure and temperature"
+    """Test Sutton pseudocritical pressure and temperature."""
     fluid = gas_properties.fluid
     specific_gravity = gas_properties.specific_gravity
     temperature_pc_true = pytest.approx(gas_properties.temperature_pc)
@@ -99,7 +97,7 @@ def test_pseudocritical_points_Sutton(gas_properties):
 
 
 def test_zfactor_DAK(gas_properties):
-    "Test Dranchuk's z-factor calculation"
+    """Test Dranchuk's z-factor calculation."""
     (
         temperature,
         pressure,
@@ -117,7 +115,7 @@ def test_zfactor_DAK(gas_properties):
 
 
 def test_b_factor_DAK(gas_properties):
-    "Test Dranchuk's b_g (depends on z-factor)"
+    """Test Dranchuk's b_g (depends on z-factor)."""
     (
         temperature,
         pressure,
@@ -142,7 +140,7 @@ def test_b_factor_DAK(gas_properties):
 
 
 def test_density_DAK(gas_properties):
-    "Test Dranchuk's density calculation (depends on z-factor)"
+    """Test Dranchuk's density calculation (depends on z-factor)."""
     (
         temperature,
         pressure,
@@ -162,7 +160,7 @@ def test_density_DAK(gas_properties):
 
 
 def test_compressibility_DAK(gas_properties):
-    "Test Dranchuk's compressibility (depends on z-factor)"
+    """Test Dranchuk's compressibility (depends on z-factor)."""
     (
         temperature,
         pressure,
@@ -182,7 +180,7 @@ def test_compressibility_DAK(gas_properties):
 
 
 def test_viscosity_Sutton(gas_properties):
-    "Test Sutton's viscosity (depends on density, which depends on z-factor)"
+    """Test Sutton's viscosity (depends on density, which depends on z-factor)."""
     (
         temperature,
         pressure,
@@ -202,7 +200,7 @@ def test_viscosity_Sutton(gas_properties):
 
 
 def test_pseudopressure_Hussainy(gas_properties):
-    "Test Al Hussainy's pseudopressure calculation (depends on viscosity, density, z-factor)"
+    """Test Al Hussainy's pseudopressure calculation (depends on viscosity, density, z-factor)."""
     (
         temperature,
         pressure,
