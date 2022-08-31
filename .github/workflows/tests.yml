@@ -20,3 +20,24 @@ jobs:
       - uses: pre-commit/action@v2.0.3
         with:
           extra_args: --hook-stage manual --all-files
+
+  tests:
+    name: Test on ${{ matrix.os }} / ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8"]
+      fail-fast: false
+      steps:
+        - uses: actions/checkout@v3
+        - name: Set up Python ${{ matrix.python-version }}
+          uses: actions/setup-python@v4
+          with:
+            python-version: ${{ matrix.python-version }}
+        - name: Test with nox
+          run: pipx run nox -s tests
+        - name: "Upload coverage to Codecov"
+          uses: codecov/codecov-action@v3
+          with:
+            fail_ci_if_error: true
