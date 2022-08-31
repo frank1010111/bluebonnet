@@ -1,8 +1,6 @@
 """Define a suite a tests for the gas module."""
 from __future__ import annotations
 
-from collections import namedtuple
-
 import numpy as np
 import pytest
 
@@ -10,34 +8,6 @@ from bluebonnet.fluids import gas
 
 TEMPERATURE_STANDARD = 60.0
 PRESSURE_STANDARD = 14.70
-
-GasParams = namedtuple(
-    "GasParams",
-    "temperature, pressure, temperature_pc, pressure_pc, specific_gravity, fluid",
-)
-
-
-@pytest.fixture(params=["dry gas", "wet gas"])
-def gas_properties(request):
-    if request.param == "dry gas":
-        out = GasParams(
-            temperature=400,
-            pressure=100,
-            temperature_pc=-102.21827232417752,
-            pressure_pc=648.510797253794,
-            specific_gravity=0.65,
-            fluid=request.param,
-        )
-    else:
-        out = GasParams(
-            temperature=300,
-            pressure=5014.7,
-            temperature_pc=-80.95111110103215,
-            pressure_pc=656.7949325583305,
-            specific_gravity=0.7661054354004884,
-            fluid=request.param,
-        )
-    return out
 
 
 def test_make_nonhydrocarbon_properties():
