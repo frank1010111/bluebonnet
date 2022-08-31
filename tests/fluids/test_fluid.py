@@ -65,7 +65,12 @@ def test_bo(oil_properties):
 
 
 def test_mu_o(oil_properties):
-    real_mu = pytest.approx(0.04317415921420302, rel=1e-3)
+    if np.abs(oil_properties.pressure - 3000) < 1:
+        real_mu = pytest.approx(0.511367423, rel=1e-3)
+    elif np.abs(oil_properties.pressure - 2000) < 1:
+        real_mu = pytest.approx(0.581137969, rel=1e-3)
+    else:
+        raise ValueError("haven't studied this pressure yet")
     fluid_instance = Fluid(
         temperature=oil_properties.temperature,
         api_gravity=oil_properties.api_gravity,
@@ -78,7 +83,12 @@ def test_mu_o(oil_properties):
 
 
 def test_bg(gas_properties):
-    real_fvf = pytest.approx(0.04317415921420302, rel=1e-3)
+    if gas_properties.fluid == "dry gas":
+        real_fvf = pytest.approx(0.04317427, rel=1e-3)
+    elif gas_properties.fluid == "wet gas":
+        real_fvf = pytest.approx(0.000813928, rel=1e-3)
+    else:
+        ValueError("gas_properties.fluid must be one of 'wet gas' or 'dry gas'")
     fluid_instance = Fluid(
         temperature=gas_properties.temperature,
         api_gravity=10,
@@ -95,7 +105,12 @@ def test_bg(gas_properties):
 
 
 def test_mu_g(gas_properties):
-    real_mu = pytest.approx(0.016528333290904862, rel=1e-3)
+    if gas_properties.fluid == "dry gas":
+        real_mu = pytest.approx(0.016528333, rel=1e-3)
+    elif gas_properties.fluid == "wet gas":
+        real_mu = pytest.approx(0.023553396, rel=1e-3)
+    else:
+        ValueError("gas_properties.fluid must be one of 'wet gas' or 'dry gas'")
     fluid_instance = Fluid(
         temperature=gas_properties.temperature,
         api_gravity=10,

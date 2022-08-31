@@ -73,13 +73,13 @@ def test_zfactor_DAK(gas_properties):
         pressure,
         temperature_pc,
         pressure_pc,
-        gas_specific_gravity,
+        _,
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
-        real_z = pytest.approx(0.9969013621293381, rel=1e-3)
+        real_z = pytest.approx(0.996901, rel=1e-3)
     else:
-        real_z = pytest.approx(1.043619, rel=1e-3)
+        real_z = pytest.approx(1.066513, rel=1e-3)
     z_factor_DAK = gas.z_factor_DAK(temperature, pressure, temperature_pc, pressure_pc)
     assert z_factor_DAK == real_z
 
@@ -91,13 +91,13 @@ def test_b_factor_DAK(gas_properties):
         pressure,
         temperature_pc,
         pressure_pc,
-        gas_specific_gravity,
+        _,
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
         real_b_g = pytest.approx(0.04317415921420302, rel=1e-3)
     else:
-        real_b_g = pytest.approx(0.002271512021371327, rel=1e-3)
+        real_b_g = pytest.approx(8.139289641971048e-4, rel=1e-3)
     b_factor = gas.b_factor_DAK(
         temperature,
         pressure,
@@ -120,9 +120,9 @@ def test_density_DAK(gas_properties):
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
-        real_density = pytest.approx(0.20470229653149913, rel=1e-3)
+        real_density = pytest.approx(0.204702, rel=1e-3)
     else:
-        real_density = pytest.approx(4.584474653270, rel=1e-3)
+        real_density = pytest.approx(12.79783, rel=1e-3)
     density = gas.density_DAK(
         temperature, pressure, temperature_pc, pressure_pc, gas_specific_gravity
     )
@@ -142,7 +142,7 @@ def test_compressibility_DAK(gas_properties):
     if fluid == "dry gas":
         real_compressibility = pytest.approx(0.01002548578259275, rel=1e-3)
     else:
-        real_compressibility = pytest.approx(0.00014265569971154697, rel=1e-3)
+        real_compressibility = pytest.approx(1.4644387216173005e-4, rel=1e-3)
     compressibility = gas.compressibility_DAK(
         temperature, pressure, temperature_pc, pressure_pc
     )
@@ -160,9 +160,9 @@ def test_viscosity_Sutton(gas_properties):
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
-        real_viscosity = pytest.approx(0.016528333290904862, rel=1e-3)
+        real_viscosity = pytest.approx(1.6528333290904862e-2, rel=1e-3)
     else:
-        real_viscosity = pytest.approx(4.584474653270, rel=1e-3)
+        real_viscosity = pytest.approx(2.3553396039641815e-2, rel=1e-3)
     viscosity = gas.viscosity_Sutton(
         temperature, pressure, temperature_pc, pressure_pc, gas_specific_gravity
     )
@@ -180,9 +180,9 @@ def test_pseudopressure_Hussainy(gas_properties):
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
-        real_m = pytest.approx(593363.7626437937, rel=1e-3)
+        real_m = pytest.approx(593363, rel=1e-3)
     else:
-        real_m = pytest.approx(2.9242745545797724, rel=1e-3)
+        real_m = pytest.approx(1280589747, rel=1e-3)
     m = gas.pseudopressure_Hussainy(
         temperature,
         pressure,
