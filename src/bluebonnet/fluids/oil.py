@@ -398,6 +398,10 @@ def oil_compressibility_undersat_Spivey(
     pressure_bubblepoint = pressure_bubblepoint_Standing(
         temperature, api_gravity, gas_specific_gravity, solution_gor_initial
     )
+    # sometimes this is passed an empty pressure array when pressures are all
+    # above the bubblepoint
+    if np.size(pressure) == 0:
+        return np.array([], dtype=np.float64)
     reduced_pressure = pressure / pressure_bubblepoint
     # set up constants for quadratic formula
     # C_labels = [
