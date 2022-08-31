@@ -117,12 +117,13 @@ def test_oil_compressibility_undersat_Spivey(oil_properties):
         api_gravity,
         gas_specific_gravity,
         solution_gor_initial,
-        fluid,
+        _,
     ) = oil_properties
 
     # overwrite pressure to be above saturation pressure
-    pressure = 3000.0
-    C_o_real = pytest.approx(1.297154e-5)
+    if pressure < 2001.0:
+        pytest.skip("only makes sense if undersaturated")
+    C_o_real = pytest.approx(9.1723089e-6)
     C_o_Spivey = oil.oil_compressibility_undersat_Spivey(
         temperature, pressure, api_gravity, gas_specific_gravity, solution_gor_initial
     )
@@ -140,9 +141,9 @@ def test_B_o_Standing(oil_properties):
         fluid,
     ) = oil_properties
     if fluid == "black oil" and math.fabs(pressure - 3000) < 1:
-        B_o_real = pytest.approx(1.378671, rel=0.001)
+        B_o_real = pytest.approx(1.38101, rel=1e-3)
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
-        B_o_real = pytest.approx(1.2820114682225974, rel=1e-3)  # for now until it works
+        B_o_real = pytest.approx(1.2929990, rel=1e-3)
     else:
         raise NotImplementedError
     B_o_Standing = oil.b_o_Standing(
@@ -164,9 +165,9 @@ def test_oil_compressibility_Standing(oil_properties):
     pseudocritical_temperature = -102.21827232417752
     pseudocritical_pressure = 653.258206420053
     if fluid == "black oil" and math.fabs(pressure - 3000) < 1:
-        C_o_real = pytest.approx(1.297154e-5)
+        C_o_real = pytest.approx(9.172308e-06, rel=1e-3)
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
-        C_o_real = pytest.approx(2e-4, rel=1e-3)  # for now until it works
+        C_o_real = pytest.approx(2.11633e-4, rel=1e-3)
     else:
         raise NotImplementedError
     C_o_Standing = oil.oil_compressibility_Standing(
@@ -192,7 +193,7 @@ def test_oil_density_Standing(oil_properties):
         fluid,
     ) = oil_properties
     if fluid == "black oil" and math.fabs(pressure - 3000) < 1:
-        density_real = pytest.approx(43.57611, rel=1e-3)
+        density_real = pytest.approx(43.50215, rel=1e-3)
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
         density_real = pytest.approx(45, rel=0.2)  # for now until it works
     else:
@@ -215,11 +216,11 @@ def test_viscosity_beggs_robinson(oil_properties):
         fluid,
     ) = oil_properties
     if fluid == "black oil" and math.fabs(pressure - 3000) < 1:
-        viscosity_real = pytest.approx(0.5121231, rel=1e-3)
+        viscosity_real = pytest.approx(0.5113674, rel=1e-3)
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
-        viscosity_real = pytest.approx(0.5811379, rel=1e-3)  # for now until it works
+        viscosity_real = pytest.approx(0.5811379, rel=1e-3)
     else:
-        raise NotImplementedError
+        raise ValueError("pressure tests only cover 3000 and 2000")
     viscosity_br = oil.viscosity_beggs_robinson(
         temperature, pressure, api_gravity, gas_specific_gravity, solution_gor_initial
     )

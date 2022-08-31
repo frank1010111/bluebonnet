@@ -14,9 +14,9 @@ from bluebonnet.flow import (
     SinglePhaseReservoir,
 )
 
-nx = (20, 50)
-nt = (100, 10_000)
-pf = (100, 1000)
+nx = (20,)
+nt = (1000,)
+pf = (100,)
 pr = (2000, 10_000)
 fluid = (
     FlowProperties(
