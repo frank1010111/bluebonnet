@@ -38,7 +38,7 @@ autoapi_options = [
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # myst_nb configuration
-nb_execution_mode = "never"
+nb_execution_mode = "off"
 nb_execution_timeout = 60
 nb_output_stderr = "remove"
 
