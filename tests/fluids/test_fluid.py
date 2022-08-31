@@ -46,7 +46,12 @@ def test_mu_w(water_properties):
 
 
 def test_bo(oil_properties):
-    real_fvf = pytest.approx(1.378671, rel=1e-3)
+    if np.abs(oil_properties.pressure - 3000) < 1:
+        real_fvf = pytest.approx(1.381015, rel=1e-3)
+    elif np.abs(oil_properties.pressure - 2000) < 1:
+        real_fvf = pytest.approx(1.292999, rel=1e-3)
+    else:
+        raise ValueError("haven't studied this pressure yet")
     fluid_instance = Fluid(
         temperature=oil_properties.temperature,
         api_gravity=oil_properties.api_gravity,
@@ -54,6 +59,7 @@ def test_bo(oil_properties):
         solution_gor_initial=oil_properties.solution_gor_initial,
         salinity=0,
     )
+    assert fluid_instance.oil_FVF(oil_properties.pressure) == real_fvf
     oil_fvf = fluid_instance.oil_FVF(np.full(2, oil_properties.pressure))
     assert oil_fvf[0] == real_fvf
 

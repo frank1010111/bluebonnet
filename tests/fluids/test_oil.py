@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import math
-from collections import namedtuple
 
 import pytest
 
@@ -10,30 +9,6 @@ from bluebonnet.fluids import oil
 
 TEMPERATURE_STANDARD = 60.0
 PRESSURE_STANDARD = 14.70
-
-OilParams = namedtuple(
-    "OilParams",
-    "temperature, pressure, api_gravity,"
-    " gas_specific_gravity, solution_gor_initial, fluid",
-)
-GasParams = namedtuple(
-    "GasParams", "pseudocritical_pressure, pseudocritical_temperature"
-)
-
-
-@pytest.fixture(params=[(3000.0, "black oil"), (2000.0, "black oil")])
-def oil_properties(request):
-    pressure, fluid = request.param
-    if fluid == "black oil":
-        out = OilParams(
-            temperature=200.0,
-            pressure=pressure,
-            api_gravity=35.0,
-            gas_specific_gravity=0.8,
-            solution_gor_initial=650.0,
-            fluid="black oil",
-        )
-    return out
 
 
 def test_bubblepoint_pressure_Standing(oil_properties):
