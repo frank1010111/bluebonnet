@@ -3,7 +3,9 @@ from __future__ import annotations
 
 from itertools import product
 
+# import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pytest
 from scipy.optimize import curve_fit
 
@@ -14,20 +16,29 @@ from bluebonnet.flow import (
     SinglePhaseReservoir,
 )
 
-nx = (20,)
+# from bluebonnet.plotting import plot_recovery_factor
+
+nx = (30,)
 nt = (1000,)
 pf = (100,)
-pr = (2000, 10_000)
-fluid = (
-    FlowProperties(
-        {
-            "pseudopressure": np.linspace(0, 1, 50),
-            "pressure": np.linspace(0, 10_000, 50),
-            "alpha": np.ones(50),
-        },
-        1.0,
-    ),
-)
+pr = (2000, 8_000)
+columns_renamer_gas = {
+    "P": "pressure",
+    "Z-Factor": "z-factor",
+    "Cg": "compressibility",
+    "Viscosity": "viscosity",
+    "Density": "density",
+}
+columns_renamer_oil = {
+    "P": "pressure",
+    "Z-Factor": "z-factor",
+    "Co": "compressibility",
+    "Oil_Viscosity": "viscosity",
+    "Oil_Density": "density",
+}
+pvt_gas = pd.read_csv("tests/data/pvt_gas.csv").rename(columns=columns_renamer_gas)
+pvt_oil = pd.read_csv("tests/data/pvt_oil.csv").rename(columns=columns_renamer_oil)
+fluid = (FlowProperties(pvt_gas, pr[1]), FlowProperties(pvt_oil, pr[1]))
 sim_props = list(product(nx, pf, pr, fluid))
 end_t = 9.0
 So, Sg, Sw = (0.7, 0.2, 0.1)
@@ -100,6 +111,10 @@ class TestRun:
         time = np.linspace(0, np.sqrt(end_t), nt) ** 2
         reservoir.simulate(time)
         rf = reservoir.recovery_factor()
+        # fig, ax = plt.subplots()
+        # ax = plot_recovery_factor(reservoir, ax)
+        # t = f"{pf=}, {pi=} {Reservoir}"
+        # fig.savefig(t + ".png")
 
         def logslope(time, rf, mask=None):
             if mask is None:
@@ -110,7 +125,7 @@ class TestRun:
             def curve(time, intercept, slope):
                 return intercept + time * slope
 
-            (intercept, slope), _ = curve_fit(curve, time_log, rf_log, p0=[0, 1])
+            (_, slope), _ = curve_fit(curve, time_log, rf_log, p0=[0, 1])
             return slope
 
         # rf stops increasing at late time
