@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from itertools import product
 
-# import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
@@ -16,12 +15,10 @@ from bluebonnet.flow import (
     SinglePhaseReservoir,
 )
 
-# from bluebonnet.plotting import plot_recovery_factor
-
 nx = (30,)
-nt = (1000,)
+nt = (1200,)
 pf = (100,)
-pr = (2000, 8_000)
+pr = (8_000,)
 columns_renamer_gas = {
     "P": "pressure",
     "Z-Factor": "z-factor",
@@ -38,9 +35,8 @@ columns_renamer_oil = {
 }
 pvt_gas = pd.read_csv("tests/data/pvt_gas.csv").rename(columns=columns_renamer_gas)
 pvt_oil = pd.read_csv("tests/data/pvt_oil.csv").rename(columns=columns_renamer_oil)
-fluid = (FlowProperties(pvt_gas, pr[1]), FlowProperties(pvt_oil, pr[1]))
+fluid = (FlowProperties(pvt_gas, pr[-1]), FlowProperties(pvt_oil, pr[-1]))
 sim_props = list(product(nx, pf, pr, fluid))
-end_t = 9.0
 So, Sg, Sw = (0.7, 0.2, 0.1)
 reservoirs = (IdealReservoir, SinglePhaseReservoir)  # TODO:, MultiPhaseReservoir)
 
@@ -81,6 +77,7 @@ class TestRun:
             reservoir = Reservoir(nx, pf, pi, fluid, So, Sg, Sw)
         else:
             reservoir = Reservoir(nx, pf, pi, fluid)
+        end_t = 9.0
         time = np.linspace(0, np.sqrt(end_t), nt) ** 2
         reservoir.simulate(time)
         rf = reservoir.recovery_factor()
@@ -108,13 +105,21 @@ class TestRun:
             reservoir = Reservoir(nx, pf, pi, fluid, So, Sg, Sw)
         else:
             reservoir = Reservoir(nx, pf, pi, fluid)
+        end_t = 100
         time = np.linspace(0, np.sqrt(end_t), nt) ** 2
         reservoir.simulate(time)
         rf = reservoir.recovery_factor()
-        # fig, ax = plt.subplots()
-        # ax = plot_recovery_factor(reservoir, ax)
-        # t = f"{pf=}, {pi=} {Reservoir}"
-        # fig.savefig(t + ".png")
+        if False:
+            import matplotlib.pyplot as plt
+
+            from bluebonnet.plotting import plot_pseudopressure, plot_recovery_factor
+
+            fig, ax = plt.subplots()
+            ax = plot_recovery_factor(reservoir, ax)
+            fig.savefig("rf.png")
+            fig, ax = plt.subplots()
+            ax = plot_pseudopressure(reservoir, 100, ax=ax)
+            fig.savefig("pseudopressure.png")
 
         def logslope(time, rf, mask=None):
             if mask is None:
@@ -129,6 +134,6 @@ class TestRun:
             return slope
 
         # rf stops increasing at late time
-        slope = logslope(time, rf, time > 5)
+        slope = logslope(time, rf, time > 10)
         assert np.abs(slope) < 0.03, "Late recovery factor is slow"
-        assert slope > 0, "Late recovery never trends negative"
+        assert slope > -1e-10, "Late recovery never trends negative"
