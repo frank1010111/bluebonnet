@@ -35,7 +35,7 @@ columns_renamer_oil = {
 }
 pvt_gas = pd.read_csv("tests/data/pvt_gas.csv").rename(columns=columns_renamer_gas)
 pvt_oil = pd.read_csv("tests/data/pvt_oil.csv").rename(columns=columns_renamer_oil)
-fluid = (FlowProperties(pvt_gas, pr[-1]), FlowProperties(pvt_oil, pr[-1]))
+fluid = (FlowProperties(pvt_gas, pr[-1]),)  # FlowProperties(pvt_oil, pr[-1]))
 sim_props = list(product(nx, pf, pr, fluid))
 So, Sg, Sw = (0.7, 0.2, 0.1)
 reservoirs = (IdealReservoir, SinglePhaseReservoir)  # TODO:, MultiPhaseReservoir)
