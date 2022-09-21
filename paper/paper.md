@@ -54,12 +54,12 @@ are:
 The `fluids` subpackage estimates the formation volume factors, solubility
 ratios, and viscosity for the oil, water and gas phases given the reservoir
 temperature, oil API gravity, gas specific gravity, and initial gas/oil ratio.
-**Fig. 1** illustrates the plots of the: **(a)** formation volume factors and
-**(b)** viscosities for the oil, gas, and water phases using the `fluids`
-subpackage.
+\autoref{fig:fluids} illustrates the plots of the **(a)** formation volume
+factors and **(b)** viscosities for the oil, gas, and water phases using the
+`fluids` subpackage.
 
-**Fig. 1**—Plots of the: **(a)** formation volume factors and **(b)**
-viscosities for the oil, gas, and water phases using the `fluids` subpackage.
+![Plots of **(a)** formation volume factors and **(b)**
+viscosities for the oil, gas, and water phases using the `fluids` subpackage.\label{fig:fluids}](Fig_1.tiff)
 
 The `flow` subpackage solves the pressure diffusivity equation to provide
 estimates of the hydrocarbon production with time and the hydrocarbon recovery
@@ -69,31 +69,32 @@ using the scaled solutions of the single-phase real gas diffusivity equation
 production for tight-oil and gas condensate wells using a two-phase scaled
 solution of the pressure diffusivity equation [@ruizmaraggi2022twophase].
 
-**Fig. 2** shows the gas recovery factors for single-phase ideal gas, real gas,
-and multiphase scaled flow solutions using the `flow` subpackage.
+\autoref{fig:flow} shows the gas recovery factors for single-phase ideal gas,
+real gas, and multiphase scaled flow solutions using the `flow` subpackage.
 
-**Fig. 2**—Plots of the gas recovery factors for ideal gas, real gas, and
+![Plots of the gas recovery factors for ideal gas, real gas, and
 multiphase flow solutions of the pressure diffusivity equation using the `flow`
-subpackage.
+subpackage.\label{fig:flow}](Fig_2.tiff)
 
 The `flow` subpackage also allows to history-match and forecast production of
 wells subject to variable bottomhole pressure conditions using a modification of
-the approach developed by @ruizmaraggi2022pressure. **Fig.3** illustrates the
-**(a)** history-match of the gas well #20 from the SPE data repository, dataset
-1 (Society of Petroleum Engineers 2021) subject to variable bottomhole flowing
-pressure conditions **(b)**.
+the approach developed by @ruizmaraggi2022pressure.
+\autoref{fig:history_pressure} illustrates the **(a)** history-match of the gas
+well #20 from the SPE data repository, dataset 1 (Society of Petroleum
+Engineers 2021) subject to variable bottomhole flowing pressure conditions
+**(b)**.
 
-**Fig. 3**—Plots the **(a)** history-match of the gas well # 20 from the SPE
+![Plots for the **(a)** history-match of the gas well #20 from the SPE
 data repository, dataset 1 (Society of Petroleum Engineers 2021) subject to
-variable bottomhole flowing pressure conditions **(b)**.
+variable bottomhole flowing pressure conditions **(b)**.\label{fig:history_pressure}](Fig_3.tiff)
 
 The `forecast` subpackage performs history matches and forecasts the production
 of unconventional wells using the scaling solutions present in the `flow`
-module. **Fig.4** illustrates the history-match of a gas well using the
-single-phase real gas flow solution.
+module. \autoref{fig:history} illustrates the history-match of a gas well using
+the single-phase real gas flow solution.
 
-**Fig. 4**—History-match of a shale gas well (blue dotted curve) using the
-single-phase real gas flow solution (solid red curve).
+![History-match of a shale gas well (blue dotted curve) using the
+single-phase real gas flow solution (solid red curve).\label{fig:history}](Fig_4.tiff)
 
 # Statement of need
 
@@ -116,48 +117,6 @@ The present library can be used for the following tasks:
 3. History-match and forecast the production of shale gas and tight-oil wells.
 4. Rate-transient (rate-time-pressure) analysis of unconventional reservoirs.
 
-<!--
-# Mathematics
-
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
-
-Double dollars make self-standing equations:
-
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
-
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
--->
-
 # Acknowledgements
 
 This library would never exist without Tad Patzek introducing several of the
@@ -174,6 +133,6 @@ pandas [@pandas2010].
 The authors would like to thank the Society of Petroleum Engineers (SPE) for
 providing open access to production data from unconventional wells through the
 SPE Data Repository, Data Set 1 (Society of Petroleum Engineers 2021) used to
-illustrate the application of the `bluebonnet` package.
+illustrate the application of this package.
 
 # References
