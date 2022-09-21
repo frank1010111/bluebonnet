@@ -18,6 +18,7 @@ authors:
   - name: Leopoldo M. Ruiz-Maraggi
     affiliation: 2
   - name: Larry W. Lake
+    affiliation: 2
 affiliations:
   - name: Pennsylvania State University, University Park, PA, USA
     index: 1
@@ -41,11 +42,10 @@ necessary to fully capture the effects of fluid properties on production.
 diffusivity equation to analyze, history-match, and forecast production of
 tight-oil and shale gas wells. `Bluebonnet` development aims to help researchers
 and petroleum engineers analyzing production data from unconventional (shale gas
-and tight oil) wells. It provides the user with a collection of tools to
-evaluate production performance of tight-oil and shale gas wells. These tools
-are:
+and tight oil) wells. It provides the user with a set of tools to evaluate
+production performance of tight-oil and shale gas wells. These tools are:
 
-1. `fluids` calculates pressure-volume-temperatura data for oil, water, and gas
+1. `fluids` calculates pressure-volume-temperature data for oil, water, and gas
    phases.
 2. `flow` for building physics-based production curves and estimating
    hydrocarbon recovery factors.
@@ -54,11 +54,11 @@ are:
 The `fluids` subpackage estimates the formation volume factors, solubility
 ratios, and viscosity for the oil, water and gas phases given the reservoir
 temperature, oil API gravity, gas specific gravity, and initial gas/oil ratio.
-\autoref{fig:fluids} illustrates the plots of the **(a)** formation volume
-factors and **(b)** viscosities for the oil, gas, and water phases using the
-`fluids` subpackage.
+\autoref{fig:fluids} illustrates the plots of the _(a)_ formation volume factors
+and _(b)_ viscosities for the oil, gas, and water phases using the `fluids`
+subpackage.
 
-![Plots of **(a)** formation volume factors and **(b)**
+![Plots of *(a)* formation volume factors and *(b)*
 viscosities for the oil, gas, and water phases using the `fluids` subpackage.\label{fig:fluids}](Fig_1.tiff)
 
 The `flow` subpackage solves the pressure diffusivity equation to provide
@@ -79,14 +79,12 @@ subpackage.\label{fig:flow}](Fig_2.tiff)
 The `flow` subpackage also allows to history-match and forecast production of
 wells subject to variable bottomhole pressure conditions using a modification of
 the approach developed by @ruizmaraggi2022pressure.
-\autoref{fig:history_pressure} illustrates the **(a)** history-match of the gas
-well #20 from the SPE data repository, dataset 1 (Society of Petroleum
-Engineers 2021) subject to variable bottomhole flowing pressure conditions
-**(b)**.
+\autoref{fig:history*pressure} illustrates the *(a)_ history-match of the gas
+well #20 from the SPE data repository [@spedata], subject to variable bottomhole
+flowing pressure conditions _(b)\_.
 
-![Plots for the **(a)** history-match of the gas well #20 from the SPE
-data repository, dataset 1 (Society of Petroleum Engineers 2021) subject to
-variable bottomhole flowing pressure conditions **(b)**.\label{fig:history_pressure}](Fig_3.tiff)
+![Plots for the *(a)* history-match of the gas well #20 from @spedata, subject to
+variable bottomhole flowing pressure conditions *(b)*.\label{fig:history_pressure}](Fig_3.tiff)
 
 The `forecast` subpackage performs history matches and forecasts the production
 of unconventional wells using the scaling solutions present in the `flow`
@@ -98,9 +96,10 @@ single-phase real gas flow solution (solid red curve).\label{fig:history}](Fig_4
 
 # Statement of need
 
-`Bluebonnet` is a petroleum engineering focused Python package for production
-analysis of hydrofractured wells. Parts of this code were first developed to
-assist in determining U.S. shale gas reserves (Patzek, Male, and Marder 2013).
+`Bluebonnet` is a Python package using petroleum engineering methods to perform
+production analysis of hydrofractured wells. Parts of this code were first
+developed to assist in determining U.S. shale gas reserves [@patzek2013;
+@male2019assessing].
 
 There are no free open-source tools that use physics-based scaled flow solutions
 of the diffusivity equation to perform decline-curve and rate-transient analysis
@@ -115,11 +114,12 @@ The present library can be used for the following tasks:
 2. Build type curves and recovery factors for shale gas and tight-oil
    reservoirs.
 3. History-match and forecast the production of shale gas and tight-oil wells.
-4. Rate-transient (rate-time-pressure) analysis of unconventional reservoirs.
+4. Perform Rate-transient analysis (rate-time-pressure) of unconventional
+   reservoirs.
 
 # Acknowledgements
 
-This library would never exist without Tad Patzek introducing several of the
+This library would not exist without Tad Patzek introducing several of the
 authors to the problem of unconventional production forecasting and kindly
 providing code samples of the pressure diffusivity equation. We thank ExxonMobil
 for funding this project with the grant "Heterogeneity and Unconventional
@@ -132,7 +132,7 @@ pandas [@pandas2010].
 
 The authors would like to thank the Society of Petroleum Engineers (SPE) for
 providing open access to production data from unconventional wells through the
-SPE Data Repository, Data Set 1 (Society of Petroleum Engineers 2021) used to
-illustrate the application of this package.
+SPE Data Repository, Data Set 1 [@spedata] used to illustrate the application of
+this package.
 
 # References
