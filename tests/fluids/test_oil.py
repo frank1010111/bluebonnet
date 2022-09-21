@@ -1,12 +1,8 @@
-"""
-Define a suite a tests for the oil module
-"""
+"""Define a suite a tests for the oil module."""
 from __future__ import annotations
 
 import math
-from collections import namedtuple
 
-import numpy as np
 import pytest
 
 from bluebonnet.fluids import oil
@@ -14,33 +10,9 @@ from bluebonnet.fluids import oil
 TEMPERATURE_STANDARD = 60.0
 PRESSURE_STANDARD = 14.70
 
-OilParams = namedtuple(
-    "OilParams",
-    "temperature, pressure, api_gravity,"
-    " gas_specific_gravity, solution_gor_initial, fluid",
-)
-GasParams = namedtuple(
-    "GasParams", "pseudocritical_pressure, pseudocritical_temperature"
-)
-
-
-@pytest.fixture(params=[(3000.0, "black oil"), (2000.0, "black oil")])
-def oil_properties(request):
-    pressure, fluid = request.param
-    if fluid == "black oil":
-        out = OilParams(
-            temperature=200.0,
-            pressure=pressure,
-            api_gravity=35.0,
-            gas_specific_gravity=0.8,
-            solution_gor_initial=650.0,
-            fluid="black oil",
-        )
-    return out
-
 
 def test_bubblepoint_pressure_Standing(oil_properties):
-    "Test Standing bubblepoint pressure calculation"
+    """Test Standing bubblepoint pressure calculation."""
     (
         temperature,
         pressure,
@@ -57,7 +29,7 @@ def test_bubblepoint_pressure_Standing(oil_properties):
 
 
 def test_solution_gor_Standing(oil_properties):
-    "Test Standing calculation of solution gas:oil raio"
+    """Test Standing calculation of solution gas:oil raio."""
     (
         temperature,
         pressure,
@@ -79,7 +51,7 @@ def test_solution_gor_Standing(oil_properties):
 
 
 def test_dgor_dpressure_Standing(oil_properties):
-    "Test whether Standing gets change in GOR over pressure right"
+    """Test whether Standing gets change in GOR over pressure right."""
     (
         temperature,
         pressure,
@@ -101,7 +73,7 @@ def test_dgor_dpressure_Standing(oil_properties):
 
 
 def test_B_o_bubblepoint_Standing(oil_properties):
-    "Test Standing bubblepoint formation volume factor"
+    """Test Standing bubblepoint formation volume factor."""
     (
         temperature,
         pressure,
@@ -118,7 +90,7 @@ def test_B_o_bubblepoint_Standing(oil_properties):
 
 
 def test_oil_compressibility_undersat_Standing(oil_properties):
-    "Test Standing oil compressibility for undersaturated oil"
+    """Test Standing oil compressibility for undersaturated oil."""
     (
         temperature,
         pressure,
@@ -138,19 +110,20 @@ def test_oil_compressibility_undersat_Standing(oil_properties):
 
 
 def test_oil_compressibility_undersat_Spivey(oil_properties):
-    "Test Spivey's oil compressibility for undersaturated oil"
+    """Test Spivey's oil compressibility for undersaturated oil."""
     (
         temperature,
         pressure,
         api_gravity,
         gas_specific_gravity,
         solution_gor_initial,
-        fluid,
+        _,
     ) = oil_properties
 
     # overwrite pressure to be above saturation pressure
-    pressure = 3000.0
-    C_o_real = pytest.approx(1.297154e-5)
+    if pressure < 2001.0:
+        pytest.skip("only makes sense if undersaturated")
+    C_o_real = pytest.approx(9.1723089e-6)
     C_o_Spivey = oil.oil_compressibility_undersat_Spivey(
         temperature, pressure, api_gravity, gas_specific_gravity, solution_gor_initial
     )
@@ -158,7 +131,7 @@ def test_oil_compressibility_undersat_Spivey(oil_properties):
 
 
 def test_B_o_Standing(oil_properties):
-    "Test Standing's formation volume factor (all saturations) for oil"
+    """Test Standing's formation volume factor (all saturations) for oil."""
     (
         temperature,
         pressure,
@@ -168,9 +141,9 @@ def test_B_o_Standing(oil_properties):
         fluid,
     ) = oil_properties
     if fluid == "black oil" and math.fabs(pressure - 3000) < 1:
-        B_o_real = pytest.approx(1.378671, rel=0.001)
+        B_o_real = pytest.approx(1.38101, rel=1e-3)
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
-        B_o_real = pytest.approx(1.2820114682225974, rel=1e-3)  # for now until it works
+        B_o_real = pytest.approx(1.2929990, rel=1e-3)
     else:
         raise NotImplementedError
     B_o_Standing = oil.b_o_Standing(
@@ -180,7 +153,7 @@ def test_B_o_Standing(oil_properties):
 
 
 def test_oil_compressibility_Standing(oil_properties):
-    "Test Standing's oil compressibility (all saturations)"
+    """Test Standing's oil compressibility (all saturations)."""
     (
         temperature,
         pressure,
@@ -192,9 +165,9 @@ def test_oil_compressibility_Standing(oil_properties):
     pseudocritical_temperature = -102.21827232417752
     pseudocritical_pressure = 653.258206420053
     if fluid == "black oil" and math.fabs(pressure - 3000) < 1:
-        C_o_real = pytest.approx(1.297154e-5)
+        C_o_real = pytest.approx(9.172308e-06, rel=1e-3)
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
-        C_o_real = pytest.approx(2e-4, rel=1e-3)  # for now until it works
+        C_o_real = pytest.approx(2.11633e-4, rel=1e-3)
     else:
         raise NotImplementedError
     C_o_Standing = oil.oil_compressibility_Standing(
@@ -210,7 +183,7 @@ def test_oil_compressibility_Standing(oil_properties):
 
 
 def test_oil_density_Standing(oil_properties):
-    "Test Standing's density (depends on solution GOR, b_o)"
+    """Test Standing's density (depends on solution GOR, b_o)."""
     (
         temperature,
         pressure,
@@ -220,7 +193,7 @@ def test_oil_density_Standing(oil_properties):
         fluid,
     ) = oil_properties
     if fluid == "black oil" and math.fabs(pressure - 3000) < 1:
-        density_real = pytest.approx(43.57611, rel=1e-3)
+        density_real = pytest.approx(43.50215, rel=1e-3)
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
         density_real = pytest.approx(45, rel=0.2)  # for now until it works
     else:
@@ -233,7 +206,7 @@ def test_oil_density_Standing(oil_properties):
 
 
 def test_viscosity_beggs_robinson(oil_properties):
-    "Test Beggs-Robinson viscosity (depends on solution GOR, bubble point)"
+    """Test Beggs-Robinson viscosity (depends on solution GOR, bubble point)."""
     (
         temperature,
         pressure,
@@ -243,11 +216,11 @@ def test_viscosity_beggs_robinson(oil_properties):
         fluid,
     ) = oil_properties
     if fluid == "black oil" and math.fabs(pressure - 3000) < 1:
-        viscosity_real = pytest.approx(0.5121231, rel=1e-3)
+        viscosity_real = pytest.approx(0.5113674, rel=1e-3)
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
-        viscosity_real = pytest.approx(0.5811379, rel=1e-3)  # for now until it works
+        viscosity_real = pytest.approx(0.5811379, rel=1e-3)
     else:
-        raise NotImplementedError
+        raise ValueError("pressure tests only cover 3000 and 2000")
     viscosity_br = oil.viscosity_beggs_robinson(
         temperature, pressure, api_gravity, gas_specific_gravity, solution_gor_initial
     )

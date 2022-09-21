@@ -1,13 +1,22 @@
 # bluebonnet
 
-Scaling solutions for production analysis from unconventional oil and gas wells
+Scaling solutions for production analysis from unconventional oil and gas wells.
+
+<p align="center">
+<a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
+<a href="https://bluebonnet.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/bluebonnet/badge/?version=latest" alt="Documentation"></a>
+<a href="https://opensource.org/licenses/BSD-3-Clause"><img src="https://img.shields.io/badge/License-BSD_3--Clause-blue.svg" alt="BSD License"></a>
+<a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white" alt="pre-commit powered"></a>
+</p>
+
+![bluebonnets in bloom](https://github.com/frank1010111/bluebonnet/raw/main/docs/_static/bluebonnets.jpg)
 
 ## Installation
 
-After downloading, from the root directory, run
+Run the command
 
 ```bash
-$ pip install .
+$ pip install git+https://github.com/frank1010111/bluebonnet.git
 ```
 
 ## Usage
@@ -19,14 +28,15 @@ tight oil and shale gas reservoirs. The main tools are:
 2. `flow` for building physics-based production curves; and
 3. `forecast` for fitting and forecasting unconventional production.
 
-Examples can be found inside the docs folder.
+Examples can be found in
+[the documentation](https://bluebonnet.readthedocs.io/en/latest/flow.html).
 
 ## Contributing
 
 Interested in contributing? Check out the
-[contributing guidelines](CONTRIBUTING.md). Please note that this project is
-released with a Code of Conduct. By contributing to this project, you agree to
-abide by its terms.
+[contributing guidelines](https://bluebonnet.readthedocs.io/en/latest/contributing.html)
+to get started. Please note that this project is released with a Code of
+Conduct. By contributing to this project, you agree to abide by its terms.
 
 ### Contributor Hall of Fame
 

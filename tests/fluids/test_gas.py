@@ -1,9 +1,5 @@
-"""
-Define a suite a tests for the gas module
-"""
+"""Define a suite a tests for the gas module."""
 from __future__ import annotations
-
-from collections import namedtuple
 
 import numpy as np
 import pytest
@@ -13,37 +9,9 @@ from bluebonnet.fluids import gas
 TEMPERATURE_STANDARD = 60.0
 PRESSURE_STANDARD = 14.70
 
-GasParams = namedtuple(
-    "GasParams",
-    "temperature, pressure, temperature_pc, pressure_pc, specific_gravity, fluid",
-)
-
-
-@pytest.fixture(params=["dry gas", "wet gas"])
-def gas_properties(request):
-    if request.param == "dry gas":
-        out = GasParams(
-            temperature=400,
-            pressure=100,
-            temperature_pc=-102.21827232417752,
-            pressure_pc=648.510797253794,
-            specific_gravity=0.65,
-            fluid=request.param,
-        )
-    else:
-        out = GasParams(
-            temperature=300,
-            pressure=5014.7,
-            temperature_pc=-80.95111110103215,
-            pressure_pc=656.7949325583305,
-            specific_gravity=0.7661054354004884,
-            fluid=request.param,
-        )
-    return out
-
 
 def test_make_nonhydrocarbon_properties():
-    "Test creation of non-hydrocarbon molecular properties"
+    """Test creation of non-hydrocarbon molecular properties."""
     nitrogen = 0.03
     hydrogen_sulfide = 0.012
     co2 = 0.018
@@ -79,7 +47,7 @@ def test_make_nonhydrocarbon_properties():
 
 
 def test_pseudocritical_points_Sutton(gas_properties):
-    "Test Sutton pseudocritical pressure and temperature"
+    """Test Sutton pseudocritical pressure and temperature."""
     fluid = gas_properties.fluid
     specific_gravity = gas_properties.specific_gravity
     temperature_pc_true = pytest.approx(gas_properties.temperature_pc)
@@ -99,37 +67,37 @@ def test_pseudocritical_points_Sutton(gas_properties):
 
 
 def test_zfactor_DAK(gas_properties):
-    "Test Dranchuk's z-factor calculation"
+    """Test Dranchuk's z-factor calculation."""
     (
         temperature,
         pressure,
         temperature_pc,
         pressure_pc,
-        gas_specific_gravity,
+        _,
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
-        real_z = pytest.approx(0.9969013621293381, rel=1e-3)
+        real_z = pytest.approx(0.996901, rel=1e-3)
     else:
-        real_z = pytest.approx(1.043619, rel=1e-3)
+        real_z = pytest.approx(1.066513, rel=1e-3)
     z_factor_DAK = gas.z_factor_DAK(temperature, pressure, temperature_pc, pressure_pc)
     assert z_factor_DAK == real_z
 
 
 def test_b_factor_DAK(gas_properties):
-    "Test Dranchuk's b_g (depends on z-factor)"
+    """Test Dranchuk's b_g (depends on z-factor)."""
     (
         temperature,
         pressure,
         temperature_pc,
         pressure_pc,
-        gas_specific_gravity,
+        _,
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
         real_b_g = pytest.approx(0.04317415921420302, rel=1e-3)
     else:
-        real_b_g = pytest.approx(0.002271512021371327, rel=1e-3)
+        real_b_g = pytest.approx(8.139289641971048e-4, rel=1e-3)
     b_factor = gas.b_factor_DAK(
         temperature,
         pressure,
@@ -142,7 +110,7 @@ def test_b_factor_DAK(gas_properties):
 
 
 def test_density_DAK(gas_properties):
-    "Test Dranchuk's density calculation (depends on z-factor)"
+    """Test Dranchuk's density calculation (depends on z-factor)."""
     (
         temperature,
         pressure,
@@ -152,9 +120,9 @@ def test_density_DAK(gas_properties):
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
-        real_density = pytest.approx(0.20470229653149913, rel=1e-3)
+        real_density = pytest.approx(0.204702, rel=1e-3)
     else:
-        real_density = pytest.approx(4.584474653270, rel=1e-3)
+        real_density = pytest.approx(12.79783, rel=1e-3)
     density = gas.density_DAK(
         temperature, pressure, temperature_pc, pressure_pc, gas_specific_gravity
     )
@@ -162,7 +130,7 @@ def test_density_DAK(gas_properties):
 
 
 def test_compressibility_DAK(gas_properties):
-    "Test Dranchuk's compressibility (depends on z-factor)"
+    """Test Dranchuk's compressibility (depends on z-factor)."""
     (
         temperature,
         pressure,
@@ -174,7 +142,7 @@ def test_compressibility_DAK(gas_properties):
     if fluid == "dry gas":
         real_compressibility = pytest.approx(0.01002548578259275, rel=1e-3)
     else:
-        real_compressibility = pytest.approx(0.00014265569971154697, rel=1e-3)
+        real_compressibility = pytest.approx(1.4644387216173005e-4, rel=1e-3)
     compressibility = gas.compressibility_DAK(
         temperature, pressure, temperature_pc, pressure_pc
     )
@@ -182,7 +150,7 @@ def test_compressibility_DAK(gas_properties):
 
 
 def test_viscosity_Sutton(gas_properties):
-    "Test Sutton's viscosity (depends on density, which depends on z-factor)"
+    """Test Sutton's viscosity (depends on density, which depends on z-factor)."""
     (
         temperature,
         pressure,
@@ -192,9 +160,9 @@ def test_viscosity_Sutton(gas_properties):
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
-        real_viscosity = pytest.approx(0.016528333290904862, rel=1e-3)
+        real_viscosity = pytest.approx(1.6528333290904862e-2, rel=1e-3)
     else:
-        real_viscosity = pytest.approx(4.584474653270, rel=1e-3)
+        real_viscosity = pytest.approx(2.3553396039641815e-2, rel=1e-3)
     viscosity = gas.viscosity_Sutton(
         temperature, pressure, temperature_pc, pressure_pc, gas_specific_gravity
     )
@@ -202,7 +170,7 @@ def test_viscosity_Sutton(gas_properties):
 
 
 def test_pseudopressure_Hussainy(gas_properties):
-    "Test Al Hussainy's pseudopressure calculation (depends on viscosity, density, z-factor)"
+    """Test Al Hussainy's pseudopressure calculation (depends on viscosity, density, z-factor)."""
     (
         temperature,
         pressure,
@@ -212,9 +180,9 @@ def test_pseudopressure_Hussainy(gas_properties):
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
-        real_m = pytest.approx(593363.7626437937, rel=1e-3)
+        real_m = pytest.approx(593363, rel=1e-3)
     else:
-        real_m = pytest.approx(2.9242745545797724, rel=1e-3)
+        real_m = pytest.approx(1280589747, rel=1e-3)
     m = gas.pseudopressure_Hussainy(
         temperature,
         pressure,

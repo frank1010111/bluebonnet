@@ -8,3 +8,4 @@ exclude =
 per-file-ignores =
     __init__.py: F401
     noxfile.py: T
+    tests/*: D103,D101,D102

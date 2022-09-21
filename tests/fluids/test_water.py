@@ -1,9 +1,5 @@
-"""
-Define a suite a tests for the gas module
-"""
+"""Define a suite a tests for the gas module."""
 from __future__ import annotations
-
-from collections import namedtuple
 
 import pytest
 
@@ -11,20 +7,6 @@ from bluebonnet.fluids import water
 
 TEMPERATURE_STANDARD = 60.0
 PRESSURE_STANDARD = 14.70
-
-WaterParams = namedtuple(
-    "WaterParams", "temperature, pressure, salinity, gas_saturated, gas_properties"
-)
-
-
-@pytest.fixture(params=[True, False])
-def water_properties(request):
-    temperature = 200
-    pressure = 4000
-    salinity = 15
-    gas_saturated = request.param
-    gas_properties = None
-    return WaterParams(temperature, pressure, salinity, gas_saturated, gas_properties)
 
 
 def test_b_water_McCain(water_properties):
