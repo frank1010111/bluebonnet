@@ -5,6 +5,7 @@ title:
 tags:
   - Python
   - hydraulic fracturing
+  - production analysis
   - production forecasting
   - multiphase flow
 authors:
@@ -22,7 +23,7 @@ affiliations:
     index: 1
   - name: University of Texas at Austin, TX, USA
     index: 2
-date: 25 August 2022
+date: 20 September 2022
 bibliography: paper.bib
 ---
 
@@ -36,36 +37,86 @@ during production these wells might be producing oil, gas, and water
 simultaneously, with each phase interacting with the others. Numerical tools are
 necessary to fully capture the effects of fluid properties on production.
 
+`Bluebonnet` is a Python package that uses scaling solutions of the pressure
+diffusivity equation to analyze, history-match, and forecast production of
+tight-oil and shale gas wells. `Bluebonnet` development aims to help researchers
+and petroleum engineers analyzing production data from unconventional (shale gas
+and tight oil) wells. It provides the user with a collection of tools to
+evaluate production performance of tight-oil and shale gas wells. These tools
+are:
+
+1. `fluids` calculates pressure-volume-temperatura data for oil, water, and gas
+   phases.
+2. `flow` for building physics-based production curves and estimating
+   hydrocarbon recovery factors.
+3. `forecast` for fitting and forecasting unconventional production.
+
+The `fluids` subpackage estimates the formation volume factors, solubility
+ratios, and viscosity for the oil, water and gas phases given the reservoir
+temperature, oil API gravity, gas specific gravity, and initial gas/oil ratio.
+**Fig. 1** illustrates the plots of the: **(a)** formation volume factors and
+**(b)** viscosities for the oil, gas, and water phases using the `fluids`
+subpackage.
+
+**Fig. 1**—Plots of the: **(a)** formation volume factors and **(b)**
+viscosities for the oil, gas, and water phases using the `fluids` subpackage.
+
+The `flow` subpackage solves the pressure diffusivity equation to provide
+estimates of the hydrocarbon production with time and the hydrocarbon recovery
+factors. This module allows the user to estimate production for shale gas wells
+using the scaled solutions of the single-phase real gas diffusivity equation
+[@patzek2013; @male2015application]. In addition, this module simulates
+production for tight-oil and gas condensate wells using a two-phase scaled
+solution of the pressure diffusivity equation [@ruizmaraggi2022twophase].
+
+**Fig. 2** shows the gas recovery factors for single-phase ideal gas, real gas,
+and multiphase scaled flow solutions using the `flow` subpackage.
+
+**Fig. 2**—Plots of the gas recovery factors for ideal gas, real gas, and
+multiphase flow solutions of the pressure diffusivity equation using the `flow`
+subpackage.
+
+The `flow` subpackage also allows to history-match and forecast production of
+wells subject to variable bottomhole pressure conditions using a modification of
+the approach developed by @ruizmaraggi2022pressure. **Fig.3** illustrates the
+**(a)** history-match of the gas well #20 from the SPE data repository, dataset
+1 (Society of Petroleum Engineers 2021) subject to variable bottomhole flowing
+pressure conditions **(b)**.
+
+**Fig. 3**—Plots the **(a)** history-match of the gas well # 20 from the SPE
+data repository, dataset 1 (Society of Petroleum Engineers 2021) subject to
+variable bottomhole flowing pressure conditions **(b)**.
+
+The `forecast` subpackage performs history matches and forecasts the production
+of unconventional wells using the scaling solutions present in the `flow`
+module. **Fig.4** illustrates the history-match of a gas well using the
+single-phase real gas flow solution.
+
+**Fig. 4**—History-match of a shale gas well (blue dotted curve) using the
+single-phase real gas flow solution (solid red curve).
+
 # Statement of need
 
 `Bluebonnet` is a petroleum engineering focused Python package for production
 analysis of hydrofractured wells. Parts of this code were first developed to
-assist in determining U.S. shale gas reserves [@Patzek:2013].
+assist in determining U.S. shale gas reserves (Patzek, Male, and Marder 2013).
 
-`Bluebonnet` is meant for researchers and petroleum engineers to analyze
-unconventional wells.
+There are no free open-source tools that use physics-based scaled flow solutions
+of the diffusivity equation to perform decline-curve and rate-transient analysis
+for unconventional reservoirs like `bluebonnet`. The main goal of producing this
+software package is to provide researches and reservoir engineers with a free
+tool suitable to analyze production from unconventional (tight oil and shale
+gas) reservoirs.
+
+The present library can be used for the following tasks:
+
+1. Estimate fluid properties of reservoir fluids.
+2. Build type curves and recovery factors for shale gas and tight-oil
+   reservoirs.
+3. History-match and forecast the production of shale gas and tight-oil wells.
+4. Rate-transient (rate-time-pressure) analysis of unconventional reservoirs.
 
 <!--
-Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
-
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
-
 # Mathematics
 
 Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
@@ -111,9 +162,18 @@ Figure sizes can be customized by adding an optional second parameter:
 
 This library would never exist without Tad Patzek introducing several of the
 authors to the problem of unconventional production forecasting and kindly
-providing code samples of pressure diffusion. We thank ExxonMobil for funding
-this project with the grant "Heterogeneity and Unconventional Production" (PI:
-Michael Marder) . Valuable comments and criticism came from discussions with
-Gary Hunter, Emre Turkoz, Zaheera Jabeen, and Deniz Ertas.
+providing code samples of the pressure diffusivity equation. We thank ExxonMobil
+for funding this project with the grant "Heterogeneity and Unconventional
+Production" (PI: Michael Marder). Valuable comments and criticism came from
+discussions with Gary Hunter, Emre Turkoz, Zaheera Jabeen, and Deniz Ertas.
+
+This project relies on the following open-source Python packages: NumPy
+[@numpy2011; @numpy2020], SciPy [@scipy2020], matplotlib [@matplotlib2007], and
+pandas [@pandas2010].
+
+The authors would like to thank the Society of Petroleum Engineers (SPE) for
+providing open access to production data from unconventional wells through the
+SPE Data Repository, Data Set 1 (Society of Petroleum Engineers 2021) used to
+illustrate the application of the `bluebonnet` package.
 
 # References
