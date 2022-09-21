@@ -79,9 +79,9 @@ subpackage.\label{fig:flow}](Fig_2.tiff)
 The `flow` subpackage also allows to history-match and forecast production of
 wells subject to variable bottomhole pressure conditions using a modification of
 the approach developed by @ruizmaraggi2022pressure.
-\autoref{fig:history*pressure} illustrates the *(a)_ history-match of the gas
+\autoref{fig:history_pressure} illustrates the *(a)* history-match of the gas
 well #20 from the SPE data repository [@spedata], subject to variable bottomhole
-flowing pressure conditions _(b)\_.
+flowing pressure conditions *(b)*.
 
 ![Plots for the *(a)* history-match of the gas well #20 from @spedata, subject to
 variable bottomhole flowing pressure conditions *(b)*.\label{fig:history_pressure}](Fig_3.tiff)
