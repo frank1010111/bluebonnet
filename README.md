@@ -3,10 +3,15 @@
 Scaling solutions for production analysis from unconventional oil and gas wells.
 
 <p align="center">
+<a href="https://codecov.io/gh/frank1010111/bluebonnet" >
+ <img src="https://codecov.io/gh/frank1010111/bluebonnet/branch/main/graph/badge.svg?token=2I28WS7LYQ"/>
+ </a>
 <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
 <a href="https://bluebonnet.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/bluebonnet/badge/?version=latest" alt="Documentation"></a>
 <a href="https://opensource.org/licenses/BSD-3-Clause"><img src="https://img.shields.io/badge/License-BSD_3--Clause-blue.svg" alt="BSD License"></a>
 <a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white" alt="pre-commit powered"></a>
+<a href="https://github.com/frank1010111/bluebonnet/actions/workflows/tests.yml/"> <img src="https://github.com/frank1010111/bluebonnet/actions/workflows/tests.yml/badge.svg" alt="tests">
+</a>
 </p>
 
 ![bluebonnets in bloom](https://github.com/frank1010111/bluebonnet/raw/main/docs/_static/bluebonnets.jpg)
