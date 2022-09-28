@@ -41,6 +41,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 nb_execution_mode = "off"
 nb_execution_timeout = 60
 nb_output_stderr = "remove"
+myst_enable_extensions = [
+    "amsmath",
+    "dollarmath",
+]
+
 
 # -- Options for HTML output -------------------------------------------------
 
