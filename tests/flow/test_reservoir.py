@@ -137,3 +137,4 @@ class TestRun:
         slope = logslope(time, rf, time > 10)
         assert np.abs(slope) < 0.03, "Late recovery factor is slow"
         assert slope > -1e-10, "Late recovery never trends negative"
+        assert np.all(rf < 1.0), "Recovery never exceeds in-place"
