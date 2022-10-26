@@ -33,8 +33,8 @@ bibliography: paper.bib
 Unconventional oil and gas wells are only productive due to extensive hydraulic
 fracturing treatments. Therefore, the character of their production over time is
 greatly influenced by engineering decisions. However, it can be difficult to
-separate the engineering decisions from the effects due to fluid properties. Also,
-during production these wells might be producing oil, gas, and water
+separate the engineering decisions from the effects due to fluid properties.
+Also, during production these wells might be producing oil, gas, and water
 simultaneously, with each phase interacting with the others. Numerical tools are
 necessary to fully capture the effects of fluid properties on production.
 
@@ -52,11 +52,12 @@ These tools are:
    recovery factors.
 3. `forecast` fits and forecasts unconventional production.
 
+<!-- prettier-ignore-->
 The `fluids` submodule estimates the formation volume factors, solubility
 ratios, and viscosity for the oil, water and gas phases given the reservoir
 temperature, oil API gravity, gas specific gravity, and initial gas/oil ratio.
-\autoref{fig:fluids} illustrates the plots of the _(a)_ formation volume factors
-and _(b)_ viscosities for the oil, gas, and water phases using the `fluids`
+\autoref{fig:fluids} illustrates the plots of the *(a)* formation volume factors
+and *(b)* viscosities for the oil, gas, and water phases using the `fluids`
 submodule.
 
 ![Plots of *(a)* formation volume factors and *(b)*
@@ -69,7 +70,8 @@ using a scaled solutions of the single-phase real gas diffusivity equation
 [@patzek2013; @male2015application]. In addition, this module simulates
 production for tight-oil and gas condensate wells using a two-phase scaled
 solution of the pressure diffusivity equation [@ruizmaraggi2022twophase]. The
-`flow` submodule also allows users to capture production variations due to changes in bottomhole pressure.
+`flow` submodule also allows users to capture production variations due to
+changes in bottomhole pressure.
 
 \autoref{fig:flow} shows the gas recovery factors for single-phase ideal gas,
 real gas, and multiphase scaled flow solutions using the `flow` submodule.
