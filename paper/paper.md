@@ -30,15 +30,15 @@ bibliography: paper.bib
 
 # Summary
 
-Unconventional oil and gas wells produce only due to extensive hydraulic
+Unconventional oil and gas wells are only productive due to extensive hydraulic
 fracturing treatments. Therefore, the character of their production over time is
 greatly influenced by engineering decisions. However, it can be difficult to
-separate the engineering decisions from the effects from fluid properties. Also,
+separate the engineering decisions from the effects due to fluid properties. Also,
 during production these wells might be producing oil, gas, and water
 simultaneously, with each phase interacting with the others. Numerical tools are
 necessary to fully capture the effects of fluid properties on production.
 
-`Bluebonnet` is a Python package that uses dimensionally scaled solutions of the
+`Bluebonnet` is a Python package that uses dimensionally scaled solutions of a
 pressure diffusivity equation to analyze, history-match, and forecast production
 of tight-oil and shale gas wells. `Bluebonnet` has been developed to help
 researchers and petroleum engineers analyzing production data from
@@ -63,13 +63,13 @@ submodule.
 viscosities for the oil, gas, and water phases using the `fluids` submodule.\label{fig:fluids}](Fig_1.tiff)
 
 The `flow` submodule solves the pressure diffusivity equation to provide
-estimates of the hydrocarbon production with time and the hydrocarbon recovery
+estimates of the hydrocarbon production over time and the hydrocarbon recovery
 factors. This module allows the user to estimate production for shale gas wells
-using the scaled solutions of the single-phase real gas diffusivity equation
+using a scaled solutions of the single-phase real gas diffusivity equation
 [@patzek2013; @male2015application]. In addition, this module simulates
 production for tight-oil and gas condensate wells using a two-phase scaled
 solution of the pressure diffusivity equation [@ruizmaraggi2022twophase]. The
-`flow` submodule also allows users capture variations in bottomhole pressure.
+`flow` submodule also allows users to capture production variations due to changes in bottomhole pressure.
 
 \autoref{fig:flow} shows the gas recovery factors for single-phase ideal gas,
 real gas, and multiphase scaled flow solutions using the `flow` submodule.
