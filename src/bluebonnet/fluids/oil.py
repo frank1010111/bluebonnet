@@ -569,8 +569,8 @@ def density_Standing(
 
     Examples
     ------
-    >>> density_Standing(200, 2000, 35, 0.8, 650, -72.2, 653)
-
+    >>> density_Standing(200, 2000, 35, 0.8, 650)
+    44.989365953905136
     """
     oil_specific_gravity = 141.5 / (131.5 + api_gravity)
     solution_gor = solution_gor_Standing(
