@@ -565,7 +565,7 @@ def density_Standing(
     Returns
     -------
     float
-        oil_density (1/psi)
+        oil_density (lb/ft^3)
 
     Examples
     ------

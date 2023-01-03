@@ -16,6 +16,8 @@ from scipy import integrate, interpolate, sparse
 
 from bluebonnet.flow.flowproperties import FlowProperties
 
+ATOL = 1e-12
+
 
 @dataclass
 class IdealReservoir:
@@ -67,10 +69,10 @@ class IdealReservoir:
             alpha_scaled = self.alpha_scaled(b)
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
-            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b)
+            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b, atol=ATOL)
         self.pseudopressure = pseudopressure
 
-    def recovery_factor(self, time: ndarray | None = None) -> ndarray:
+    def recovery_factor(self, time: ndarray | None = None, density=False) -> ndarray:
         """Calculate recovery factor over time.
 
         If time has is not specified, requires that `simulate` has been run
@@ -93,9 +95,18 @@ class IdealReservoir:
                     "Need to run simulate before calculating recovery factor",
                 )
         h_inv = self.nx - 1.0
-        pp = self.pseudopressure[:, :3]
-        dp_dx = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5
-        cumulative = integrate.cumulative_trapezoid(dp_dx, self.time, initial=0)
+        if density:
+            pseudopressure_to_mass = interpolate.interp1d(
+                self.fluid.pvt_props["m-scaled"],
+                self.fluid.pvt_props["density"],
+                fill_value="extrapolate",
+            )
+            mass = pseudopressure_to_mass(self.pseudopressure)
+            rate = np.sum(mass, 1)
+        else:
+            pp = self.pseudopressure[:, :3]
+            rate = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5  # dp_dx
+        cumulative = integrate.cumulative_trapezoid(rate, self.time, initial=0)
         self.recovery = cumulative * self.fvf_scale()
         return self.recovery
 
@@ -200,7 +211,7 @@ class SinglePhaseReservoir(IdealReservoir):
                 )
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
-            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b)
+            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b, atol=ATOL)
         self.pseudopressure = pseudopressure
 
 
@@ -266,7 +277,7 @@ class MultiPhaseReservoir(SinglePhaseReservoir):
             alpha_scaled = self.alpha_scaled(b, sat)
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
-            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b)
+            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b, atol=ATOL)
             saturations[i + 1] = self._step_saturation(sat, b, pseudopressure[i + 1])
         self.time = time
         self.pseudopressure = pseudopressure
