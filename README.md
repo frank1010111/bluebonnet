@@ -12,6 +12,9 @@ Scaling solutions for production analysis from unconventional oil and gas wells.
 <a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white" alt="pre-commit powered"></a>
 <a href="https://github.com/frank1010111/bluebonnet/actions/workflows/tests.yml/"> <img src="https://github.com/frank1010111/bluebonnet/actions/workflows/tests.yml/badge.svg" alt="tests">
 </a>
+<a href="https://pypi.org/project/bluebonnet">
+ <img src="https://img.shields.io/pypi/dm/bluebonnet">
+</a>
 </p>
 
 ![bluebonnets in bloom](https://github.com/frank1010111/bluebonnet/raw/main/docs/_static/bluebonnets.jpg)
@@ -21,7 +24,7 @@ Scaling solutions for production analysis from unconventional oil and gas wells.
 Run the command
 
 ```bash
-$ pip install git+https://github.com/frank1010111/bluebonnet.git
+pip install bluebonnet
 ```
 
 ## Usage
