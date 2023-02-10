@@ -19,11 +19,11 @@ def b_water_McCain(
 
     Returns
     -------
-    float
+    b_w : float
         b-factor (reservoir bbl / standard bbl)
 
     Examples
-    -------
+    --------
     >>> b_water_McCain(400, 3000)
 
     """
@@ -51,11 +51,11 @@ def b_water_McCain_dp(
 
     Returns
     -------
-    float
+    b_w_dp : float
         derivative of b-factor (reservoir bbl / standard bbl) / psi
 
     Examples
-    -------
+    --------
     >>> b_water_McCain_dp(400, 3000)
 
     """
@@ -85,11 +85,11 @@ def compressibility_water_McCain(
 
     Returns
     -------
-    float
-        density in lb-mass / cu ft
+    c_w : float
+        compressibility of water in 1/psi
 
     Examples
-    -------
+    --------
     >>> density_water_McCain(400, 3000, 15)
 
     """
@@ -100,7 +100,7 @@ def compressibility_water_McCain(
 def density_water_McCain(
     temperature: float, pressure: float | NDArray[np.float64], salinity: float
 ) -> float | NDArray[np.float64]:
-    """Calculate the density for water.
+    r"""Calculate the density for water.
 
     Parameters
     ----------
@@ -113,11 +113,11 @@ def density_water_McCain(
 
     Returns
     -------
-    float
-        density in lb-mass / cu ft
+    rho_w : float
+        density in lb-mass / cu ft, :math:`\rho_w`
 
     Examples
-    -------
+    --------
     >>> density_water_McCain(400, 3000, 15)
 
     """
@@ -129,7 +129,7 @@ def density_water_McCain(
 def viscosity_water_McCain(
     temperature: float, pressure: float | NDArray[np.float64], salinity: float
 ) -> float | NDArray[np.float64]:
-    """Calculate the viscosity for water, Using McCain (1991).
+    r"""Calculate the viscosity for water, Using McCain (1991).
 
     Parameters
     ----------
@@ -142,11 +142,11 @@ def viscosity_water_McCain(
 
     Returns
     -------
-    float
-        viscosity in centipoise
+    mu_w : float
+        viscosity in centipoise, :math:`\mu_w`
 
     Examples
-    -------
+    --------
     >>> viscosity_water_McCain(400, 3000, 15)
     0.2627774655403418
     """
