@@ -30,12 +30,12 @@ def make_nonhydrocarbon_properties(
 
     Returns
     --------
-    NDArray
+    non_hydrocrabon_properties : NDArray
         structured array of non-hydrocarbon fluid properties
 
     Examples
     --------
-    make_nonhydrocarbon_properties(0.03, 0.012, 0.018)
+    >>> make_nonhydrocarbon_properties(0.03, 0.012, 0.018)
     """
     non_hydrocarbon_properties = np.array(
         [
@@ -76,7 +76,7 @@ def z_factor_DAK(
 
     Returns
     -------
-    float
+    z_fact: float
         z_factor (dimensionless)
 
     Examples
@@ -159,13 +159,13 @@ def z_factor_hallyarbrough(pressure: float, temperature: float) -> float:
 
     Returns
     -------
-    float:
+    zfact: float:
         z-factor
 
     References
     ----------
-    <https://wiki.whitson.com/eos/eos_models/zfactor/index.html#hall-yarbrough-estimation-of-gas-z-factor>
-    """
+    `Hall-Yarbrough estimation <https://wiki.whitson.com/eos/eos_models/zfactor/index.html#hall-yarbrough-estimation-of-gas-z-factor>`_
+    """  # noqa: E501
     t = 1 / temperature
     y = 0.001
     fdum = 1
@@ -211,7 +211,7 @@ def b_factor_DAK(
 
     Returns
     -------
-    float
+    b_g : float
         b-factor (reservoir barrels / scf)
 
     Examples
@@ -255,12 +255,12 @@ def density_DAK(
 
     Returns
     -------
-    float
+    rho_g : float
         density_gas (lb / cubic ft)
 
     Examples
     -------
-    density_DAK(400, 100, -102, 649, 0.65) # returns 0.2143
+    >>> density_DAK(400, 100, -102, 649, 0.65) # returns 0.2143
     """
     MOLECULAR_WEIGHT_AIR = 28.964
     R = 10.73159
@@ -293,7 +293,7 @@ def compressibility_DAK(
 
     Returns
     -------
-    float
+    c_g: float
         compressibility (1 / psi)
 
     Examples
@@ -367,7 +367,7 @@ def viscosity_Sutton(
 
     Returns
     -------
-    float
+    mu_g : float
         viscosity_gas (centipoise)
 
     Examples
@@ -425,9 +425,9 @@ def pseudocritical_point_Sutton(
 
     Returns
     -------
-    float
+    pseudocritical_temp : float
         temperature_pseudocritical (F)
-    float
+    pseudocritical_p : float
         pressure_pseudocritical (psia)
 
     Examples
@@ -518,7 +518,7 @@ def pseudopressure_Hussainy(
 
     Returns
     -------
-    float
+    m : float
         pseudopressure (psi^2 / centipoise)
 
     Examples

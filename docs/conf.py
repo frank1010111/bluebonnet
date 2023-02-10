@@ -9,7 +9,7 @@ from __future__ import annotations
 
 # -- Project information -----------------------------------------------------
 project = "bluebonnet"
-copyright = "2021, Frank Male"
+copyright = "2021-2023, Frank Male"
 author = "Frank Male"
 
 # -- General configuration ---------------------------------------------------

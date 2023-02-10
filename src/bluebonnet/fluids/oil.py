@@ -112,7 +112,7 @@ def pressure_bubblepoint_Standing(
 
     Returns
     -------
-    float
+    p_b : float
         Bubble point pressure in psia.
 
     Examples
@@ -149,8 +149,8 @@ def b_o_bubblepoint_Standing(
 
     Returns
     -------
-    NDArray
-        B_o (rb/stb)
+    b_o : NDArray
+        Oil formation volume factor (rb/stb)
 
     Example
     -------
@@ -191,11 +191,12 @@ def db_o_dgor_Standing(
 
     Returns
     -------
-    NDArray
-        B_o (rb/stb)
+    dbo_dgor:  NDArray
+        Change in Oil formation volume factor per unit GOR (rb/stb / (scf/bbl))
 
     Example
     -------
+    >>> db_o_dgor_Standing(200, 35, 0.8, 650)
     """
     oil_specific_gravity = 141.5 / (131.5 + api_gravity)
     sqrt_gravity_ratio = np.sqrt(gas_specific_gravity / oil_specific_gravity)
@@ -232,7 +233,7 @@ def solution_gor_Standing(
 
     Returns
     -------
-    float
+    gor : float
         Solution GOR in scf/stb
 
     Examples
@@ -273,7 +274,7 @@ def dgor_dpressure_Standing(
     gas_specific_gravity: float,
     solution_gor_initial: float,
 ) -> float:
-    """Calculate the instantaneous change in GOR with pressure using Standing.
+    r"""Calculate the instantaneous change in GOR with pressure using Standing.
 
     Parameters
     ----------
@@ -290,11 +291,11 @@ def dgor_dpressure_Standing(
 
     Returns
     -------
-    float
-        Change in GOR per pressure ( scf / scf / psi)
+    dgor : float
+        Change in GOR per pressure ( scf / scf / psi). :math:`\partial R_s/\partial p`
 
     Examples
-    -------
+    --------
     >>> dgor_dpressure_Standing(200, 3_000, 35, 0.8, 650)
     0
     >>> dgor_dpressure_Standing(200, 2_000, 35, 0.8, 650)
@@ -339,10 +340,11 @@ def oil_compressibility_undersat_Standing(
 
     Returns
     -------
-    float
-        oil_compressibility in 1/psi
+    c_o : float
+        oil compressibility in 1/psi
 
     Example
+    -------
     >>> oil_compressibility_undersat_Standing(200, 3_000, 35, 0.8, 650)
     1.478788544207282e-05
     """
@@ -388,10 +390,11 @@ def oil_compressibility_undersat_Spivey(
 
     Returns
     -------
-    float
-        oil_compressibility in 1/psi
+    c_o : float
+        oil compressibility in 1/psi
 
-    Example
+    Examples
+    --------
     >>> oil_compressibility_undersat_Spivey(200, 3_000, 35, 0.8, 650)
     9.177554347361075e-06
     """
@@ -486,8 +489,8 @@ def oil_compressibility_Standing(
 
     Returns
     -------
-    float
-        oil_compressibility (1/psi)
+    c_o : float
+        oil compressibility in 1/psi
 
     Examples
     ------
@@ -564,8 +567,8 @@ def density_Standing(
 
     Returns
     -------
-    float
-        oil_density (lb/ft^3)
+    rho_o : float
+        oil density (lb/ft^3)
 
     Examples
     ------
@@ -609,8 +612,8 @@ def viscosity_beggs_robinson(
 
     Returns
     -------
-    NDArray
-        $\\mu_o$, the oil viscosity
+    mu_o : float
+        :math:`\mu_o`, the oil viscosity
     """
     pressure_bubblepoint = pressure_bubblepoint_Standing(
         temperature, api_gravity, gas_specific_gravity, solution_gor_initial

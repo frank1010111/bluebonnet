@@ -23,6 +23,17 @@ def test_b_water_McCain_dp(water_properties):
     assert water.b_water_McCain_dp(temperature, pressure) == b_water_dp_true
 
 
+def test_compressibility_McCain(water_properties):
+    temperature = water_properties.temperature
+    pressure = water_properties.pressure
+    salinity = water_properties.salinity
+    co_water_true = pytest.approx(3.0860375940019587e-06)
+    assert (
+        water.compressibility_water_McCain(temperature, pressure, salinity)
+        == co_water_true
+    )
+
+
 def test_density_McCain(water_properties):
     density_water_true = pytest.approx(67.205706)
     assert (

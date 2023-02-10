@@ -173,8 +173,9 @@ def plot_production_comparison(
 
     Returns
     -------
-    matplotlib figure and tuple of axes with cumulative production and
-    pressure over time (scaled by tau)
+    fig, (ax1, ax2): Any
+        matplotlib figure and tuple of axes with cumulative production and
+        pressure over time (scaled by tau)
     """
     if filter_zero_prod_days:
         prod_data = prod_data[
