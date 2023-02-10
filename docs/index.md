@@ -7,11 +7,12 @@
 :hidden:
 fluids.ipynb
 flow.ipynb
+oil_flow.ipynb
 forecast.ipynb
 forecast_varying.ipynb
-changelog.md
+autoapi/index
 contributing.md
 conduct.md
-autoapi/index
 background.md
+changelog.md
 ```
