@@ -27,22 +27,15 @@ class FlowProperties:
     Attributes
     ----------
     pvt_props : Mapping
-
         has accessors for pseudopressure, alpha, compressibility, viscosity, z-factor
 
-        pseudopressure: pseudopressure in psi^2/centipoise
-
-        pressure: pore pressure
-
-        alpha: hydraulic diffusivity
-
-        compressibility: total compressibility
-
-        viscosity: dynamic viscosity :math:`\mu`
-
-        z-factor: compressibility factor, :math:`Z = p/\rho R T`
-
-        m-scaled: pseudopressure scaled by initial pseudopressure
+        * `pseudopressure`: pseudopressure in psi^2/centipoise
+        * `pressure`: pore pressure
+        * `alpha`: hydraulic diffusivity
+        * `compressibility`: total compressibility
+        * `viscosity`: dynamic viscosity :math:`\mu`
+        * `z-factor`: compressibility factor, :math:`Z = p/\rho R T`
+        * `m-scaled`: pseudopressure scaled by initial pseudopressure
 
     m_i : float
         pseudopressure that corresponds to initial reservoir pressure
@@ -121,6 +114,7 @@ class FlowProperties:
 
 
 FlowPropertiesOnePhase = FlowProperties
+"""Alias for :code:`FlowProperties`"""
 
 
 class FlowPropertiesSimple(FlowProperties):
@@ -173,10 +167,10 @@ class FlowPropertiesTwoPhase(FlowProperties):
     References
     ----------
     Ruiz Maraggi, L.M., Lake, L.W. and Walsh, M.P., 2020. "A Two-Phase Non-Linear One-
-        Dimensional Flow Model for Reserves Estimation in Tight Oil and Gas
-        Condensate Reservoirs Using Scaling Principles." In SPE Latin American and
-        Caribbean Petroleum Engineering Conference. OnePetro.
-        https://doi.org/10.2118/199032-MS
+    Dimensional Flow Model for Reserves Estimation in Tight Oil and Gas
+    Condensate Reservoirs Using Scaling Principles." In SPE Latin American and
+    Caribbean Petroleum Engineering Conference. OnePetro.
+    https://doi.org/10.2118/199032-MS
     """
 
     @classmethod
@@ -198,9 +192,11 @@ class FlowPropertiesTwoPhase(FlowProperties):
         ----------
         df_pvt : Mapping
             table of PVT properties by pressure with co-varying So
+
             columns: pseudopressure, pressure, Bo, Bg, Bw, Rs, Rv, mu_o, mu_g, mu_w, So
         df_kr : Mapping
             table of relative permeabilities
+
             columns: So, Sg, Sw, kro, krg, krw
         reference_densities: dictionary of strings pointing to floats
             density at STP for oil, gas, and water
@@ -268,22 +264,33 @@ def alpha_multiphase(
 ) -> ndarray:
     """Calculate hydraulic diffusivity for a multiphase (two or three phase) system.
 
-    Args:
-        pressure (ndarray): absolute pressure for the cells
-        So (ndarray): Oil saturation for the cells
-        phi (float): porosity (assumed constant), in range from 0 to 1
-        Sw (float): Water saturation (assumed constant)
-        pvt (dict): PVT properties including
-            `rho_x0`: density at reference pressure
-            `mu_x`: viscosity (function of pressure)
-            `Bx`: formation volume factor (function of pressure)
-            for the x-components o (oil), g (gas), w (water)
-            `Rv`, `Rs`: dissolved and free gas (functions of pressure)
-        kr (dict): relative permeability for x-phases (o, g, w)
-            `krx`: relative permeability (function of So)
+    Args
+    ----
+    pressure : ndarray
+        absolute pressure for the cells
+    So : ndarray
+        Oil saturation for the cells
+    phi : float
+        porosity (assumed constant), in range from 0 to 1
+    Sw : float
+        Water saturation (assumed constant)
+    pvt : dict
+        PVT properties including
 
-    Returns:
-        ndarray: total hydraulic diffusivity
+        * `rho_x0`: density at reference pressure
+        * `mu_x`: viscosity (function of pressure)
+        * `Bx`: formation volume factor (function of pressure) \
+        for the x-components o (oil), g (gas), w (water)
+        * `Rv`, `Rs`: dissolved and free gas (functions of pressure)
+    kr : dict
+        relative permeability for x-phases (o, g, w)
+
+        `krx`: relative permeability (function of So)
+
+    Returns
+    -------
+    alpha_t: ndarray
+        total hydraulic diffusivity
     """
     lambda_combined = lambda_combined_func(pressure, So, pvt, kr)
     compressibility_combined = compressibility_combined_func(pressure, So, phi, Sw, pvt)
@@ -295,20 +302,30 @@ def lambda_combined_func(
 ) -> ndarray:
     """Calculate mobility for three phase system.
 
-    Args:
-        pressure (ndarray): reservoir pressure for the cells
-        So (ndarray): oil saturation (varies from 0-1) for the cells
-        pvt (dict): PVT properties including
-            `rho_x0`: density at reference pressure
-            `mu_x`: viscosity (function of pressure)
-            `Bx`: formation volume factor (function of pressure)
-            for the x-components o (oil), g (gas), w (water)
-            `Rv`, `Rs`: dissolved and free gas (functions of pressure)
-        kr (dict): relative permeability for x-phases (o, g, w)
-            `krx`: relative permeability (function of So)
+    Args
+    ----
+    pressure : ndarray
+        absolute pressure for the cells
+    So : ndarray
+        Oil saturation for the cells
+    pvt : dict
+        PVT properties including
 
-    Returns:
-        ndarray: mobility for the cells
+        * `rho_x0`: density at reference pressure
+        * `mu_x`: viscosity (function of pressure)
+        * `Bx`: formation volume factor (function of pressure) \
+        for the x-components o (oil), g (gas), w (water)
+        * `Rv`, `Rs`: dissolved and free gas (functions of pressure)
+
+    kr : dict
+        relative permeability for x-phases (o, g, w)
+
+        `krx`: relative permeability (function of So)
+
+    Returns
+    -------
+    lambda_t: ndarray
+        mobility for the cells
     """
     lambda_oil = pvt["rho_o0"] * (
         pvt["Rv"](pressure)
@@ -333,21 +350,30 @@ def compressibility_combined_func(
 ) -> ndarray:
     """Calculate three-phase compressibility.
 
-    Args:
-        pressure (ndarray): reservoir pressure for the cells
-        So (ndarray): oil saturation (varies from 0-1) for the cells
-        pvt (dict): PVT properties including
-            `rho_x0`: density at reference pressure
-            `mu_x`: viscosity (function of pressure)
-            `Bx`: formation volume factor (function of pressure)
-            for the x-components o (oil), g (gas), w (water)
-            `Rv`, `Rs`: dissolved and free gas (functions of pressure)
-        kr (dict): relative permeability for x-phases (o, g, w)
-            `krx`: relative permeability (function of So)
+    Args
+    ----
+    pressure : ndarray
+        absolute pressure for the cells
+    So : ndarray
+        Oil saturation for the cells
+    pvt : dict
+        PVT properties including
 
+        * `rho_x0`: density at reference pressure
+        * `mu_x`: viscosity (function of pressure)
+        * `Bx`: formation volume factor (function of pressure) \
+        for the x-components o (oil), g (gas), w (water)
+        * `Rv`, `Rs`: dissolved and free gas (functions of pressure)
 
-    Returns:
-        ndarray: Total fluid compressibility
+    kr : dict
+        relative permeability for x-phases (o, g, w)
+
+        `krx`: relative permeability (function of So)
+
+    Returns
+    -------
+    cp : ndarray
+        Total fluid compressibility for the cells
     """
     Sg = 1 - So - Sw
     oil_cp = (
@@ -383,21 +409,29 @@ def pseudopressure_threephase(
 ) -> ndarray:
     """Calculate pseudopressure over pressure for three-phase fluid.
 
-    Args:
-        pressure (ndarray): reservoir pressure for the cells
-        So (ndarray): oil saturation (varies from 0-1) for the cells
-        pvt (dict): PVT properties including
-            `rho_x0`: density at reference pressure
-            `mu_x`: viscosity (function of pressure)
-            `Bx`: formation volume factor (function of pressure)
-            for the x-components o (oil), g (gas), w (water)
-            `Rv`, `Rs`: dissolved and free gas (functions of pressure)
-        kr (dict): relative permeability for x-phases (o, g, w)
-            `krx`: relative permeability (function of So)
+    Args
+    ----
+    pressure : ndarray
+        absolute pressure for the cells
+    So : ndarray
+        Oil saturation for the cells
+    pvt : dict
+        PVT properties including
 
-    Returns:
+        * `rho_x0`: density at reference pressure
+        * `mu_x`: viscosity (function of pressure)
+        * `Bx`: formation volume factor (function of pressure) \
+        for the x-components o (oil), g (gas), w (water)
+        * `Rv`, `Rs`: dissolved and free gas (functions of pressure)
+
+    kr : dict
+        relative permeability for x-phases (o, g, w)
+
+        `krx`: relative permeability (function of So)
+
+    Returns
     -------
-        ndarray: pseudopressure
+        pseudopressure : ndarray
     """
     lambda_oil = pvt["rho_o0"] * (
         pvt["Rv"](pressure)
@@ -430,12 +464,13 @@ class FlowPropertiesMultiPhase(FlowProperties):
     ----------
     df : Mapping
         has columns for pseudopressure, alpha, So, Sg, Sw
-        pseudopressure: pseudopressure scaled from 0 for frac face, 1 for initial
+
+        * `pseudopressure`: pseudopressure scaled from 0 for frac face, 1 for initial\
             reservoir conditions
-        alpha: hydraulic diffusivity (needn't be scaled)
-        So: oil saturation
-        Sg: gas saturation
-        Sw: water saturation
+        * `alpha`: hydraulic diffusivity (needn't be scaled)
+        * `So`: oil saturation
+        * `Sg`: gas saturation
+        * `Sw`: water saturation
     fvf_scale: dict
         includes Bo,Bg,Bw at initial conditions divided by FVF at the frac face
     """
@@ -461,15 +496,43 @@ class FlowPropertiesMultiPhase(FlowProperties):
 
 
 RelPermParams = namedtuple(
-    "RelPermParams", "n_o n_g n_w S_or S_wc S_gc k_ro_max k_rw_max k_rg_max"
+    "RelPermParams", "n_o n_w n_g S_or S_wc S_gc k_ro_max k_rw_max k_rg_max"
 )
+"""Stores the parameters for a Brooks-Corey relative permeability model.
+
+Parameters
+----------
+n_o : float
+    Exponent for oil relative permeability
+n_w : float
+    Exponent for water relative permeability
+n_g : float
+    Exponent for gas relative permeability
+S_or : float
+    Residual saturation for oil (zero permeability point)
+S_wr : float
+    Residual saturation for water (zero permeability point)
+S_gr : float
+    Residual saturation for gas (zero permeability point)
+k_ro_max : float
+    Maximum relative permeability of the oil phase
+k_rw_max : float
+    Maximum relative permeability of the water phase
+k_rg_max : float
+    Maximum relative permeability of the gas phase
+"""
 
 
 def relative_permeabilities(
     saturations: ndarray,
     params: RelPermParams,
 ) -> ndarray:
-    """Brooks-Corey power-law relative permeability.
+    r"""Brooks-Corey power-law relative permeability.
+
+    .. math ::
+        k_{ro} = k_{ro,max}\left(\frac{S_o - S_{or}}{1-S_{or}-S_{wr}-S_{gr}}\right) \\
+        k_{rw} = k_{rw,max}\left(\frac{S_w - S_{wr}}{1-S_{or}-S_{wr}-S_{gr}}\right) \\
+        k_{rg} = k_{rg,max}\left(\frac{S_g - S_{gr}}{1-S_{or}-S_{wr}-S_{gr}}\right)
 
     Parameters
     ----------
@@ -481,7 +544,14 @@ def relative_permeabilities(
     Returns
     -------
     k_rel: numpy record array
-        records include k_o, k_w, k_g (aka oil, water gas)
+        records include k_o, k_w, k_g (aka oil, water, gas)
+
+    References
+    ----------
+    Brooks, R.H. and Corey, A.T. 1964. Hydraulic Properties of Porous Media.
+    Hydrology Papers, No. 3, Colorado State U., Fort Collins, Colorado.
+
+    https://petrowiki.spe.org/Relative_permeability_models
     """
     if np.any(np.abs([sum(v) - 1 for v in saturations]) > 1e-3):
         raise ValueError("Saturations must sum to 1")
