@@ -28,7 +28,9 @@ from bluebonnet.fluids.oil import (
 from bluebonnet.fluids.water import b_water_McCain, viscosity_water_McCain
 
 PRESSURE_STANDARD = 14.7
+"""STP pressure (14.7 psi)"""
 TEMPERATURE_STANDARD = 60
+"""STP Temperature (60 degrees F)"""
 
 
 def build_pvt_gas(
@@ -38,8 +40,8 @@ def build_pvt_gas(
 
     Parameters
     -----------
-    gas_values : Mapping
-        FieldValues must contain 'N2','H2S','CO2', 'Gas Specific Gravity',
+    gas_values : dictionary
+        keys include 'N2','H2S','CO2', 'Gas Specific Gravity',
         'Reservoir Temperature (deg F)'
     gas_dryness : str
         One of 'wet gas' or 'dry gas'
@@ -119,30 +121,32 @@ class Fluid:
 
     Parameters
     ----------
-    temperature: reservoir temperature (in F)
-    api_gravity: oil gravity in degrees API
-    gas_specific_gravity: Gas gravity relative to air
-    solution_gor_initial: initial reservoir gas-oil ratio in scf/bbl
-    salinity: water salinity in weight percent total dissolved solids
-    water_saturation_initial: initial water saturation (V/V)
-
-    Methods
-    ---------
-    water_FVF: Bw
-    water_viscosity: $\\mu_w$
-    gas_FVF: Bg
-    gas_viscosity: $\\mu_g$
-    oil_FVF: Bo
-    oil_viscosity: $\\mu_o$
-    pressure_bubblepoint
+    temperature: float
+        reservoir temperature (in F)
+    api_gravity: float
+        oil gravity in degrees API
+    gas_specific_gravity: float
+        Gas gravity relative to air
+    solution_gor_initial: float
+        initial reservoir gas-oil ratio in scf/bbl
+    salinity: float
+        water salinity in weight percent total dissolved solids
+    water_saturation_initial: float
+        initial water saturation (V/V)
     """
 
     temperature: float
+    """Temperature in F"""
     api_gravity: float
+    """Oil API gravity"""
     gas_specific_gravity: float
+    """Gas specific gravity"""
     solution_gor_initial: float
+    """Initial gas-oil ratio"""
     salinity: float = 0.0
-    water_saturation_initial = 0.0
+    """Salinity (total dissolved solids)"""
+    water_saturation_initial: float = 0.0
+    """Initial water saturation"""
 
     def water_FVF(
         self, pressure: NDArray[np.float] | float
@@ -155,8 +159,8 @@ class Fluid:
             water pressure in psia
         Returns
         ----------
-        ndarray
-            b-factor in reservoir bbl/ standard bbl
+        b_w: ndarray
+            b-factor in reservoir bbl / standard bbl
         """
         b_w = np.array([b_water_McCain(self.temperature, p) for p in pressure])
         return b_w
@@ -171,7 +175,7 @@ class Fluid:
 
         Returns
         -------
-        float
+        mu_w : float
             viscosity in centipoise
         """
         return viscosity_water_McCain(self.temperature, pressure, self.salinity)
@@ -195,7 +199,7 @@ class Fluid:
 
         Returns
         -------
-        ndarray
+        b_g: ndarray
             b-factor (reservoir barrels / scf)
         """
         b_g = np.array(
@@ -230,7 +234,7 @@ class Fluid:
 
         Returns
         -------
-        ndarray
+        mu_g : ndarray
             viscosity_gas (centipoise)
 
         Examples
@@ -262,8 +266,8 @@ class Fluid:
 
         Returns
         -------
-        ndarray
-            Bo, the formation volume factor (V/V)
+        b_o : ndarray
+            :math:`b_o`, the formation volume factor (V/V)
         """
         fvf_oil = b_o_Standing(
             self.temperature,
@@ -279,8 +283,8 @@ class Fluid:
 
         Returns
         -------
-        ndarray
-            $\\mu_o$, the oil viscosity
+        mu_o: ndarray
+            :math:`\mu_o`, the oil viscosity
         """
         visc_br = np.vectorize(viscosity_beggs_robinson)
         mu_o = visc_br(
@@ -299,7 +303,7 @@ class Fluid:
 
         Returns
         -------
-        float
+        p_bubble : float
             Bubble point pressure in psia.
 
         Examples
@@ -331,7 +335,7 @@ def pseudopressure(
 
     Returns
     -------
-    NDArray
+    m : NDArray
         pseudopressure, psia^2 / cp
     """
     pp = 2 * pressure / (viscosity * z_factor)
