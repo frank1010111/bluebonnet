@@ -16,13 +16,15 @@ from scipy import integrate, interpolate, sparse
 
 from bluebonnet.flow.flowproperties import FlowProperties
 
-ATOL = 1e-12
+_ATOL = 1e-12
 
 
 @dataclass
 class IdealReservoir:
     """
     Class for building scaling solutions of production from hydrofractured wells.
+
+    This maintains simulation parameters and fluid properties.
 
     Parameters
     ----------
@@ -34,17 +36,16 @@ class IdealReservoir:
         reservoir pressure before production (psi)
     fluid : FlowProperties
         reservoir fluid PVT/flow properties
-
-    Methods
-    ----------
-    simulate : calculate pressure over time
-    recovery_factor : calculate recovery factor over time
     """
 
     nx: int
+    """number of spatial nodes"""
     pressure_fracface: float | npt.NDArray
+    """drawdown pressure at :math:`x=0` (psi)"""
     pressure_initial: float
+    """reservoir pressure before production (psi)"""
     fluid: FlowProperties
+    """reservoir fluid PVT/flow properties"""
 
     def __post_init___(self):
         """Last initialization steps."""
@@ -69,7 +70,7 @@ class IdealReservoir:
             alpha_scaled = self.alpha_scaled(b)
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
-            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b, atol=ATOL)
+            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b, atol=_ATOL)
         self.pseudopressure = pseudopressure
 
     def recovery_factor(self, time: ndarray | None = None, density=False) -> ndarray:
@@ -143,8 +144,9 @@ class IdealReservoir:
     def fvf_scale(self) -> float:
         """Scaling for formation volume factor.
 
-        Returns:
-            float: FVF
+        Returns
+        -------
+        FVF : float
         """
         return 1 - self.pressure_fracface / self.pressure_initial
 
@@ -160,8 +162,9 @@ class SinglePhaseReservoir(IdealReservoir):
     def fvf_scale(self) -> float:
         """Scaling for formation volume factor.
 
-        Returns:
-            float: FVF
+        Returns
+        -------
+        FVF : float
         """
         return 1
 
@@ -212,7 +215,7 @@ class SinglePhaseReservoir(IdealReservoir):
                 )
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
-            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b, atol=ATOL)
+            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b, atol=_ATOL)
         self.pseudopressure = pseudopressure
 
 
@@ -223,10 +226,10 @@ class TwoPhaseReservoir(SinglePhaseReservoir):
     References
     ----------
     Ruiz Maraggi, L.M., Lake, L.W. and Walsh, M.P., 2020. "A Two-Phase Non-Linear One-
-        Dimensional Flow Model for Reserves Estimation in Tight Oil and Gas
-        Condensate Reservoirs Using Scaling Principles." In SPE Latin American and
-        Caribbean Petroleum Engineering Conference. OnePetro.
-        https://doi.org/10.2118/199032-MS
+    Dimensional Flow Model for Reserves Estimation in Tight Oil and Gas
+    Condensate Reservoirs Using Scaling Principles." In SPE Latin American and
+    Caribbean Petroleum Engineering Conference. OnePetro.
+    https://doi.org/10.2118/199032-MS
     """
 
     Sw_init: float
@@ -244,11 +247,32 @@ class TwoPhaseReservoir(SinglePhaseReservoir):
 
 @dataclass
 class MultiPhaseReservoir(SinglePhaseReservoir):
-    """Reservoir with three phases: oil, gas, and water all flowing."""
+    """Reservoir with three phases: oil, gas, and water all flowing.
+
+    Parameters
+    ----------
+    nx : int
+        number of spatial nodes
+    pressure_fracface : float | NDArray
+        drawdown pressure at x=0 (psi)
+    pressure_initial : float
+        reservoir pressure before production (psi)
+    fluid : FlowProperties
+        reservoir fluid PVT/flow properties
+    So_init : float
+        oil saturation at the beginning
+    Sw_init : float
+        water saturation
+    Sg_init : float
+        gas saturation
+    """
 
     So_init: float
-    Sg_init: float
+    """Initial oil saturation."""
     Sw_init: float
+    """Initial water saturation."""
+    Sg_init: float
+    """Initial gas saturation."""
 
     def simulate(self, time: ndarray):
         """Calculate simulation pressure over time.
@@ -278,7 +302,9 @@ class MultiPhaseReservoir(SinglePhaseReservoir):
             alpha_scaled = self.alpha_scaled(b, sat)
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
-            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b, atol=ATOL)
+            pseudopressure[i + 1], info = sparse.linalg.bicgstab(
+                a_matrix, b, atol=_ATOL
+            )
             saturations[i + 1] = self._step_saturation(sat, b, pseudopressure[i + 1])
         self.time = time
         self.pseudopressure = pseudopressure
@@ -295,7 +321,7 @@ class MultiPhaseReservoir(SinglePhaseReservoir):
         ----------
         pseudopressure : ndarray
             scaled pseudopressure
-        saturaion : ndarray
+        saturation : ndarray
             record array with So, Sg, Sw records
 
         Returns
@@ -312,13 +338,18 @@ class MultiPhaseReservoir(SinglePhaseReservoir):
     ) -> ndarray:
         """Calculate new saturation.
 
-        Args:
-            saturation (ndarray): old saturation
-            ppressure_old (ndarray): old pressure
-            ppressure_new (ndarray): new pressure
+        Args
+        ----
+        saturation : ndarray
+            old saturation
+        ppressure_old : ndarray
+            old pressure
+        ppressure_new : ndarray
+            new pressure
 
-        Returns:
-            ndarray: new saturation
+        Returns
+        -------
+        new saturation: ndarray
         """
         return NotImplementedError
 
