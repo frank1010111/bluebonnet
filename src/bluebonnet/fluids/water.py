@@ -69,6 +69,34 @@ def b_water_McCain_dp(
     return d2V_dp2 * (1 + dV_dt)
 
 
+def compressibility_water_McCain(
+    temperature: float, pressure: float | NDArray[np.float64], salinity: float
+) -> float | NDArray[np.float64]:
+    """Calculate the compressibility for water.
+
+    Parameters
+    ----------
+    temperature : float
+        water temperature in Fahrenheit
+    pressure: float | NDArray
+        water pressure in psia
+    salinity: float
+        salinity in weight percent total dissolved solids
+
+    Returns
+    -------
+    float
+        density in lb-mass / cu ft
+
+    Examples
+    -------
+    >>> density_water_McCain(400, 3000, 15)
+
+    """
+    c_w = 1 / (7.033 * pressure + 0.5415 * salinity - 537 * temperature + 403300.0)
+    return c_w
+
+
 def density_water_McCain(
     temperature: float, pressure: float | NDArray[np.float64], salinity: float
 ) -> float | NDArray[np.float64]:
