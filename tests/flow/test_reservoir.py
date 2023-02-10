@@ -44,7 +44,6 @@ reservoirs = (IdealReservoir, SinglePhaseReservoir)  # TODO:, MultiPhaseReservoi
 @pytest.mark.parametrize("Reservoir", reservoirs)
 @pytest.mark.parametrize("nx,pf,pi,fluid", sim_props)
 def reservoir_start(nx, pf, pi, fluid, Reservoir):
-
     if Reservoir == MultiPhaseReservoir:
         reservoir = Reservoir(nx, pf, pi, fluid, So, Sg, Sw)
         assert reservoir.So == So
