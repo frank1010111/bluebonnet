@@ -102,11 +102,12 @@ class IdealReservoir:
                 fill_value="extrapolate",
             )
             mass = pseudopressure_to_mass(self.pseudopressure)
-            rate = np.sum(mass, 1)
+            mass_over_time = np.sum(mass, 1)
+            cumulative = 1.0 - mass_over_time / mass_over_time[0]
         else:
             pp = self.pseudopressure[:, :3]
             rate = (-pp[:, 2] + 4 * pp[:, 1] - 3 * pp[:, 0]) * h_inv * 0.5  # dp_dx
-        cumulative = integrate.cumulative_trapezoid(rate, self.time, initial=0)
+            cumulative = integrate.cumulative_trapezoid(rate, self.time, initial=0)
         self.recovery = cumulative * self.fvf_scale()
         return self.recovery
 
