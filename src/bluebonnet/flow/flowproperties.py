@@ -123,6 +123,46 @@ class FlowProperties:
 FlowPropertiesOnePhase = FlowProperties
 
 
+class FlowPropertiesSimple(FlowProperties):
+    """Flow properties where only viscosity and compressibility vary with pressure."""
+
+    def __init__(self, pvt_props: Mapping[str, ndarray], p_i: float):
+        """Wrap table of flow properties with useful methods.
+
+        If alpha is not in the table, calculates hydraulic diffusivity as a function of
+        compressibility and viscosity.
+
+        Parameters
+        -----------
+        pvt_props : Mapping
+            has accessors for pressure, compressibility, viscosity
+
+        p_i : float
+            Initial reservoir pressure
+        """
+        pvt_props = copy.copy(pvt_props)
+        need_cols = {
+            "compressibility",
+            "pressure",
+            "viscosity",
+        }
+        if need_cols.intersection(pvt_props) != need_cols:
+            raise ValueError("Need pvt_props to have: " + ", ".join(need_cols))
+        pvt_props["alpha"] = 1 / (  # mypy: ignore
+            pvt_props["compressibility"] * pvt_props["viscosity"]
+        )
+        pvt_props["m-scaled"] = pvt_props["pressure"]
+        self.m_scaled_func = interp1d(pvt_props["pressure"], pvt_props["m-scaled"])
+        self.m_i = self.m_scaled_func(p_i)
+        self.alpha = interp1d(
+            pvt_props["m-scaled"],
+            pvt_props["alpha"],
+            fill_value=(min(pvt_props["alpha"]), max(pvt_props["alpha"])),
+            bounds_error=False,
+        )
+        self.pvt_props = pvt_props
+
+
 class FlowPropertiesTwoPhase(FlowProperties):
     """
     Flow properties for the system.

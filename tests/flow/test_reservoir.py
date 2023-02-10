@@ -44,7 +44,6 @@ reservoirs = (IdealReservoir, SinglePhaseReservoir)  # TODO:, MultiPhaseReservoi
 @pytest.mark.parametrize("Reservoir", reservoirs)
 @pytest.mark.parametrize("nx,pf,pi,fluid", sim_props)
 def reservoir_start(nx, pf, pi, fluid, Reservoir):
-
     if Reservoir == MultiPhaseReservoir:
         reservoir = Reservoir(nx, pf, pi, fluid, So, Sg, Sw)
         assert reservoir.So == So
@@ -80,7 +79,6 @@ class TestRun:
         end_t = 9.0
         time = np.linspace(0, np.sqrt(end_t), nt) ** 2
         reservoir.simulate(time)
-        rf = reservoir.recovery_factor()
 
         def logslope(time, rf, mask=None):
             if mask is None:
@@ -95,10 +93,12 @@ class TestRun:
             return slope
 
         # rf goes as sqrt-time in early production
-        slope = logslope(time, rf, (time > 0.1) & (time < 0.3))
-        assert (
-            np.abs(slope - 0.5) < 0.05
-        ), "Early recovery factor goes as the square root"
+        for density in (True, False):
+            rf = reservoir.recovery_factor(density=density)
+            slope = logslope(time, rf, (time > 0.1) & (time < 0.3))
+            assert (
+                np.abs(slope - 0.5) < 0.05
+            ), "Early recovery factor goes as the square root"
 
     def test_rf_late_asymptotes(self, nx, pf, pi, fluid, Reservoir, nt):
         if Reservoir == MultiPhaseReservoir:
@@ -108,7 +108,6 @@ class TestRun:
         end_t = 100
         time = np.linspace(0, np.sqrt(end_t), nt) ** 2
         reservoir.simulate(time)
-        rf = reservoir.recovery_factor()
         if False:
             import matplotlib.pyplot as plt
 
@@ -134,6 +133,8 @@ class TestRun:
             return slope
 
         # rf stops increasing at late time
-        slope = logslope(time, rf, time > 10)
-        assert np.abs(slope) < 0.03, "Late recovery factor is slow"
-        assert slope > -1e-10, "Late recovery never trends negative"
+        for density in (True, False):
+            rf = reservoir.recovery_factor(density=density)
+            slope = logslope(time, rf, time > 10)
+            assert np.abs(slope) < 0.03, "Late recovery factor is slow"
+            assert slope > -1e-10, "Late recovery never trends negative"
