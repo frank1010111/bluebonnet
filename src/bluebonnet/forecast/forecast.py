@@ -23,7 +23,9 @@ class Bounds:
     """
 
     M: tuple[float, float]
+    """Minimum and maximum resource in place"""
     tau: tuple[float, float]
+    """Minimum and maximum time-to-boundary dominated flow"""
 
     def __post_init___(self):
         """Validate bounds."""
@@ -50,19 +52,19 @@ class ForecasterOnePhase:
 
     Parameters
     ----------
-    rf_curve: the recovery factor over scaled time, as a callable
-              (interpolators are best)
-    bounds: the minimum and maximum values that the rf_curve accepts
-              (watch the limits for the rf_curve function)
+    rf_curve: Callable
+        the recovery factor over scaled time, as a callable
+        (interpolators are best). So :code:`rf_curve(time_scaled) -> recovery_factor`
+    bounds : Bounds
+        the minimum and maximum values that the rf_curve accepts
+        (watch the limits for the rf_curve function)
 
-    Methods
-    ----------
-    forecast_cum: forecast the cumulative production over time
-    fit: fit M and tau for the scaling curve
     """
 
     rf_curve: Callable
+    """function or interpolator with recovery factor over scaled time"""
     bounds: Bounds = _default_bounds
+    """Limits on max and min resource in place and time-to-BDF"""
 
     def forecast_cum(
         self,
@@ -74,11 +76,14 @@ class ForecasterOnePhase:
 
         Parameters
         ----------
-        time_on_production: time since the well started producing
-                            (days or years, ideally, since months are uneven), ndarray
-        M: the resource in place (Mstb, Mscf, or other standard units), float
-        tau: the time until BDF/depletion flow
-             (days or years, same units as time on prod), float
+        time_on_production: ndarray
+            time since the well started producing
+            (days or years, ideally, since months are uneven)
+        M: float
+            the resource in place (Mstb, Mscf, or other standard units)
+        tau: float
+            the time until BDF/depletion flow
+            (days or years, same units as time on prod)
         """
         if M is None:
             M = self.M_
@@ -96,11 +101,15 @@ class ForecasterOnePhase:
 
         Parameters
         ----------
-        time_on_production: time since the well started producing
-                            (days or years, ideally, since months are uneven), ndarray
-        cum_production: the cumulative production over time
-                        (Mstb, Mscf, or other standard units), ndarray
-        tau: [Optional] the time-to-depletion (BDF), same units as time on prod, float
+        time_on_production: ndarray
+            time since the well started producing
+            (days or years, ideally, since months are uneven)
+        cum_production: ndarray
+            the cumulative production over time
+            (Mstb, Mscf, or other standard units)
+        tau: [Optional float]
+            the time-to-depletion (BDF), using the same units as time on prod.
+            If not provided, will find best tau.
         """
         if tau is None:
             p0 = (cum_production[-1] * 2, time_on_production[-1] * 5)
