@@ -159,8 +159,8 @@ def plot_production_comparison(
         contains columns 'Days', 'Gas', and 'Pressure'
     pvt_table : pd.DataFrame
         information on equation of state, for example from build_pvt_gas
-    pressure_initial : float
-        guess for initial reservoir pressure
+    params : Parameters
+        fit result parameters
     filter_window_size : int or None
         If not None, boxcar filter size to average pressure data
     filter_zero_prod_days : bool
