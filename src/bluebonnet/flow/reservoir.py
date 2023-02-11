@@ -47,7 +47,7 @@ class IdealReservoir:
     fluid: FlowProperties
     """reservoir fluid PVT/flow properties"""
 
-    def __post_init___(self):
+    def __post_init__(self):
         """Last initialization steps."""
 
     def simulate(self, time: ndarray):
