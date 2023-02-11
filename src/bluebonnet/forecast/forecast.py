@@ -27,7 +27,7 @@ class Bounds:
     tau: tuple[float, float]
     """Minimum and maximum time-to-boundary dominated flow"""
 
-    def __post_init___(self):
+    def __post_init__(self):
         """Validate bounds."""
         if len(self.M) != 2:
             raise ValueError("M must be two elements")
