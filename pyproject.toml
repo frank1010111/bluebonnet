@@ -48,6 +48,7 @@ docs = [
 test = [
     "pytest >=6.2",
     "pytest-cov >=2.12.1",
+    "pytest-mpl >=0.16",
     "pytest-xdist >=2.4",
 ]
 
@@ -58,3 +59,16 @@ build-backend = "hatchling.build"
 
 [tool.isort]
 profile = "black"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+    "--cov=bluebonnet",
+    "--cov-append",
+    "--cov-report=xml",
+    "--mpl",
+    "--mpl-baseline-path=tests/baseline"
+]
+testpaths = [
+    "tests",
+]

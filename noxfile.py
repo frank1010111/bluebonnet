@@ -39,13 +39,7 @@ def pylint(session: nox.Session) -> None:
 def tests(session: nox.Session) -> None:
     """Run the unit and regular tests."""
     session.install(".[test]")
-    session.run(
-        "pytest",
-        "--cov=bluebonnet",
-        "--cov-append",
-        "--cov-report=xml",
-        *session.posargs,
-    )
+    session.run("pytest", *session.posargs)
 
 
 @nox.session

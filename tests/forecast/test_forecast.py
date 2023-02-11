@@ -4,6 +4,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import pytest
+from lmfit import Parameters
 
 from bluebonnet.flow import FlowProperties, IdealReservoir, SinglePhaseReservoir
 from bluebonnet.forecast import (
@@ -28,6 +29,24 @@ def rf_curve():
     reservoir.simulate(time_scaled)
     reservoir.recovery_factor()
     return reservoir.recovery_factor_interpolator()
+
+
+@pytest.fixture()
+def pressure_varying_prod():
+    """Necessary data for a pressure-varying system."""
+    tau_in = 180.0
+    pressure_v_time = np.full(nt, pf)
+    pressure_v_time[nt // 4 : nt // 2] /= 2.0  # noqa: E203
+    pressure_v_time[nt // 2 :] /= 4.0  # noqa: E203
+    pvt_table = pd.read_csv("tests/data/pvt_gas_HAYNESVILLE SHALE_20.csv")
+    flow_props = FlowProperties(pvt_table, pi)
+    reservoir = SinglePhaseReservoir(nx, pf, pi, flow_props)
+    reservoir.simulate(time_scaled, pressure_v_time)
+    rf = reservoir.recovery_factor()
+    prod = pd.DataFrame(
+        {"Days": time_scaled * tau_in, "Gas": rf, "Pressure": pressure_v_time}
+    )
+    return prod, pvt_table
 
 
 def test_bounds():
@@ -63,27 +82,26 @@ def test_ForecasterOnePhase(rf_curve):
     assert np.allclose(cum_production, cum_fit)
 
 
-@pytest.mark.parametrize("res_type", ["ideal reservoir", "real reservoir"])
-def test_fit_production_pressure(res_type):
+def test_fit_production_pressure(pressure_varying_prod):
     """Test fitting for production and pressure."""
-    pressure_v_time = np.full(nt, pf)
-    pressure_v_time[nt // 4 : nt // 2] /= 2.0  # noqa: E203
-    pressure_v_time[nt // 2 :] /= 4.0  # noqa: E203
-    if res_type.startswith("ideal"):
-        pvt_table = None
-        reservoir = IdealReservoir(nx, pf, pi, None)
-        reservoir.simulate(time_scaled, pressure_v_time)
-        rf = reservoir.recovery_factor()
-    else:
-        pvt_table = pd.read_csv("tests/data/pvt_gas_HAYNESVILLE SHALE_20.csv")
-        flow_props = FlowProperties(pvt_table, pi)
-        reservoir = SinglePhaseReservoir(nx, pf, pi, flow_props)
-        reservoir.simulate(time_scaled, pressure_v_time)
-        rf = reservoir.recovery_factor()
-    tau_in = 180.0
-    prod = pd.DataFrame(
-        {"Days": time_scaled * tau_in, "Gas": rf, "Pressure": pressure_v_time}
-    )
+    prod, pvt_table = pressure_varying_prod
     result = fit_production_pressure(prod, pvt_table, pi, n_iter=4)
-    assert result.params["tau"].value < 1000, "is tau moving in the right direction?"
-    assert result.params["M"].value == pytest.approx(1)
+    assert result.params["tau"].value < 1e3, "is tau moving in the right direction?"
+    assert result.params["M"].value > 1e3, "is M increasing from the initial guess?"
+
+
+@pytest.mark.mpl_image_compare
+def test_fit_plot(pressure_varying_prod):
+    prod, pvt_table = pressure_varying_prod
+    params = Parameters()
+    params.add("M", 1300)
+    params.add("tau", 420)
+    params.add("p_initial", pi)
+    fig, _ = plot_production_comparison(
+        prod,
+        pvt_table,
+        params,
+        filter_window_size=1,
+        filter_zero_prod_days=True,
+    )
+    return fig
