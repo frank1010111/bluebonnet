@@ -541,9 +541,9 @@ n_g : float
     Exponent for gas relative permeability
 S_or : float
     Residual saturation for oil (zero permeability point)
-S_wr : float
+S_wc : float
     Residual saturation for water (zero permeability point)
-S_gr : float
+S_gc : float
     Residual saturation for gas (zero permeability point)
 k_ro_max : float
     Maximum relative permeability of the oil phase
