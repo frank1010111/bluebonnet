@@ -12,6 +12,7 @@ from collections import namedtuple
 from typing import Mapping
 
 import numpy as np
+import pandas as pd
 from numpy import ndarray
 from scipy.integrate import cumulative_trapezoid
 from scipy.interpolate import LinearNDInterpolator, interp1d
@@ -257,6 +258,36 @@ class FlowPropertiesTwoPhase(FlowProperties):
         object.pvt = pvt
         object.kr = kr
         return object
+
+
+def rescale_pseudopressure(
+    df_pvt: Mapping[str, ndarray], p_frac: float, p_i: float
+) -> Mapping[str, ndarray]:
+    """Rescale pseudopressure to be 1 at p_i and 0 at p_frac.
+
+    Parameters
+    ----------
+    df_pvt : Mapping[str,ndarray]
+        table of PVT properties, including at least "pressure" and "pseudopressure"
+    p_frac : float
+        pressure at the frac face
+    p_i : float
+        initial reservoir pressure
+
+    Returns
+    -------
+    df_pvt : Mapping[str,ndarray]
+        new table of PVT properties
+    """
+    if hasattr(df_pvt, "copy"):
+        df_pvt = df_pvt.copy()
+    else:
+        df_pvt = copy.deepcopy(df_pvt)
+    pseudopressure = interp1d(df_pvt.pressure, df_pvt.pseudopressure)
+    df_pvt["pseudopressure"] = (
+        pseudopressure(df_pvt["pressure"]) - pseudopressure(p_frac)
+    ) / (pseudopressure(p_i) - pseudopressure(p_frac))
+    return df_pvt
 
 
 def alpha_multiphase(
@@ -587,3 +618,43 @@ def relative_permeabilities(
     for i in ("kro", "krw", "krg"):
         k_rel[i][k_rel[i] < 0] = 0  # negative permeability seems bad
     return k_rel
+
+
+def relative_permeabilities_twophase(
+    params: RelPermParams, Sw: float = 0.1
+) -> pd.DataFrame:
+    """Make two-phase relative permeability curves from Brooks-Corey.
+
+    Parameters
+    ----------
+    params : RelPermParams
+        Includes Corey exponents, residual saturations, and max relative permeabilities
+
+    Returns
+    -------
+    df_kr: pd.DataFrame
+        k_rx for saturations. Includes the columns "So","Sw","Sg","kro","krw","krg"
+
+    Examples
+    --------
+    >>> relperm_params = RelPermParams(
+            n_o=1, n_g=1, n_w=1, S_or=0, S_gc=0, S_wc=0.1, k_ro_max=1, k_rw_max=1, k_rg_max=1
+        )
+    >>> relative_permeabilities_twophase(relperm_params, 0.1)
+    """
+    if Sw > params.S_wc:
+        raise ValueError(
+            "Water saturation is above residual, so we have three flowing phases"
+        )
+    saturations_test = pd.DataFrame(
+        {
+            "So": np.linspace(0, 1 - Sw, 50),
+            "Sw": np.full(50, Sw),
+            "Sg": np.linspace(1 - Sw, 0, 50),
+        }
+    )
+    kr_matrix = pd.DataFrame(
+        relative_permeabilities(saturations_test.to_records(index=False), params)
+    )
+    df_kr = pd.concat([saturations_test, kr_matrix], axis=1)
+    return df_kr
