@@ -111,7 +111,7 @@ def fit_production_pressure(
 
     # with noisy data, sometimes a boxcar filter is beneficial
     if filter_window_size is not None:
-        pressure_fracface = sp.ndimage.filters.uniform_filter1d(
+        pressure_fracface = sp.ndimage.uniform_filter1d(
             pressure_fracface, size=filter_window_size
         )
     cumulative_prod = np.cumsum(np.array(prod_data["Gas"]))
@@ -189,7 +189,7 @@ def plot_production_comparison(
     pressure_fracface = np.array(prod_data["Pressure"])
     #
     if filter_window_size is not None:
-        pressure_fracface = sp.ndimage.filters.uniform_filter1d(
+        pressure_fracface = sp.ndimage.uniform_filter1d(
             pressure_fracface, size=filter_window_size
         )
     #
