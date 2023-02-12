@@ -60,14 +60,25 @@ build-backend = "hatchling.build"
 [tool.isort]
 profile = "black"
 
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "@jit",
+  "@njit",
+  "raise NotImplementedError",
+]
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
-    "--cov=bluebonnet",
+    "--cov=src/bluebonnet",
     "--cov-append",
     "--cov-report=xml",
+    "--cov-config=pyproject.toml",
     "--mpl",
-    "--mpl-baseline-path=tests/baseline"
+    "--mpl-baseline-path=tests/baseline",
 ]
 testpaths = [
     "tests",
