@@ -8,6 +8,8 @@ from bluebonnet.flow.flowproperties import (
     FlowPropertiesTwoPhase,
     RelPermParams,
     relative_permeabilities,
+    relative_permeabilities_twophase,
+    rescale_pseudopressure,
 )
 from bluebonnet.flow.reservoir import (
     IdealReservoir,
@@ -27,4 +29,6 @@ __all__ = [
     "MultiPhaseReservoir",
     "SinglePhaseReservoir",
     "TwoPhaseReservoir",
+    "relative_permeabilities_twophase",
+    "rescale_pseudopressure",
 ]
