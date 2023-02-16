@@ -46,44 +46,11 @@ repos:
       - id: blacken-docs
         additional_dependencies: [black==22.3.0]
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: "v0.0.246"
     hooks:
-      - id: isort
-        args: ["-a", "from __future__ import annotations"] # Python 3.7+
-
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.32.0
-    hooks:
-      - id: pyupgrade
-        args: ["--py37-plus"]
-
-  - repo: https://github.com/hadialqattan/pycln
-    rev: v1.3.2
-    hooks:
-      - id: pycln
-        additional_dependencies: [click<8.1]
-        args: [--all]
-        stages: [manual]
-
-  - repo: https://github.com/asottile/yesqa
-    rev: v1.3.0
-    hooks:
-      - id: yesqa
-        exclude: docs/conf.py
-        additional_dependencies: &flake8_dependencies
-          - flake8-absolute-import
-          - flake8-black
-          - flake8-docstrings
-          - flake8-bugbear
-          - flake8-print
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 4.0.1
-    hooks:
-      - id: flake8
-        exclude: docs/conf.py
-        additional_dependencies: *flake8_dependencies
+      - id: ruff
+        args: ["--fix", "--show-fixes"]
 
   # - repo: https://github.com/pre-commit/mirrors-mypy
   #   rev: v0.950
