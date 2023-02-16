@@ -32,8 +32,9 @@ def reservoir():
     reservoir = SinglePhaseReservoir(
         nx, pressure_fracface=pf, pressure_initial=pi, fluid=fluid
     )
-    time = np.linspace(0, 11.0, nt)
-    reservoir.simulate(time)
+    t_end = 11
+    time_scaled = np.linspace(0, np.sqrt(t_end), nt) ** 2
+    reservoir.simulate(time_scaled)
     return reservoir
 
 
