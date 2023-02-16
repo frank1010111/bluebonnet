@@ -9,7 +9,7 @@ from __future__ import annotations
 import copy
 import warnings
 from collections import namedtuple
-from typing import Mapping
+from collections.abc import Mapping
 
 import numpy as np
 import pandas as pd
@@ -142,7 +142,8 @@ class FlowPropertiesSimple(FlowProperties):
             "viscosity",
         }
         if need_cols.intersection(pvt_props) != need_cols:
-            raise ValueError("Need pvt_props to have: " + ", ".join(need_cols))
+            msg = "Need pvt_props to have: " + ", ".join(need_cols)
+            raise ValueError(msg)
         pvt_props["alpha"] = 1 / (  # mypy: ignore
             pvt_props["compressibility"] * pvt_props["viscosity"]
         )
@@ -224,9 +225,11 @@ class FlowPropertiesTwoPhase(FlowProperties):
         }
         need_cols_kr = {"So", "Sg", "Sw", "kro", "krg", "krw"}
         if need_cols_pvt.intersection(pvt_props) != need_cols_pvt:
-            raise ValueError(f"df_pvt needs all of {need_cols_pvt}")
+            msg = f"df_pvt needs all of {need_cols_pvt}"
+            raise ValueError(msg)
         if need_cols_kr.intersection(kr_props) != need_cols_kr:
-            raise ValueError(f"df_kr needs all of {need_cols_kr}")
+            msg = f"df_kr needs all of {need_cols_kr}"
+            raise ValueError(msg)
         pvt = {
             prop: interp1d(
                 pvt_props["pressure"], pvt_props[prop], fill_value="extrapolate"
@@ -243,7 +246,7 @@ class FlowPropertiesTwoPhase(FlowProperties):
             pvt_props["pressure"], pvt_props["So"], phi, Sw, pvt, kr
         )
         pseudopressure = pseudopressure_threephase(
-            pvt_props["pressure"], pvt_props["So"], Sw, pvt, kr
+            pvt_props["pressure"], pvt_props["So"], pvt, kr
         )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -279,10 +282,7 @@ def rescale_pseudopressure(
     df_pvt : Mapping[str,ndarray]
         new table of PVT properties
     """
-    if hasattr(df_pvt, "copy"):
-        df_pvt = df_pvt.copy()
-    else:
-        df_pvt = copy.deepcopy(df_pvt)
+    df_pvt = df_pvt.copy() if hasattr(df_pvt, "copy") else copy.deepcopy(df_pvt)
     pseudopressure = interp1d(df_pvt.pressure, df_pvt.pseudopressure)
     df_pvt["pseudopressure"] = (
         pseudopressure(df_pvt["pressure"]) - pseudopressure(p_frac)
@@ -436,7 +436,7 @@ def compressibility_combined_func(
 
 
 def pseudopressure_threephase(
-    pressure: ndarray, So: ndarray, Sw: float | ndarray, pvt: dict, kr: dict
+    pressure: ndarray, So: ndarray, pvt: dict, kr: dict
 ) -> ndarray:
     """Calculate pseudopressure over pressure for three-phase fluid.
 
@@ -517,10 +517,11 @@ class FlowPropertiesMultiPhase(FlowProperties):
         """
         need_cols = {"pseudopressure", "alpha", "So", "Sg", "Sw"}
         if need_cols.intersection(df.columns) != need_cols:
-            raise ValueError(
+            msg = (
                 "Need input dataframe to have 'pseudopressure', 'compressibility',"
                 " and 'alpha' columns"
             )
+            raise ValueError(msg)
         self.df = df
         x = df["pseudopressure", "So", "Sg", "Sw"]
         self.alpha = LinearNDInterpolator(x, df["alpha"])
@@ -585,19 +586,26 @@ def relative_permeabilities(
     https://petrowiki.spe.org/Relative_permeability_models
     """
     if np.any(np.abs([sum(v) - 1 for v in saturations]) > 1e-3):
-        raise ValueError("Saturations must sum to 1")
+        msg = "Saturations must sum to 1"
+        raise ValueError(msg)
     if max(params.n_o, params.n_g, params.n_w) > 6:
-        raise ValueError("Exponents must be less than 6")
+        msg = "Exponents must be less than 6"
+        raise ValueError(msg)
     if min(params.n_o, params.n_g, params.n_w) < 1:
-        raise ValueError("Exponents must be at least 1")
+        msg = "Exponents must be at least 1"
+        raise ValueError(msg)
     if min(params.S_or, params.S_wc, params.S_gc) < 0:
-        raise ValueError("Critical saturations must be at least 0")
+        msg = "Critical saturations must be at least 0"
+        raise ValueError(msg)
     if max(params.S_or, params.S_wc, params.S_gc) > 1:
-        raise ValueError("Critical saturations must be less than 1")
+        msg = "Critical saturations must be less than 1"
+        raise ValueError(msg)
     if min(params.k_ro_max, params.k_rw_max, params.k_rg_max) < 0:
-        raise ValueError("Max relative permeability must be at least 0")
+        msg = "Max relative permeability must be at least 0"
+        raise ValueError(msg)
     if max(params.k_ro_max, params.k_rw_max, params.k_rg_max) > 1:
-        raise ValueError("Max relative permeability must be less than 1")
+        msg = "Max relative permeability must be less than 1"
+        raise ValueError(msg)
 
     denominator = 1 - params.S_or - params.S_wc - params.S_gc
     kro = (
@@ -613,7 +621,8 @@ def relative_permeabilities(
         * ((saturations["Sg"] - params.S_gc) / denominator) ** params.n_g
     )
     k_rel = np.array(
-        list(zip(kro, krw, krg)), dtype=[(i, np.float64) for i in ("kro", "krw", "krg")]
+        list(zip(kro, krw, krg)),
+        dtype=[(i, np.float64) for i in ("kro", "krw", "krg")],
     )
     for i in ("kro", "krw", "krg"):
         k_rel[i][k_rel[i] < 0] = 0  # negative permeability seems bad
@@ -643,9 +652,8 @@ def relative_permeabilities_twophase(
     >>> relative_permeabilities_twophase(relperm_params, 0.1)
     """
     if Sw > params.S_wc:
-        raise ValueError(
-            "Water saturation is above residual, so we have three flowing phases"
-        )
+        msg = "Water saturation is above residual, so we have three flowing phases"
+        raise ValueError(msg)
     saturations_test = pd.DataFrame(
         {
             "So": np.linspace(0, 1 - Sw, 50),

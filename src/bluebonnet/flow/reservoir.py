@@ -6,8 +6,8 @@ difference methods.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 import numpy as np
 import numpy.typing as npt
@@ -91,10 +91,9 @@ class IdealReservoir:
         if time is None:
             try:
                 time = self.time
-            except AttributeError:
-                raise RuntimeError(
-                    "Need to run simulate before calculating recovery factor",
-                )
+            except AttributeError as e:
+                msg = "Need to run simulate before calculating recovery factor"
+                raise RuntimeError(msg) from e
         h_inv = self.nx - 1.0
         if density:
             pseudopressure_to_mass = interpolate.interp1d(
@@ -123,10 +122,9 @@ class IdealReservoir:
         """
         try:
             time = self.time
-        except AttributeError:
-            raise RuntimeError(
-                "Need to run simulate",
-            )
+        except AttributeError as e:
+            msg = "Need to run simulate"
+            raise RuntimeError(msg) from e
         try:
             recovery = self.recovery
         except AttributeError:
@@ -191,10 +189,11 @@ class SinglePhaseReservoir(IdealReservoir):
             pressure_fracface = np.full(len(time), self.pressure_fracface)
         else:
             if len(pressure_fracface) != len(time):
-                raise ValueError(
+                msg = (
                     "Pressure time series does not match time variable:"
                     f" {len(pressure_fracface)} versus {len(time)}"
                 )
+                raise ValueError(msg)
             self.pressure_fracface = pressure_fracface
         m_i = self.fluid.m_i
         m_f = self.fluid.m_scaled_func(pressure_fracface)
@@ -209,10 +208,9 @@ class SinglePhaseReservoir(IdealReservoir):
             b[0] = m_f[i] + self.alpha_scaled(m_f[i]) * m_f[i] * mesh_ratio
             try:
                 alpha_scaled = self.alpha_scaled(b)
-            except ValueError:
-                raise ValueError(
-                    f"scaling failed where m_initial={m_i}  m_fracface={m_f}"
-                )
+            except ValueError as e:
+                msg = f"scaling failed where m_initial={m_i}  m_fracface={m_f}"
+                raise ValueError(msg) from e
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
             pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b, atol=_ATOL)
@@ -334,7 +332,10 @@ class MultiPhaseReservoir(SinglePhaseReservoir):
         return alpha(pseudopressure, s["So"], s["Sg"], s["Sw"]) / alpha(1)
 
     def _step_saturation(
-        self, saturation: ndarray, ppressure_old: ndarray, ppressure_new: ndarray
+        self,
+        saturation: ndarray,  # noqa: ARG002
+        ppressure_old: ndarray,  # noqa: ARG002
+        ppressure_new: ndarray,  # noqa: ARG002
     ) -> ndarray:
         """Calculate new saturation.
 

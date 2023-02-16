@@ -1,8 +1,8 @@
 """Fit and forecast production from hydrofractured reservoirs."""
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 import numpy as np
 import numpy.typing as npt
@@ -30,13 +30,17 @@ class Bounds:
     def __post_init__(self):
         """Validate bounds."""
         if len(self.M) != 2:
-            raise ValueError("M must be two elements")
+            msg = f"M must be two elements, not {len(self.M)} elements"
+            raise ValueError(msg)
         if len(self.tau) != 2:
-            raise ValueError("tau must be two elements")
+            msg = f"tau must be two elements, not {len(self.tau)} elements"
+            raise ValueError(msg)
         if self.M[0] >= self.M[1]:
-            raise ValueError(f"{self.M[0]=} must be greater than {self.M[1]=}")
+            msg = f"{self.M[0]=} must be greater than {self.M[1]=}"
+            raise ValueError(msg)
         if self.tau[0] >= self.tau[1]:
-            raise ValueError(f"{self.tau[0]=} must be greater than {self.tau[1]=}")
+            msg = f"{self.tau[0]=} must be greater than {self.tau[1]=}"
+            raise ValueError(msg)
 
     def fit_bounds(self):
         """Return bounds for forecaster instance fits."""

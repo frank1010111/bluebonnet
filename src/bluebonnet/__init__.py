@@ -6,4 +6,4 @@ from importlib.metadata import version
 
 __version__ = version("bluebonnet")
 
-import bluebonnet.plotting  # noqa: F401
+import bluebonnet.plotting

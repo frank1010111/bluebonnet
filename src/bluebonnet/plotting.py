@@ -28,7 +28,7 @@ class SquareRootScale(mscale.ScaleBase):
 
     def __init__(self, axis, **kwargs):
         """Initialize for axis."""
-        mscale.ScaleBase.__init__(self, axis)
+        mscale.ScaleBase.__init__(self, axis, **kwargs)
 
     def set_default_locators_and_formatters(self, axis):
         """Set major and minor locators and formatters."""
@@ -37,7 +37,7 @@ class SquareRootScale(mscale.ScaleBase):
         axis.set_minor_locator(ticker.NullLocator())
         axis.set_minor_formatter(ticker.NullFormatter())
 
-    def limit_range_for_scale(self, vmin, vmax, minpos):
+    def limit_range_for_scale(self, vmin, vmax, minpos):  # noqa: ARG
         """Do not allow negative values."""
         return max(0.0, vmin), vmax
 

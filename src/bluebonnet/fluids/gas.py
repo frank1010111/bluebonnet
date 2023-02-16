@@ -440,7 +440,8 @@ def pseudocritical_point_Sutton(
     (-72.20351526841193, 653.2582064200534)
     """
     if fluid not in ("dry gas", "wet gas"):
-        raise ValueError(f"fluid must be one of ('dry gas','wet gas'), not {fluid}")
+        msg = f"fluid must be one of ('dry gas','wet gas'), not {fluid}"
+        raise ValueError(msg)
     MOLECULAR_WEIGHT_AIR = 28.964
     fraction = non_hydrocarbon_properties["fraction"]
     molecular_weight = non_hydrocarbon_properties["molecular weight"]
