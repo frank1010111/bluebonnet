@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from bluebonnet.fluids import Fluid
 
 
@@ -51,7 +50,8 @@ def test_bo(oil_properties):
     elif np.abs(oil_properties.pressure - 2000) < 1:
         real_fvf = pytest.approx(1.292999, rel=1e-3)
     else:
-        raise ValueError("haven't studied this pressure yet")
+        msg = "haven't studied this pressure yet"
+        raise ValueError(msg)
     fluid_instance = Fluid(
         temperature=oil_properties.temperature,
         api_gravity=oil_properties.api_gravity,
@@ -70,7 +70,8 @@ def test_mu_o(oil_properties):
     elif np.abs(oil_properties.pressure - 2000) < 1:
         real_mu = pytest.approx(0.581137969, rel=1e-3)
     else:
-        raise ValueError("haven't studied this pressure yet")
+        msg = "haven't studied this pressure yet"
+        raise ValueError(msg)
     fluid_instance = Fluid(
         temperature=oil_properties.temperature,
         api_gravity=oil_properties.api_gravity,

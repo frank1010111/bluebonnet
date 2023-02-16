@@ -4,8 +4,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import pytest
-from lmfit import Parameters
-
 from bluebonnet.flow import FlowProperties, IdealReservoir, SinglePhaseReservoir
 from bluebonnet.forecast import (
     Bounds,
@@ -13,6 +11,7 @@ from bluebonnet.forecast import (
     fit_production_pressure,
     plot_production_comparison,
 )
+from lmfit import Parameters
 
 t_end = 6.0
 nx = 40
@@ -36,8 +35,8 @@ def pressure_varying_prod():
     """Necessary data for a pressure-varying system."""
     tau_in = 180.0
     pressure_v_time = np.full(nt, pf)
-    pressure_v_time[nt // 4 : nt // 2] /= 2.0  # noqa: E203
-    pressure_v_time[nt // 2 :] /= 4.0  # noqa: E203
+    pressure_v_time[nt // 4 : nt // 2] /= 2.0
+    pressure_v_time[nt // 2 :] /= 4.0
     pvt_table = pd.read_csv("tests/data/pvt_gas_HAYNESVILLE SHALE_20.csv")
     flow_props = FlowProperties(pvt_table, pi)
     reservoir = SinglePhaseReservoir(nx, pf, pi, flow_props)
@@ -53,13 +52,13 @@ def test_bounds():
     """Make sure bounds uses post_init properly."""
     correct_bounds = Bounds(M=(0, 1), tau=(2, 3))
     assert correct_bounds.fit_bounds() == ((0, 2), (1, 3))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="M must be two elements"):
         Bounds(M=(1, 2, 3), tau=(0, 1))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="tau must be two elements"):
         Bounds(M=(1, 2), tau=(1,))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="M.* must be greater"):
         Bounds(M=(1, 0), tau=(0, 1))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="tau.* must be greater"):
         Bounds((0, 1), (20, 10))
 
 
@@ -90,7 +89,7 @@ def test_fit_production_pressure(pressure_varying_prod):
     assert result.params["M"].value > 1e3, "is M increasing from the initial guess?"
 
 
-@pytest.mark.mpl_image_compare
+@pytest.mark.mpl_image_compare()
 def test_fit_plot(pressure_varying_prod):
     prod, pvt_table = pressure_varying_prod
     params = Parameters()

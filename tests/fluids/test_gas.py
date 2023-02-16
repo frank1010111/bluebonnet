@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from bluebonnet.fluids import gas
 
 TEMPERATURE_STANDARD = 60.0

@@ -6,14 +6,13 @@ from itertools import product
 import numpy as np
 import pandas as pd
 import pytest
-from scipy.optimize import curve_fit
-
 from bluebonnet.flow import (
     FlowProperties,
     IdealReservoir,
     MultiPhaseReservoir,
     SinglePhaseReservoir,
 )
+from scipy.optimize import curve_fit
 
 nx = (30,)
 nt = (1200,)
@@ -42,7 +41,7 @@ reservoirs = (IdealReservoir, SinglePhaseReservoir)  # TODO:, MultiPhaseReservoi
 
 
 @pytest.mark.parametrize("Reservoir", reservoirs)
-@pytest.mark.parametrize("nx,pf,pi,fluid", sim_props)
+@pytest.mark.parametrize(("nx", "pf", "pi", "fluid"), sim_props)
 def reservoir_start(nx, pf, pi, fluid, Reservoir):
     if Reservoir == MultiPhaseReservoir:
         reservoir = Reservoir(nx, pf, pi, fluid, So, Sg, Sw)
@@ -62,7 +61,7 @@ def reservoir_start(nx, pf, pi, fluid, Reservoir):
 @pytest.mark.parametrize("Reservoir", reservoirs)
 @pytest.mark.parametrize("nx,pf,pi,fluid", sim_props)
 class TestRun:
-    def test_rf_fails_early(self, nx, pf, pi, fluid, Reservoir, nt):
+    def test_rf_fails_early(self, nx, pf, pi, fluid, Reservoir, nt):  # noqa: ARG002
         if Reservoir == MultiPhaseReservoir:
             reservoir = Reservoir(nx, pf, pi, fluid, So, Sg, Sw)
         else:
@@ -110,7 +109,6 @@ class TestRun:
         reservoir.simulate(time)
         if False:
             import matplotlib.pyplot as plt
-
             from bluebonnet.plotting import plot_pseudopressure, plot_recovery_factor
 
             fig, ax = plt.subplots()

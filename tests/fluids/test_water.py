@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from bluebonnet.fluids import water
 
 TEMPERATURE_STANDARD = 60.0

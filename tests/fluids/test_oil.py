@@ -4,7 +4,6 @@ from __future__ import annotations
 import math
 
 import pytest
-
 from bluebonnet.fluids import oil
 
 TEMPERATURE_STANDARD = 60.0
@@ -220,7 +219,8 @@ def test_viscosity_beggs_robinson(oil_properties):
     elif fluid == "black oil" and math.fabs(pressure - 2000) < 1:
         viscosity_real = pytest.approx(0.5811379, rel=1e-3)
     else:
-        raise ValueError("pressure tests only cover 3000 and 2000")
+        msg = "pressure tests only cover 3000 and 2000"
+        raise ValueError(msg)
     viscosity_br = oil.viscosity_beggs_robinson(
         temperature, pressure, api_gravity, gas_specific_gravity, solution_gor_initial
     )
