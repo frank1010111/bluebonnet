@@ -147,15 +147,18 @@ def plot_recovery_rate(
         _, ax = plt.subplots()
 
     cumulative = reservoir.recovery_factor()
-    rate = np.diff(cumulative)
-    ax.plot(reservoir.time[:-1], rate)
+    rate = np.gradient(cumulative, reservoir.time)
+    ax.plot(reservoir.time, rate)
     ax.set(
-        xscale="log", yscale="log", ylim=(1.0e-4, None), xlim=(0, max(reservoir.time))
+        xscale="log",
+        yscale="log",
+        ylim=(1.0e-4, None),
+        xlim=(1e-6, max(reservoir.time)),
+        xlabel="Scaled time",
+        ylabel="Recovery rate",
     )
     if change_ticks:
-        tick_locs = np.round(
-            (np.linspace(0, 1, 7) * np.sqrt(max(reservoir.time))) ** 2, 1
-        )
+        tick_locs = (np.logspace(-7, 0, 7) * np.sqrt(max(reservoir.time))) ** 2
         ax.set_xticks(tick_locs)
     return ax
 
@@ -184,7 +187,13 @@ def plot_recovery_factor(
     rf = reservoir.recovery_factor()
     time = reservoir.time
     ax.plot(time, rf)
-    ax.set(xscale="squareroot", ylim=(0, None), xlim=(0, max(time)))
+    ax.set(
+        xscale="squareroot",
+        ylim=(0, None),
+        xlim=(0, max(time)),
+        xlabel="Scaled time",
+        ylabel="Recovery factor",
+    )
     if change_ticks:
         tick_locs = np.round((np.linspace(0, 1, 7) * np.sqrt(max(time))) ** 2, 1)
         ax.set_xticks(tick_locs)
