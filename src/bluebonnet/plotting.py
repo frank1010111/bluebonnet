@@ -145,8 +145,10 @@ def plot_recovery_rate(
     """
     if ax is None:
         _, ax = plt.subplots()
-    reservoir.recovery_factor()
-    ax.plot(reservoir.time, reservoir.rate)
+
+    cumulative = reservoir.recovery_factor()
+    rate = np.diff(cumulative)
+    ax.plot(reservoir.time[:-1], rate)
     ax.set(
         xscale="log", yscale="log", ylim=(1.0e-4, None), xlim=(0, max(reservoir.time))
     )
