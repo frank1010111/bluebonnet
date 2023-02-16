@@ -52,13 +52,12 @@ test = [
     "pytest-xdist >=2.4",
 ]
 
-
 [build-system]
 requires = ["hatchling>=0.7"]
 build-backend = "hatchling.build"
 
-[tool.isort]
-profile = "black"
+[tool.check-manifest]
+ignore = [".ruff_cache"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -122,6 +121,6 @@ flake8-unused-arguments.ignore-variadic-names = true
 isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.per-file-ignores]
-"__init__.py"=["F401"]
-"noxfile.py"=["T", "T201"]
-"tests/**.py"=["D101", "D102", "D103"]
+"__init__.py" = ["F401"]
+"noxfile.py" = ["T", "T201"]
+"tests/**.py" = ["D101", "D102", "D103"]
