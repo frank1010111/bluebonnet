@@ -68,11 +68,13 @@ exclude_lines = [
   "@njit",
   "raise NotImplementedError",
 ]
+[tool.coverage.run]
+source = ["src/bluebonnet"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
-    "--cov=src/bluebonnet",
+    "--cov",
     "--cov-append",
     "--cov-report=xml",
     "--cov-config=pyproject.toml",
