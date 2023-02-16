@@ -57,7 +57,7 @@ requires = ["hatchling>=0.7"]
 build-backend = "hatchling.build"
 
 [tool.check-manifest]
-ignore = [".ruff_cache"]
+ignore = [".ruff_cache/**"]
 
 [tool.coverage.report]
 exclude_lines = [
