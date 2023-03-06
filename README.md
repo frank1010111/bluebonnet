@@ -16,6 +16,9 @@ Scaling solutions for production analysis from unconventional oil and gas wells.
  <img src="https://img.shields.io/pypi/dm/bluebonnet">
 </a>
 </p>
+<p align="center">
+<a href="https://joss.theoj.org/papers/4837f716d7ac1273629fb7d3f8b4ca10"><img src="https://joss.theoj.org/papers/4837f716d7ac1273629fb7d3f8b4ca10/status.svg"></a>
+</p>
 
 ![bluebonnets in bloom](https://github.com/frank1010111/bluebonnet/raw/main/docs/_static/bluebonnets.jpg)
 
