@@ -2,7 +2,7 @@
 
 Flow into hydraulically fractured wells is primarily one-dimensional. It
 responds to pressure gradients in accordance with Darcy's law. The
-one-dimensional flow units can be described with a characterestic size.
+one-dimensional flow units can be described with a characteristic size.
 Sometimes, the easy solution is the right one.
 
 ## Single phase flow
@@ -138,7 +138,6 @@ $$
 \frac{\left(\frac{k{rg}}{\mu_g B_g} +R_s\frac{k{ro}}{\mu_o B_o}\right) \dfrac{\partial \left(R_v\frac{S_g}{B_g} +\frac{S_o}{B_o} \right) }{\partial p}
 -\left(R_v\frac{k_{rg}}{\mu_g B_g}+\frac{k_{ro}}{\mu_o B_o}\right)
 \dfrac{\partial \left(\frac{S_g}{B_g} +R_s\frac{S_o}{B_o} \right)}{\partial p}}
-% denominator
 {\left(R_v\frac{k_{rg}}{\mu_g B_g} +\frac{k{ro}}{\mu_o B_o}\right)
 \dfrac{\partial \left(\frac{S_g}{B_g}+R_s\frac{S_o}{B_o} \right)}{\partial S}
 -\left(\frac{k{rg}}{\mu_g B_g} +R_s\frac{k{ro}}{\mu_o B_o}\right)
