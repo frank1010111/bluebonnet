@@ -66,7 +66,7 @@ viscosities for the oil, gas, and water phases using the `fluids` submodule.\lab
 The `flow` submodule solves the pressure diffusivity equation to provide
 estimates of the hydrocarbon production over time and the hydrocarbon recovery
 factors. This module allows the user to estimate production for shale gas wells
-using a scaled solutions of the single-phase real gas diffusivity equation
+using scaled solutions of the single-phase real gas diffusivity equation
 [@patzek2013; @male2015application]. In addition, this module simulates
 production for tight-oil and gas condensate wells using a two-phase scaled
 solution of the pressure diffusivity equation [@ruizmaraggi2022twophase]. The
@@ -110,7 +110,7 @@ developed to assist in determining U.S. shale gas reserves [@patzek2013;
 There are no free open-source tools that use physics-based scaled flow solutions
 of the diffusivity equation to perform decline-curve and rate-transient analysis
 for unconventional reservoirs like `bluebonnet`. The goal for producing this
-software package is to provide researches and reservoir engineers with a free
+software package is to provide researchers and reservoir engineers with a free
 and open source tool suitable to analyze production from unconventional (tight
 oil and shale gas) reservoirs.
 
