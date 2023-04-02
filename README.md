@@ -3,15 +3,17 @@
 Scaling solutions for production analysis from unconventional oil and gas wells.
 
 <p align="center">
-<a href="https://codecov.io/gh/frank1010111/bluebonnet" >
- <img src="https://codecov.io/gh/frank1010111/bluebonnet/branch/main/graph/badge.svg?token=2I28WS7LYQ"/>
- </a>
 <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
-<a href="https://bluebonnet.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/bluebonnet/badge/?version=latest" alt="Documentation"></a>
+<a href="https://codecov.io/gh/frank1010111/bluebonnet" >
 <a href="https://opensource.org/licenses/BSD-3-Clause"><img src="https://img.shields.io/badge/License-BSD_3--Clause-blue.svg" alt="BSD License"></a>
 <a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white" alt="pre-commit powered"></a>
+</p>
+<p align="center">
+<a href="https://bluebonnet.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/bluebonnet/badge/?version=latest" alt="Documentation"></a>
 <a href="https://github.com/frank1010111/bluebonnet/actions/workflows/tests.yml/"> <img src="https://github.com/frank1010111/bluebonnet/actions/workflows/tests.yml/badge.svg" alt="tests">
 </a>
+ <img src="https://codecov.io/gh/frank1010111/bluebonnet/branch/main/graph/badge.svg?token=2I28WS7LYQ"/>
+ </a>
 <a href="https://pypi.org/project/bluebonnet">
  <img src="https://img.shields.io/pypi/dm/bluebonnet">
 </a>
@@ -40,32 +42,7 @@ tight oil and shale gas reservoirs. The main tools are:
 3. `forecast` for fitting and forecasting unconventional production.
 
 Examples can be found in
-[the documentation](https://bluebonnet.readthedocs.io/en/latest/flow.html).
-
-## What makes bluebonnet unique?
-
-The goal for this package is to make it easier to forecast production from
-hydrofractured wells. It uses semi-universal recovery factor scaling curves
-scaled by drainage volume and time-to-BDF to achieve these feats. These methods
-have been used to make forecasts from the individual well level up to the basin
-and play level, depending on the availability of fluid property and bottomhole
-pressure data.
-
-Compare to the most common unconventional production analysis tool. Emprical
-decline curve analysis (DCA) provides very fast answers, but lack physical
-meaning. Bluebonnet fits include estimates of the resource within the drainage
-volume and of permeability divided by interfracture spacing. A completion
-program purporting to increase the size of the fractured area can be tested with
-bluebonnet without requiring extensive 3D reservoir simulations.
-
-Also, bluebonnet naturally handles flow transitions, unlike DCA and type curves.
-Arps, for instance, has to have multiple segments stitched together to capture
-well behavior after the start of boundary dominated flow.
-
-Sometimes, 3-D reservoir simulation is absolutely necessary to understand the
-flow patterns around unconventional wells. However, due to the symmetries
-inherent in such flow and the independence of production between neighboring
-wells, one-dimensional methods like bluebonnet cover many of these use-cases.
+[the documentation](https://bluebonnet.readthedocs.io/en/latest).
 
 ## Contributing
 
