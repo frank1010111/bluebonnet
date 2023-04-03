@@ -32,6 +32,10 @@ Run the command
 pip install bluebonnet
 ```
 
+This package works for Python versions 3.8-3.11. Dependencies are automatically
+installed by `pip`. They include standards of the Python scientific stack,
+including `lmfit`, `matplotlib`, `numpy`, `pandas`, and `scipy`.
+
 ## Usage
 
 `bluebonnet` has a collection of tools for performing reservoir simulation in
