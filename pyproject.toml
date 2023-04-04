@@ -74,7 +74,7 @@ source = ["src/bluebonnet"]
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
-    "--cov",
+    "--cov=bluebonnet",
     "--cov-append",
     "--cov-report=xml",
     "--cov-config=pyproject.toml",
