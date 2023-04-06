@@ -9,7 +9,7 @@ import nox
 
 DIR = Path(__file__).parent.resolve()
 
-nox.options.sessions = ["lint", "pylint", "tests"]
+nox.options.sessions = ["lint", "tests"]
 
 
 @nox.session
@@ -20,19 +20,6 @@ def lint(session: nox.Session) -> None:
     """
     session.install("pre-commit")
     session.run("pre-commit", "run", "--all-files", *session.posargs)
-
-
-@nox.session
-def pylint(session: nox.Session) -> None:
-    """
-    Run PyLint.
-
-    This needs to be installed into the package environment, and is slower
-    than a pre-commit check
-
-    """
-    session.install(".", "pylint")
-    session.run("pylint", "src", *session.posargs)
 
 
 @nox.session
