@@ -1,2 +1,1 @@
-data/dataset_1_well_20.csv filter=lfs diff=lfs merge=lfs -text
 data/WellData_20.csv filter=lfs diff=lfs merge=lfs -text
