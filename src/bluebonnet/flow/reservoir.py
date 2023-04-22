@@ -44,7 +44,7 @@ class IdealReservoir:
     """drawdown pressure at :math:`x=0` (psi)"""
     pressure_initial: float
     """reservoir pressure before production (psi)"""
-    fluid: FlowProperties
+    fluid: FlowProperties | None = None
     """reservoir fluid PVT/flow properties"""
 
     def __post_init__(self):
@@ -230,7 +230,7 @@ class TwoPhaseReservoir(SinglePhaseReservoir):
     https://doi.org/10.2118/199032-MS
     """
 
-    Sw_init: float
+    Sw_init: float = 0.0
 
     def simulate(self, time: ndarray):
         """Calculate simulation pressure over time.
@@ -265,11 +265,11 @@ class MultiPhaseReservoir(SinglePhaseReservoir):
         gas saturation
     """
 
-    So_init: float
+    So_init: float = 1.0
     """Initial oil saturation."""
-    Sw_init: float
+    Sw_init: float = 0.0
     """Initial water saturation."""
-    Sg_init: float
+    Sg_init: float = 0.0
     """Initial gas saturation."""
 
     def simulate(self, time: ndarray):
