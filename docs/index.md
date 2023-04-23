@@ -53,12 +53,14 @@ Bluebonnet is extremely customizable. You can mix and match your fluid
 properties, relative permeabilities, and fitting functions to your heart's
 content.
 
-Caveat emptor: it will allow you to cut yourself. Want recovery factors greater
-than one? Fluids that behave in unphysical ways? You bet! Want negative
-Brooks-Corey exponents? Okay, that's a bridge too far unless you bypass the
-checks, but you get the idea.
+```{note}
+Bluebonnet will allow you to cut yourself. Want recovery factors greater
+than one? Fluids that behave in unphysical ways? Reservoir pressures lower than bottomhole pressure? You bet! Want negative
+Brooks-Corey exponents? Okay, that's a bridge too, but you get the idea.
+```
 
-These how-to guides are here to help you fine-tune your models.
+These how-to guides are here to help you mix and match and fine-tune your
+models.
 
 ```{toctree}
 :maxdepth: 2
