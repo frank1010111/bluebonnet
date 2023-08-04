@@ -44,24 +44,18 @@ of tight-oil and shale gas wells. `Bluebonnet` has been developed to help
 researchers and petroleum engineers analyzing production data from
 unconventional (shale gas and tight oil) wells. It provides the user with a set
 of tools to evaluate production performance of tight-oil and shale gas wells.
-These tools are:
+These tools provide the following functionality:
 
-1. `fluids` calculates pressure-volume-temperature properties for oil, water,
+1. `bluebonnet.fluids`: pressure-volume-temperature properties for oil, water,
    and gas phases.
-2. `flow` builds physics-based production curves and estimates hydrocarbon
-   recovery factors.
-3. `forecast` fits and forecasts unconventional production.
+2. `bluebonnet.flow`: physics-based production curves and hydrocarbon recovery
+   factors.
+3. `bluebonnet.forecast`: fits and forecasts for unconventional production.
 
 <!-- prettier-ignore-->
 The `fluids` submodule estimates the formation volume factors, solubility
 ratios, and viscosity for the oil, water and gas phases given the reservoir
 temperature, oil API gravity, gas specific gravity, and initial gas/oil ratio.
-\autoref{fig:fluids} illustrates the plots of the *(a)* formation volume factors
-and *(b)* viscosities for the oil, gas, and water phases using the `fluids`
-submodule.
-
-![Plots of *(a)* formation volume factors and *(b)*
-viscosities for the oil, gas, and water phases using the `fluids` submodule.\label{fig:fluids}](Fig_1.tiff)
 
 The `flow` submodule solves the pressure diffusivity equation to provide
 estimates of the hydrocarbon production over time and the hydrocarbon recovery
@@ -73,33 +67,13 @@ solution of the pressure diffusivity equation [@ruizmaraggi2022twophase]. The
 `flow` submodule also allows users to capture production variations due to
 changes in bottomhole pressure.
 
-\autoref{fig:flow} shows the gas recovery factors for single-phase ideal gas,
-real gas, and multiphase scaled flow solutions using the `flow` submodule.
-
-![Plots of the gas recovery factors for ideal gas, real gas, and
-multiphase flow solutions of the pressure diffusivity equation using the `flow`
-submodule.\label{fig:flow}](Fig_2.tiff)
-
 The `forecast` submodule performs history matches and forecasts the production
 of unconventional wells using the scaling solutions present in the `flow`
-module. \autoref{fig:history} illustrates the history-match of a gas well using
-the single-phase real gas flow solution.
-
-![History-match of a shale gas well (blue dotted curve) using the
-single-phase real gas flow solution (solid red curve).\label{fig:history}](Fig_4.tiff)
-
-The `forecast` submodule also allows users to history-match and forecast
+module. The `forecast` submodule also allows users to history-match and forecast
 production of wells subject to variable bottomhole pressure conditions using a
 modification of the approach developed by @ruizmaraggi2022pressure.
 
 <!-- prettier-ignore -->
-\autoref{fig:history_pressure} illustrates the *(a)* history-match of the gas
-well #20 from the SPE data repository [@spedata], subject to variable bottomhole
-flowing pressure conditions *(b)*.
-
-![Plots for the *(a)* history-match of the gas well #20 from @spedata, subject to
-variable bottomhole flowing pressure conditions *(b)*.\label{fig:history_pressure}](Fig_3.tiff)
-
 # Statement of need
 
 `Bluebonnet` is a Python package using petroleum engineering methods to perform
