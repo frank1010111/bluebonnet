@@ -70,4 +70,5 @@ def paper(session: nox.Sesson) -> None:
         "--env",
         "JOURNAL=joss",
         "openjournals/inara",
+        external=True,
     )
