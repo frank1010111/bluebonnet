@@ -1,6 +1,6 @@
 [project]
 name = "bluebonnet"
-version = "0.2.0"
+version = "0.2.1"
 description = "Scaling solutions for production analysis from unconventional oil and gas wells"
 authors = [
     { name = "Frank Male", email = "frank.male@psu.edu" },
