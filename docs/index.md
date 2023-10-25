@@ -10,6 +10,7 @@ flow.ipynb
 oil_flow.ipynb
 forecast.ipynb
 forecast_varying.ipynb
+bayesian_fitting.ipynb
 autoapi/index
 contributing.md
 conduct.md
