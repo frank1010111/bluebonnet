@@ -18,10 +18,14 @@ author = "Frank Male"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "myst_nb",
+    "nbsphinx",
+    "myst_parser",
     "autoapi.extension",
+    "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
+    "sphinx_design",
 ]
 autoapi_dirs = ["../src"]
 autoapi_options = [
@@ -52,4 +56,4 @@ myst_enable_extensions = [
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"

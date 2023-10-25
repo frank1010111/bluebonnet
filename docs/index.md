@@ -56,7 +56,7 @@ content.
 ```{note}
 Bluebonnet will allow you to cut yourself. Want recovery factors greater
 than one? Fluids that behave in unphysical ways? Reservoir pressures lower than bottomhole pressure? You bet! Want negative
-Brooks-Corey exponents? Okay, that's a bridge too, but you get the idea.
+Brooks-Corey exponents? Okay, that's a bridge too far, but you get the idea.
 ```
 
 These how-to guides are here to help you mix and match and fine-tune your
