@@ -209,62 +209,6 @@ class SinglePhaseReservoir(IdealReservoir):
 
 
 @dataclass
-class LongTimeSinglePhaseReservoir(SinglePhaseReservoir):
-    def simulate(
-        self, time: ndarray[float], pressure_fracface: ndarray[float] | None = None
-    ):
-        """Calculate simulation pressure over time.
-
-        Args
-        ----
-        time : ndarray
-            times to solve for pressure
-        pressure_fracface : Iterable[float] | None, optional
-            pressure at frac-face over time. Defaults to None, which is no change
-
-        Raises
-        ------
-        ValueError: wrong length changing pressure at frac-face
-        """
-        self.time = time
-        dx_squared = (1 / self.nx) ** 2
-        pseudopressure = np.empty((len(time), self.nx))
-        if pressure_fracface is None:
-            pressure_fracface = np.full(len(time), self.pressure_fracface)
-        else:
-            if len(pressure_fracface) != len(time):
-                raise ValueError(
-                    "Pressure time series does not match time variable:"
-                    f" {len(pressure_fracface)} versus {len(time)}"
-                )
-            self.pressure_fracface = pressure_fracface
-        m_i = self.fluid.m_i
-        m_f = self.fluid.m_scaled_func(pressure_fracface)
-        pseudopressure_initial = np.full(self.nx, m_i)
-        pseudopressure_initial[0] = m_f[0]
-        pseudopressure[0, :] = pseudopressure_initial
-
-        for i in range(len(time) - 1):
-            mesh_ratio = (time[i + 1] - time[i]) / dx_squared
-            b = np.minimum(pseudopressure[i].copy(), m_i)
-            # Enforce the boundary condition at x=0
-            b[0] = m_f[i] + self.alpha_scaled(m_f[i]) * m_f[i] * mesh_ratio
-            try:
-                alpha_scaled = self.alpha_scaled(b)
-            except ValueError:
-                raise ValueError(
-                    f"scaling failed where m_initial={m_i}  m_fracface={m_f}"
-                )
-            kt_h2 = mesh_ratio * alpha_scaled
-            """
-            This is basically where the code has to be modified for long-time behavior.
-            We need a
-            """
-            a_matrix = _build_long_time_matrix(kt_h2)
-            pseudopressure[i + 1], _ = sparse.linalg.bicgstab(a_matrix, b)
-        self.pseudopressure = pseudopressure
-
-
 @dataclass
 class TwoPhaseReservoir(SinglePhaseReservoir):
     """Oil-gas reservoir simulation.
@@ -400,32 +344,3 @@ def _build_matrix(kt_h2: ndarray) -> sparse.spmatrix:
     )
     return a_matrix
 
-def _build_long_time_matrix(kt_h2: ndarray) -> sparse.spmatrix:
-    r"""
-    This has to be modified for the new equation.
-
-    Set up A matrix for timestepping.
-
-    Follows :math: `A x = b` -> :math: `x = A \ b`
-
-    Parameters
-    ----------
-    kt_h2: ndarray
-        diffusivity * dt / dx^2
-
-    Returns
-    -------
-    a_matrix: sp.sparse.matrix
-        The A matrix
-    """
-    diagonal_long = 1.0 + 2 * kt_h2
-    # diagonal_long[0] = -1.0
-    # diagonal_low = np.concatenate([[0], -kt_h2[2:-1], [-2 * kt_h2[-1]]])
-    # diagonal_upper = np.concatenate([[0, -kt_h2[1]], -kt_h2[2:-1]])
-    diagonal_long[-1] = 1.0 + kt_h2[-1]
-    diagonal_low = -kt_h2[1:]
-    diagonal_upper = -kt_h2[0:-1]
-    a_matrix = sparse.diags(
-        [diagonal_low, diagonal_long, diagonal_upper], [-1, 0, 1], format="csr"
-    )
-    return a_matrix
