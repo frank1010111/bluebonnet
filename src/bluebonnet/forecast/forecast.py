@@ -46,6 +46,19 @@ class Bounds:
         """Return bounds for forecaster instance fits."""
         return ((self.M[0], self.tau[0]), (self.M[1], self.tau[1]))
 
+    def regularize_initial_guess(self, guess: list[float]) -> list[float]:
+        """Ensure that initial guess is within bounds"""
+        if self.M[0] > guess[0]:
+            guess[0] = self.M[0]
+        elif guess[0] > self.M[1]:
+            guess[0] = sum(self.M) / 2
+        if len(guess) == 2:
+            if self.tau[0] > guess[1]:
+                guess[1] = self.tau[0]
+            elif guess[1] > self.tau[1]:
+                guess[1] = sum(self.tau) / 2
+        return guess
+
 
 _default_bounds = Bounds(M=(0, np.inf), tau=(1e-10, np.inf))
 
@@ -116,17 +129,24 @@ class ForecasterOnePhase:
             If not provided, will find best tau.
         """
         if tau is None:
-            p0 = (cum_production[-1] * 2, time_on_production[-1] * 5)
+            p0 = [cum_production[-1] * 2, time_on_production[-1] * 5]
             bounds = self.bounds.fit_bounds()
-            forecast = lambda top, M, tau: _forecast_cum_onephase(  # noqa: E731
-                self.rf_curve, top, M, tau
-            )
+            p0 = self.bounds.regularize_initial_guess(p0)
+
+            def forecast(time_on_production, M, tau):
+                """Forecast cumulative production."""
+                return _forecast_cum_onephase(self.rf_curve, time_on_production, M, tau)
+
         else:
-            p0 = (cum_production[-1] * 2,)
+            p0 = [
+                cum_production[-1] * 2,
+            ]
             bounds = self.bounds.M
-            forecast = lambda top, M: _forecast_cum_onephase(  # noqa: BLK,E731
-                self.rf_curve, top, M, tau
-            )
+            p0 = self.bounds.regularize_initial_guess(p0)
+
+            def forecast(time_on_production, M):
+                """Forecast cumulative production."""
+                return _forecast_cum_onephase(self.rf_curve, time_on_production, M, tau)
 
         fit, covariance = curve_fit(
             forecast,

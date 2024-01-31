@@ -13,6 +13,7 @@ from bluebonnet.flow.flowproperties import (
     relative_permeabilities_twophase,
     rescale_pseudopressure,
 )
+from scipy.interpolate import interp1d
 
 pr = 8_000.0
 Sw = 0.1
@@ -87,6 +88,46 @@ def df_pvt():
         (df_pvt["Rs"].max() - df_pvt["Rs"]) * df_pvt["Bg"] / df_pvt["Bo"] / 5.61458 + 1
     )
     return df_pvt
+
+
+def pvt_multiphase_oil():
+    """Generate pvt_multiphase_oil.csv"""
+    Sw = 0.1
+    p_frac = 1000
+    p_res = 6_000
+    pvt_oil = pd.read_csv("../tests/data/pvt_oil.csv")
+    pvt_water = pd.read_csv("../tests/data/pvt_water.csv").rename(
+        columns={"T": "temperature", "P": "pressure", "Viscosity": "mu_w"}
+    )
+    df_pvt = (
+        pvt_water.drop(columns=["temperature"])
+        .merge(
+            pvt_oil.rename(
+                columns={
+                    "T": "temperature",
+                    "P": "pressure",
+                    "Oil_Viscosity": "mu_o",
+                    "Gas_Viscosity": "mu_g",
+                    "Rso": "Rs",
+                }
+            ),
+            on="pressure",
+        )
+        .assign(Rv=0)
+    )
+
+    # calculate So, Sg assuming no mobile water
+    df_pvt["So"] = (1 - Sw) / (
+        (df_pvt["Rs"].max() - df_pvt["Rs"]) * df_pvt["Bg"] / df_pvt["Bo"] / 5.61458 + 1
+    )
+
+    # scale pseudopressure
+    pseudopressure = interp1d(df_pvt.pressure, df_pvt.pseudopressure)
+    df_pvt["pseudopressure"] = (
+        pseudopressure(df_pvt["pressure"]) - pseudopressure(p_frac)
+    ) / (pseudopressure(p_res) - pseudopressure(p_frac))
+
+    df_pvt.to_csv("../data/pvt_multiphase_oil.csv")
 
 
 # # TODO: Figure out how to test FlowProperties

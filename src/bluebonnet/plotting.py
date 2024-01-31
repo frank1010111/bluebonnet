@@ -1,7 +1,7 @@
 """Ease plotting production and fluid flow information."""
 from __future__ import annotations
 
-from typing import Union
+from typing import Any, Union
 
 import matplotlib.pyplot as plt
 import matplotlib.scale as mscale
@@ -86,6 +86,7 @@ def plot_pseudopressure(
     ax: plt.Axes = None,
     x_max: float = 1,
     y_max: float | None = None,
+    plot_kwargs: dict[str, Any] | None = None,
 ) -> plt.Axes:
     """Plot pseudopressure versus distance over time.
 
@@ -103,6 +104,8 @@ def plot_pseudopressure(
         maximum distance to plot, by default 1
     y_max : float | None, optional
         maximum pseudopressure to plot, by default None
+    plot_kwargs : dict[str,Any] | None, optional
+        arguments to pass to the plotting routine
 
     Returns
     -------
@@ -113,19 +116,24 @@ def plot_pseudopressure(
         _, ax = plt.subplots()
     x = np.linspace(1 / reservoir.nx, 1, reservoir.nx)
     pinit = reservoir.pseudopressure[0, -1]
+    if plot_kwargs is None:
+        plot_kwargs = {}
     for i, p in enumerate(reservoir.pseudopressure):
         if i % every == 0:
             if rescale:
                 pscale = (p - p[0]) / (pinit - p[0])
-                ax.plot(x, pscale, color="steelblue")
+                ax.plot(x, pscale, color="steelblue", **plot_kwargs)
             else:
-                ax.plot(x, p, color="steelblue")
+                ax.plot(x, p, color="steelblue", **plot_kwargs)
     ax.set(xlabel="x", ylabel="Pseudopressure", xlim=(0, x_max), ylim=(0, y_max))
     return ax
 
 
 def plot_recovery_rate(
-    reservoir: Reservoir, ax: plt.Axes | None = None, change_ticks: bool = False
+    reservoir: Reservoir,
+    ax: plt.Axes | None = None,
+    change_ticks: bool = False,
+    plot_kwargs: dict[str, Any] | None = None,
 ) -> plt.Axes:
     """Plot recovery rate over time.
 
@@ -137,6 +145,8 @@ def plot_recovery_rate(
         axes to plot on, by default None
     change_ticks : bool, optional
         if true, set xticks, by default False
+    plot_kwargs : dict[str,Any] | None, optional
+        arguments to pass to the plotting routine
 
     Returns
     -------
@@ -145,10 +155,12 @@ def plot_recovery_rate(
     """
     if ax is None:
         _, ax = plt.subplots()
+    if plot_kwargs is None:
+        plot_kwargs = {}
 
     cumulative = reservoir.recovery_factor()
     rate = np.gradient(cumulative, reservoir.time)
-    ax.plot(reservoir.time, rate)
+    ax.plot(reservoir.time, rate, label="Recovery rate", **plot_kwargs)
     ax.set(
         xscale="log",
         yscale="log",
@@ -164,7 +176,10 @@ def plot_recovery_rate(
 
 
 def plot_recovery_factor(
-    reservoir: Reservoir, ax: plt.Axes | None = None, change_ticks: bool = False
+    reservoir: Reservoir,
+    ax: plt.Axes | None = None,
+    change_ticks: bool = False,
+    plot_kwargs: dict[str, Any] | None = None,
 ) -> plt.Axes:
     """Plot cumulatie recovery over time.
 
@@ -176,6 +191,8 @@ def plot_recovery_factor(
         axes to plot on, by default None
     change_ticks : bool, optional
         if true, set xticks, by default False
+    plot_kwargs : dict[str,Any] | None, optional
+        arguments to pass to the plotting routine
 
     Returns
     -------
@@ -184,9 +201,11 @@ def plot_recovery_factor(
     """
     if ax is None:
         _, ax = plt.subplots()
+    if plot_kwargs is None:
+        plot_kwargs = {}
     rf = reservoir.recovery_factor()
     time = reservoir.time
-    ax.plot(time, rf)
+    ax.plot(time, rf, label="Recovery factor", **plot_kwargs)
     ax.set(
         xscale="squareroot",
         ylim=(0, None),
