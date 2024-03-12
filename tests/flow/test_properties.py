@@ -1,4 +1,5 @@
 """Define a suite a tests for the flowproperties module."""
+
 from __future__ import annotations
 
 from copy import copy

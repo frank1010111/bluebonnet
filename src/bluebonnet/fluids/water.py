@@ -1,4 +1,5 @@
 """PVT and viscosity for water from the correlations provided by McCain."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -150,12 +151,7 @@ def viscosity_water_McCain(
     >>> viscosity_water_McCain(400, 3000, 15)
     0.2627774655403418
     """
-    A = (
-        109.574
-        - 8.40564 * salinity
-        + 0.313314 * salinity**2
-        + 8.72213e-3 * salinity**3
-    )
+    A = 109.574 - 8.40564 * salinity + 0.313314 * salinity**2 + 8.72213e-3 * salinity**3
     B = (
         1.12166
         - 2.63951e-2 * salinity
@@ -164,8 +160,6 @@ def viscosity_water_McCain(
         - 1.55586e-6 * salinity**4
     )
     mu_water = (
-        A
-        * temperature**-B
-        * (0.9994 + 4.0295e-5 * pressure + 3.1062e-9 * pressure**2)
+        A * temperature**-B * (0.9994 + 4.0295e-5 * pressure + 3.1062e-9 * pressure**2)
     )
     return mu_water

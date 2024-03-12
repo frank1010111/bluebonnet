@@ -1,4 +1,5 @@
 """Ease plotting production and fluid flow information."""
+
 from __future__ import annotations
 
 from typing import Any, Union

@@ -1,4 +1,5 @@
 """Define a suite a tests for the gas module."""
+
 from __future__ import annotations
 
 import pytest

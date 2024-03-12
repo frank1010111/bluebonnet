@@ -4,6 +4,7 @@ Pressure (or pseudo-pressure) changes affect all sorts of things. This
 module includes structures for storing these pressure-dependent properties
 in order to aid the reservoir simulators in the `reservoir` module.
 """
+
 from __future__ import annotations
 
 import copy
