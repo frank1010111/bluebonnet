@@ -38,7 +38,7 @@ class SquareRootScale(mscale.ScaleBase):
         axis.set_minor_locator(ticker.NullLocator())
         axis.set_minor_formatter(ticker.NullFormatter())
 
-    def limit_range_for_scale(self, vmin, vmax, minpos):  # noqa: ARG
+    def limit_range_for_scale(self, vmin, vmax, minpos):  # noqa: ARG002
         """Do not allow negative values."""
         return max(0.0, vmin), vmax
 
