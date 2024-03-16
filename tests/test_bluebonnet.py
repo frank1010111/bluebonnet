@@ -1,4 +1,5 @@
 """Smoke test that bluebonnet imports."""
+
 from __future__ import annotations
 
 import bluebonnet

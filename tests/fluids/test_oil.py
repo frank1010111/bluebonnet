@@ -1,4 +1,5 @@
 """Define a suite a tests for the oil module."""
+
 from __future__ import annotations
 
 import math

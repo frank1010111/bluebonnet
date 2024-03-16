@@ -1,4 +1,5 @@
 """Define a suite a tests for the fluid module."""
+
 from __future__ import annotations
 
 import numpy as np
