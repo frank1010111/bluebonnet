@@ -86,6 +86,10 @@ addopts = [
 testpaths = ["tests"]
 
 [tool.ruff]
+line-length = 99
+target-version = "py37"
+
+[tool.ruff.lint]
 select = [
   "E",
   "F",
@@ -115,8 +119,6 @@ extend-ignore = [
   "PT004",  # Use underscore for non-returning fixture (use usefixture instead)
   "RET504", # 'unnecessary' variable assignment before return statement
 ]
-line-length = 99
-target-version = "py37"
 unfixable = [
   "T20",  # Removes print statements
   "F841", # Removes unused variables
@@ -125,7 +127,7 @@ exclude = []
 flake8-unused-arguments.ignore-variadic-names = true
 isort.required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "noxfile.py" = ["T", "T201"]
 "tests/**.py" = ["D101", "D102", "D103"]
