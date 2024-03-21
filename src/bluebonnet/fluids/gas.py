@@ -1,4 +1,5 @@
 """Gas pvt properties, using Dranchuk and Abou-Kassem's correlations."""
+
 from __future__ import annotations
 
 import math
@@ -165,7 +166,7 @@ def z_factor_hallyarbrough(pressure: float, temperature: float) -> float:
     References
     ----------
     `Hall-Yarbrough estimation <https://wiki.whitson.com/eos/eos_models/zfactor/index.html#hall-yarbrough-estimation-of-gas-z-factor>`_
-    """  # noqa: E501
+    """
     t = 1 / temperature
     y = 0.001
     fdum = 1

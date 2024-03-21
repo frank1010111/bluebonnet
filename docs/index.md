@@ -31,7 +31,7 @@ have been used to make forecasts from the individual well level up to the basin
 and play level, depending on the availability of fluid property and bottomhole
 pressure data.
 
-Compare to the most common unconventional production analysis tool. Emprical
+Compare to the most common unconventional production analysis tool. Empirical
 decline curve analysis (DCA) provides very fast answers, but lack physical
 meaning. Bluebonnet fits include estimates of the resource within the drainage
 volume and of permeability divided by interfracture spacing. A completion

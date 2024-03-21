@@ -1,4 +1,5 @@
 """Define a suite a tests for the reservoir module."""
+
 from __future__ import annotations
 
 from itertools import product
