@@ -33,10 +33,7 @@ def tests(session: nox.Session) -> None:
 
 @nox.session(reuse_venv=True)
 def docs(session: nox.Session) -> None:
-    """
-    Build the docs. Pass "--serve" to serve. Pass "-b linkcheck" to check links.
-    """
-
+    """Build the docs. Pass "--serve" to serve. Pass "-b linkcheck" to check links."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--serve", action="store_true", help="Serve after building")
     parser.add_argument(
@@ -85,7 +82,7 @@ def build(session: nox.Session) -> None:
 
 
 @nox.session
-def paper(session: nox.Sesson) -> None:
+def paper(session: nox.Session) -> None:
     """Build the JOSS paper draft."""
     paper_dir = DIR.joinpath("paper")
     session.run(
