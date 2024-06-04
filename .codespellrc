@@ -1,2 +1,2 @@
 [codespell]
-skip = docs/*.ipynb
+skip = docs/*.ipynb,paper/paper.bib
