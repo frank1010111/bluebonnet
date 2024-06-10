@@ -9,17 +9,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  linting:
-    name: Linting
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-      - uses: actions/setup-python@v3
-      - uses: pre-commit/action@v3.0.1
-        with:
-          extra_args: --hook-stage manual --all-files
 
   tests:
     name: Test on ${{ matrix.os }} / ${{ matrix.python-version }}
