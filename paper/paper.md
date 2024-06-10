@@ -61,11 +61,10 @@ The `flow` submodule solves the pressure diffusivity equation to provide
 estimates of the hydrocarbon production over time and the hydrocarbon recovery
 factors. This module allows the user to estimate production for shale gas wells
 using scaled solutions of the single-phase real gas diffusivity equation
-[@patzek2013; @male2015application]. In addition, this module simulates
-production for tight-oil and gas condensate wells using a two-phase scaled
-solution of the pressure diffusivity equation [@ruizmaraggi2022twophase]. The
-`flow` submodule also allows users to capture production variations due to
-changes in bottomhole pressure.
+[@patzek2013; @male2015application]. In addition, this module simulates production
+for tight-oil and gas condensate wells using a two-phase scaled solution of the pressure
+diffusivity equation [@ruizmaraggi2022twophase]. The `flow` submodule also allows
+users to capture production variations due to changes in bottomhole pressure.
 
 The `forecast` submodule performs history matches and forecasts the production
 of unconventional wells using the scaling solutions present in the `flow`
@@ -78,8 +77,7 @@ modification of the approach developed by @ruizmaraggi2022pressure.
 
 `Bluebonnet` is a Python package using petroleum engineering methods to perform
 production analysis of hydrofractured wells. Parts of this code were first
-developed to assist in determining U.S. shale gas reserves [@patzek2013;
-@male2019assessing].
+developed to assist in determining U.S. shale gas reserves [@patzek2013; @male2019assessing].
 
 There are no free open-source tools that use physics-based scaled flow solutions
 of the diffusivity equation to perform decline-curve and rate-transient analysis
@@ -107,8 +105,8 @@ Production" (PI: Michael Marder). Valuable comments and criticism came from
 discussions with Gary Hunter, Emre Turkoz, Zaheera Jabeen, and Deniz Ertas.
 
 This project relies on the following open-source Python packages: NumPy
-[@numpy2011; @numpy2020], SciPy [@scipy2020], matplotlib [@matplotlib2007], and
-pandas [@pandas2010].
+[@numpy2011; @numpy2020], SciPy [@scipy2020], matplotlib [@matplotlib2007], and pandas
+[@pandas2010].
 
 The authors would like to thank the Society of Petroleum Engineers (SPE) for
 providing open access to production data from unconventional wells through the

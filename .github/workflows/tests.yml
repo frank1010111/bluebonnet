@@ -9,7 +9,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   tests:
     name: Test on ${{ matrix.os }} / ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
