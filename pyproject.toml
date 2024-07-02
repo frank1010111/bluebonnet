@@ -25,7 +25,7 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 readme = "README.md"
-requires-python = ">=3.8,<3.12"
+requires-python = ">=3.8,<3.13"
 dependencies = [
   "lmfit >=1.0",
   "numpy >=1.22",

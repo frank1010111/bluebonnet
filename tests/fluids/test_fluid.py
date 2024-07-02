@@ -90,7 +90,8 @@ def test_bg(gas_properties):
     elif gas_properties.fluid == "wet gas":
         real_fvf = pytest.approx(0.000813928, rel=1e-3)
     else:
-        ValueError("gas_properties.fluid must be one of 'wet gas' or 'dry gas'")
+        msg = "gas_properties.fluid must be one of 'wet gas' or 'dry gas'"
+        raise ValueError(msg)
     fluid_instance = Fluid(
         temperature=gas_properties.temperature,
         api_gravity=10,
@@ -112,7 +113,8 @@ def test_mu_g(gas_properties):
     elif gas_properties.fluid == "wet gas":
         real_mu = pytest.approx(0.023553396, rel=1e-3)
     else:
-        ValueError("gas_properties.fluid must be one of 'wet gas' or 'dry gas'")
+        msg = "haven't studied this pressure yet"
+        raise ValueError(msg)
     fluid_instance = Fluid(
         temperature=gas_properties.temperature,
         api_gravity=10,

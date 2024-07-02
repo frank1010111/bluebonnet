@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 from numpy.typing import NDArray
-from scipy.integrate import cumtrapz
+from scipy.integrate import cumulative_trapezoid
 
 from bluebonnet.fluids.gas import (
     b_factor_DAK,
@@ -106,7 +106,7 @@ def build_pvt_gas(
             "viscosity": viscosity,
         }
     )
-    pseudopressure = 2 * cumtrapz(
+    pseudopressure = 2 * cumulative_trapezoid(
         pvt_gas["pressure"] / (pvt_gas["viscosity"] * pvt_gas["z-factor"]),
         pvt_gas["pressure"],
         initial=0.0,
