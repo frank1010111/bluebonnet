@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 from numpy.typing import NDArray
-from scipy.integrate import cumtrapz
+from scipy.integrate import cumulative_trapezoid
 
 from bluebonnet.fluids.gas import (
     b_factor_DAK,
@@ -91,10 +91,7 @@ def build_pvt_gas(
         ]
     )
     compressibility = np.array(
-        [
-            compressibility_DAK(temperature, p, temperature_pc, pressure_pc)
-            for p in pressure
-        ]
+        [compressibility_DAK(temperature, p, temperature_pc, pressure_pc) for p in pressure]
     )
     pvt_gas = pd.DataFrame(
         data={
@@ -106,7 +103,7 @@ def build_pvt_gas(
             "viscosity": viscosity,
         }
     )
-    pseudopressure = 2 * cumtrapz(
+    pseudopressure = 2 * cumulative_trapezoid(
         pvt_gas["pressure"] / (pvt_gas["viscosity"] * pvt_gas["z-factor"]),
         pvt_gas["pressure"],
         initial=0.0,
@@ -148,9 +145,7 @@ class Fluid:
     water_saturation_initial: float = 0.0
     """Initial water saturation"""
 
-    def water_FVF(
-        self, pressure: NDArray[np.float] | float
-    ) -> NDArray[np.float] | float:
+    def water_FVF(self, pressure: NDArray[np.float] | float) -> NDArray[np.float] | float:
         """Water formation volume factor (B-factor) from McCain.
 
         Parameters
