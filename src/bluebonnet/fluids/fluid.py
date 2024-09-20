@@ -91,7 +91,10 @@ def build_pvt_gas(
         ]
     )
     compressibility = np.array(
-        [compressibility_DAK(temperature, p, temperature_pc, pressure_pc) for p in pressure]
+        [
+            compressibility_DAK(temperature, p, temperature_pc, pressure_pc)
+            for p in pressure
+        ]
     )
     pvt_gas = pd.DataFrame(
         data={
@@ -145,7 +148,9 @@ class Fluid:
     water_saturation_initial: float = 0.0
     """Initial water saturation"""
 
-    def water_FVF(self, pressure: NDArray[np.float] | float) -> NDArray[np.float] | float:
+    def water_FVF(
+        self, pressure: NDArray[np.float] | float
+    ) -> NDArray[np.float] | float:
         """Water formation volume factor (B-factor) from McCain.
 
         Parameters
