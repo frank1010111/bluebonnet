@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 
 import pytest
+
 from bluebonnet.fluids import oil
 
 TEMPERATURE_STANDARD = 60.0

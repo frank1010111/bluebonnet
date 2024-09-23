@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
+
 from bluebonnet.flow import FlowProperties
 from bluebonnet.plotting import (
     SinglePhaseReservoir,
@@ -27,7 +28,7 @@ pvt_gas = pd.read_csv("tests/data/pvt_gas.csv").rename(columns=columns_renamer_g
 fluid = FlowProperties(pvt_gas, pi)
 
 
-@pytest.fixture()
+@pytest.fixture
 def reservoir():
     reservoir = SinglePhaseReservoir(
         nx, pressure_fracface=pf, pressure_initial=pi, fluid=fluid
@@ -38,7 +39,7 @@ def reservoir():
     return reservoir
 
 
-@pytest.mark.mpl_image_compare()
+@pytest.mark.mpl_image_compare
 @pytest.mark.parametrize("rescale", [True, False])
 def test_plot_pseudopressure(reservoir, rescale):
     fig, ax = plt.subplots()
@@ -46,7 +47,7 @@ def test_plot_pseudopressure(reservoir, rescale):
     return fig
 
 
-@pytest.mark.mpl_image_compare()
+@pytest.mark.mpl_image_compare
 @pytest.mark.parametrize("change_ticks", [True, False])
 def test_plot_recovery_rate(reservoir, change_ticks):
     fig, ax = plt.subplots()
@@ -54,7 +55,7 @@ def test_plot_recovery_rate(reservoir, change_ticks):
     return fig
 
 
-@pytest.mark.mpl_image_compare()
+@pytest.mark.mpl_image_compare
 @pytest.mark.parametrize("change_ticks", [True, False])
 def test_plot_recovery_factor(reservoir, change_ticks):
     fig, ax = plt.subplots()

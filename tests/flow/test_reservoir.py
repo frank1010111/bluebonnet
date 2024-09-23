@@ -7,13 +7,14 @@ from itertools import product
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.optimize import curve_fit
+
 from bluebonnet.flow import (
     FlowProperties,
     IdealReservoir,
     MultiPhaseReservoir,
     SinglePhaseReservoir,
 )
-from scipy.optimize import curve_fit
 
 nx = (30,)
 nt = (1200,)
@@ -110,6 +111,7 @@ class TestRun:
         reservoir.simulate(time)
         if False:
             import matplotlib.pyplot as plt
+
             from bluebonnet.plotting import plot_pseudopressure, plot_recovery_factor
 
             fig, ax = plt.subplots()
