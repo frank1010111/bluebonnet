@@ -5,6 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import pytest
+from lmfit import Parameters
+
 from bluebonnet.flow import FlowProperties, IdealReservoir, SinglePhaseReservoir
 from bluebonnet.forecast import (
     Bounds,
@@ -12,7 +14,6 @@ from bluebonnet.forecast import (
     fit_production_pressure,
     plot_production_comparison,
 )
-from lmfit import Parameters
 
 t_end = 6.0
 nx = 40
@@ -22,7 +23,7 @@ pi = 5_000.0
 time_scaled = np.linspace(0, np.sqrt(t_end), nt) ** 2
 
 
-@pytest.fixture()
+@pytest.fixture
 def rf_curve():
     """Return function for recovery factor from an ideal reservoir."""
     reservoir = IdealReservoir(nx, pf, pi, None)
@@ -31,7 +32,7 @@ def rf_curve():
     return reservoir.recovery_factor_interpolator()
 
 
-@pytest.fixture()
+@pytest.fixture
 def pressure_varying_prod():
     """Necessary data for a pressure-varying system."""
     tau_in = 180.0
@@ -88,7 +89,7 @@ def test_fit_production_pressure(pressure_varying_prod):
     assert result.params["M"].value > 1e3, "is M increasing from the initial guess?"
 
 
-@pytest.mark.mpl_image_compare()
+@pytest.mark.mpl_image_compare
 def test_fit_plot(pressure_varying_prod):
     prod, pvt_table = pressure_varying_prod
     params = Parameters()

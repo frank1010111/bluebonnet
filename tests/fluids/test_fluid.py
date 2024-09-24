@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from bluebonnet.fluids import Fluid
 
 
-@pytest.fixture()
+@pytest.fixture
 def fluid_instance(oil_properties):
     fluid = Fluid(
         oil_properties.temperature,

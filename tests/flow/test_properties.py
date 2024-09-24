@@ -7,6 +7,8 @@ from copy import copy
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.interpolate import interp1d
+
 from bluebonnet.flow.flowproperties import (
     FlowPropertiesTwoPhase,
     RelPermParams,
@@ -14,7 +16,6 @@ from bluebonnet.flow.flowproperties import (
     relative_permeabilities_twophase,
     rescale_pseudopressure,
 )
-from scipy.interpolate import interp1d
 
 pr = 8_000.0
 Sw = 0.1
@@ -36,7 +37,7 @@ pvt_gas = pd.read_csv("tests/data/pvt_gas.csv").rename(columns=columns_renamer_g
 pvt_oil = pd.read_csv("tests/data/pvt_oil.csv").rename(columns=columns_renamer_oil)
 
 
-@pytest.fixture()
+@pytest.fixture
 def relperm_params():
     return RelPermParams(
         n_o=1,
@@ -51,7 +52,7 @@ def relperm_params():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def saturations_test():
     return pd.DataFrame(
         {
@@ -62,7 +63,7 @@ def saturations_test():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def df_pvt():
     # get pvt tables
     pvt_oil = pd.read_csv("tests/data/pvt_oil.csv")
