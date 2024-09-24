@@ -1,3 +1,5 @@
+"""Test plotting functionality."""
+
 from __future__ import annotations
 
 import matplotlib.pyplot as plt
@@ -29,9 +31,7 @@ fluid = FlowProperties(pvt_gas, pi)
 
 @pytest.fixture()
 def reservoir():
-    reservoir = SinglePhaseReservoir(
-        nx, pressure_fracface=pf, pressure_initial=pi, fluid=fluid
-    )
+    reservoir = SinglePhaseReservoir(nx, pressure_fracface=pf, pressure_initial=pi, fluid=fluid)
     t_end = 11
     time_scaled = np.linspace(0, np.sqrt(t_end), nt) ** 2
     reservoir.simulate(time_scaled)

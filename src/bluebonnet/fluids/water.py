@@ -159,7 +159,5 @@ def viscosity_water_McCain(
         + 5.47119e-5 * salinity**3
         - 1.55586e-6 * salinity**4
     )
-    mu_water = (
-        A * temperature**-B * (0.9994 + 4.0295e-5 * pressure + 3.1062e-9 * pressure**2)
-    )
+    mu_water = A * temperature**-B * (0.9994 + 4.0295e-5 * pressure + 3.1062e-9 * pressure**2)
     return mu_water

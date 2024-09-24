@@ -17,9 +17,7 @@ from bluebonnet.flow import (
     TwoPhaseReservoir,
 )
 
-Reservoir = Union[
-    IdealReservoir, SinglePhaseReservoir, TwoPhaseReservoir, MultiPhaseReservoir
-]
+Reservoir = Union[IdealReservoir, SinglePhaseReservoir, TwoPhaseReservoir, MultiPhaseReservoir]
 
 
 class SquareRootScale(mscale.ScaleBase):

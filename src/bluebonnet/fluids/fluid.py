@@ -39,7 +39,7 @@ def build_pvt_gas(
     """Build a table of PVT properties for use in the flow module.
 
     Parameters
-    -----------
+    ----------
     gas_values : dictionary
         keys include 'N2','H2S','CO2', 'Gas Specific Gravity',
         'Reservoir Temperature (deg F)'
@@ -91,10 +91,7 @@ def build_pvt_gas(
         ]
     )
     compressibility = np.array(
-        [
-            compressibility_DAK(temperature, p, temperature_pc, pressure_pc)
-            for p in pressure
-        ]
+        [compressibility_DAK(temperature, p, temperature_pc, pressure_pc) for p in pressure]
     )
     pvt_gas = pd.DataFrame(
         data={
@@ -148,17 +145,16 @@ class Fluid:
     water_saturation_initial: float = 0.0
     """Initial water saturation"""
 
-    def water_FVF(
-        self, pressure: NDArray[np.float] | float
-    ) -> NDArray[np.float] | float:
+    def water_FVF(self, pressure: NDArray[float] | float) -> NDArray[float] | float:
         """Water formation volume factor (B-factor) from McCain.
 
         Parameters
         ----------
         pressure: np.ndarray
             water pressure in psia
+
         Returns
-        ----------
+        -------
         b_w: ndarray
             b-factor in reservoir bbl / standard bbl
         """
@@ -238,7 +234,7 @@ class Fluid:
             viscosity_gas (centipoise)
 
         Examples
-        -------
+        --------
         >>> Fluid(400, 35, 0.65, 0).viscosity_gas(100, -102, 649)
         0.01652719692109309
         """
@@ -307,7 +303,7 @@ class Fluid:
             Bubble point pressure in psia.
 
         Examples
-        -------
+        --------
         >>> Fluid(200, 35, 0.8, 650).pressure_bubblepoint()
         2627.2017021875276
         """

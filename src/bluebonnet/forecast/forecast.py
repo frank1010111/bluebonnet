@@ -48,7 +48,7 @@ class Bounds:
         return ((self.M[0], self.tau[0]), (self.M[1], self.tau[1]))
 
     def regularize_initial_guess(self, guess: list[float]) -> list[float]:
-        """Ensure that initial guess is within bounds"""
+        """Ensure that initial guess is within bounds."""
         if self.M[0] > guess[0]:
             guess[0] = self.M[0]
         elif guess[0] > self.M[1]:

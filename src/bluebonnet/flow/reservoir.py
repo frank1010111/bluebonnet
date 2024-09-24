@@ -166,9 +166,7 @@ class SinglePhaseReservoir(IdealReservoir):
         """
         return 1
 
-    def simulate(
-        self, time: ndarray[float], pressure_fracface: ndarray[float] | None = None
-    ):
+    def simulate(self, time: ndarray[float], pressure_fracface: ndarray[float] | None = None):
         """Calculate simulation pressure over time.
 
         Args
@@ -300,9 +298,7 @@ class MultiPhaseReservoir(SinglePhaseReservoir):
             alpha_scaled = self.alpha_scaled(b, sat)
             kt_h2 = mesh_ratio * alpha_scaled
             a_matrix = _build_matrix(kt_h2)
-            pseudopressure[i + 1], info = sparse.linalg.bicgstab(
-                a_matrix, b, atol=_ATOL
-            )
+            pseudopressure[i + 1], info = sparse.linalg.bicgstab(a_matrix, b, atol=_ATOL)
             saturations[i + 1] = self._step_saturation(sat, b, pseudopressure[i + 1])
         self.time = time
         self.pseudopressure = pseudopressure

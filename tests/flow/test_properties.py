@@ -92,7 +92,7 @@ def df_pvt():
 
 
 def pvt_multiphase_oil():
-    """Generate pvt_multiphase_oil.csv"""
+    """Generate pvt_multiphase_oil.csv."""
     Sw = 0.1
     p_frac = 1000
     p_res = 6_000
@@ -124,9 +124,9 @@ def pvt_multiphase_oil():
 
     # scale pseudopressure
     pseudopressure = interp1d(df_pvt.pressure, df_pvt.pseudopressure)
-    df_pvt["pseudopressure"] = (
-        pseudopressure(df_pvt["pressure"]) - pseudopressure(p_frac)
-    ) / (pseudopressure(p_res) - pseudopressure(p_frac))
+    df_pvt["pseudopressure"] = (pseudopressure(df_pvt["pressure"]) - pseudopressure(p_frac)) / (
+        pseudopressure(p_res) - pseudopressure(p_frac)
+    )
 
     df_pvt.to_csv("../data/pvt_multiphase_oil.csv")
 

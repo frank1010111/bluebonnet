@@ -43,9 +43,7 @@ def pressure_varying_prod():
     reservoir = SinglePhaseReservoir(nx, pf, pi, flow_props)
     reservoir.simulate(time_scaled, pressure_v_time)
     rf = reservoir.recovery_factor()
-    prod = pd.DataFrame(
-        {"Days": time_scaled * tau_in, "Gas": rf, "Pressure": pressure_v_time}
-    )
+    prod = pd.DataFrame({"Days": time_scaled * tau_in, "Gas": rf, "Pressure": pressure_v_time})
     return prod, pvt_table
 
 

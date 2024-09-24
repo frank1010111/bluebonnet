@@ -52,9 +52,7 @@ def _obj_function(
     # )
     t = days / tau
     flow_propertiesM = FlowProperties(pvt_table, pressure_initial)
-    res_realgasM = SinglePhaseReservoir(
-        80, pressure_initial, pressure_initial, flow_propertiesM
-    )
+    res_realgasM = SinglePhaseReservoir(80, pressure_initial, pressure_initial, flow_propertiesM)
     res_realgasM.simulate(t, pressure_fracface=pressure_fracface)
     recovery_factor = res_realgasM.recovery_factor()
     return resource_in_place * recovery_factor - production
@@ -101,9 +99,9 @@ def fit_production_pressure(
         Best fits for tau, M, and p_initial
     """
     if filter_zero_prod_days:
-        prod_data = prod_data[
-            (prod_data["Gas"] > 0) & (pd.notna(prod_data["Pressure"]))
-        ][["Days", "Gas", "Pressure"]]
+        prod_data = prod_data[(prod_data["Gas"] > 0) & (pd.notna(prod_data["Pressure"]))][
+            ["Days", "Gas", "Pressure"]
+        ]
     else:
         prod_data = prod_data[["Days", "Gas", "Pressure"]]
 
@@ -112,16 +110,12 @@ def fit_production_pressure(
 
     # with noisy data, sometimes a boxcar filter is beneficial
     if filter_window_size is not None:
-        pressure_fracface = sp.ndimage.uniform_filter1d(
-            pressure_fracface, size=filter_window_size
-        )
+        pressure_fracface = sp.ndimage.uniform_filter1d(pressure_fracface, size=filter_window_size)
     cumulative_prod = np.cumsum(np.array(prod_data["Gas"]))
 
     if params is None:
         params = Parameters()
-        params.add(
-            "tau", value=1000.0, min=30.0, max=time[len(time) - 1] * 2
-        )  # units: days
+        params.add("tau", value=1000.0, min=30.0, max=time[len(time) - 1] * 2)  # units: days
         params.add(
             "M",
             value=cumulative_prod[-1],
@@ -179,9 +173,9 @@ def plot_production_comparison(
         pressure over time (scaled by tau)
     """
     if filter_zero_prod_days:
-        prod_data = prod_data[
-            (prod_data["Gas"] > 0) & (pd.notna(prod_data["Pressure"]))
-        ][["Days", "Gas", "Pressure"]]
+        prod_data = prod_data[(prod_data["Gas"] > 0) & (pd.notna(prod_data["Pressure"]))][
+            ["Days", "Gas", "Pressure"]
+        ]
         time = np.arange(len(prod_data["Days"]))
     else:
         prod_data = prod_data[["Days", "Gas", "Pressure"]]
@@ -190,9 +184,7 @@ def plot_production_comparison(
     pressure_fracface = np.array(prod_data["Pressure"])
     #
     if filter_window_size is not None:
-        pressure_fracface = sp.ndimage.uniform_filter1d(
-            pressure_fracface, size=filter_window_size
-        )
+        pressure_fracface = sp.ndimage.uniform_filter1d(pressure_fracface, size=filter_window_size)
     #
     cumulative_prod = np.cumsum(np.array(prod_data["Gas"]))
 
@@ -202,9 +194,7 @@ def plot_production_comparison(
     # pressure_fracface = pressure_initial
 
     flow_propertiesM = FlowProperties(pvt_table, pressure_initial)
-    res_realgasM = SinglePhaseReservoir(
-        80, pressure_fracface, pressure_initial, flow_propertiesM
-    )
+    res_realgasM = SinglePhaseReservoir(80, pressure_fracface, pressure_initial, flow_propertiesM)
     res_realgasM.simulate(time / tau, pressure_fracface=pressure_fracface)
 
     rf2M = res_realgasM.recovery_factor()

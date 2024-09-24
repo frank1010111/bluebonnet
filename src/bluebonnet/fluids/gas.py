@@ -30,7 +30,7 @@ def make_nonhydrocarbon_properties(
        for other non-hydrocarbon molecules
 
     Returns
-    --------
+    -------
     non_hydrocrabon_properties : NDArray
         structured array of non-hydrocarbon fluid properties
 
@@ -81,7 +81,7 @@ def z_factor_DAK(
         z_factor (dimensionless)
 
     Examples
-    ------
+    --------
     >>> z_factor_DAK(400, 100, -102, 649)
     0.9969013621293381
     """
@@ -139,9 +139,7 @@ def z_factor_DAK(
         return math.fabs(F_rho / DF_rho)
 
     rho_guess = 0.27 * pressure_reduced / temp_reduced
-    bounds = (
-        (rho_guess / 5, rho_guess * 20),
-    )  # bounds go from a z-factor of 0.05 to 5
+    bounds = ((rho_guess / 5, rho_guess * 20),)  # bounds go from a z-factor of 0.05 to 5
     result = minimize(calculate_error_fraction, rho_guess, bounds=bounds)
     rho = result.x[0]
     Z_factor = 0.27 * pressure_reduced / (rho * temp_reduced)
@@ -180,9 +178,7 @@ def z_factor_hallyarbrough(pressure: float, temperature: float) -> float:
         dfdy = (
             (1 + 4 * y + 4 * y**2 - 4 * y**3 + y**4) / (1 - y) ** 4
             - (29.52 * t - 19.52 * t**2 + 9.16 * t**3) * y
-            + (2.18 + 2.82 * t)
-            * (90.7 * t - 242.2 * t**2 + 42.4 * t**3)
-            * y ** (1.18 + 2.82 * t)
+            + (2.18 + 2.82 * t) * (90.7 * t - 242.2 * t**2 + 42.4 * t**3) * y ** (1.18 + 2.82 * t)
         )
         y = y - fdum / dfdy
     zfact = 0.06125 * pressure * t * np.exp(-1.2 * (1 - t) ** 2) / y
@@ -216,7 +212,7 @@ def b_factor_DAK(
         b-factor (reservoir barrels / scf)
 
     Examples
-    -------
+    --------
     >>> b_factor_DAK(400, 100, -102, 649, 60, 14.7)
     0.04317415921420302
     """
@@ -260,7 +256,7 @@ def density_DAK(
         density_gas (lb / cubic ft)
 
     Examples
-    -------
+    --------
     >>> density_DAK(400, 100, -102, 649, 0.65) # returns 0.2143
     """
     MOLECULAR_WEIGHT_AIR = 28.964
@@ -298,7 +294,7 @@ def compressibility_DAK(
         compressibility (1 / psi)
 
     Examples
-    ------
+    --------
     >>> compressibility_DAK(400, 104.7, -102, 649)
     0.009576560643021937
     """
@@ -337,9 +333,9 @@ def compressibility_DAK(
         + 2 * A[9] * A[10] * rho**3 / (temp_reduced**3)
         - 2 * A[9] * A[10] ** 2 * rho**5 / (temp_reduced**3)
     ) * math.exp(-A[10] * rho**2)
-    compressibility_reduced = 1.0 / pressure_reduced - 0.27 / (
-        z_factor**2 * temp_reduced
-    ) * (dz_drho / (1 + rho * dz_drho / z_factor))
+    compressibility_reduced = 1.0 / pressure_reduced - 0.27 / (z_factor**2 * temp_reduced) * (
+        dz_drho / (1 + rho * dz_drho / z_factor)
+    )
     compressibility = compressibility_reduced / pressure_pseudocritical
     return compressibility
 
@@ -372,7 +368,7 @@ def viscosity_Sutton(
         viscosity_gas (centipoise)
 
     Examples
-    -------
+    --------
     >>> viscosity_Sutton(400, 100, -102, 649, 0.65)
     0.01652719692109309
     """
@@ -388,8 +384,7 @@ def viscosity_Sutton(
     )
     rho *= 16.018463 / 1e3  # convert to grams / cc
     xi = 0.949 * (
-        (temperature_pseudocritical + 459.67)
-        / (molecular_weight**3 * pressure_pseudocritical**4)
+        (temperature_pseudocritical + 459.67) / (molecular_weight**3 * pressure_pseudocritical**4)
     ) ** (1.0 / 6.0)
     viscosity_lowpressure = (
         1e-5
@@ -432,7 +427,7 @@ def pseudocritical_point_Sutton(
         pressure_pseudocritical (psia)
 
     Examples
-    ------
+    --------
     >>> non_hydrocarbon_properties = make_nonhydrocarbon_properties(0.03, 0.012, 0.018)
     >>> points_pseudocritical_Sutton(0.65, non_hydrocarbon_properties, "dry gas")
     (-102.21827232417752, 648.510797253794)
@@ -454,25 +449,17 @@ def pseudocritical_point_Sutton(
     ) / fraction_hydrocarbon
     if fluid == "dry gas":
         temp_critical_hydrocarbon = (
-            120.1
-            + 429 * specific_gravity_hydrocarbon
-            - 62.9 * specific_gravity_hydrocarbon**2
+            120.1 + 429 * specific_gravity_hydrocarbon - 62.9 * specific_gravity_hydrocarbon**2
         )
         pressure_critical_hydrocarbon = (
-            671.1
-            - 14 * specific_gravity_hydrocarbon
-            - 34.3 * specific_gravity_hydrocarbon**2
+            671.1 - 14 * specific_gravity_hydrocarbon - 34.3 * specific_gravity_hydrocarbon**2
         )
     else:
         temp_critical_hydrocarbon = (
-            164.3
-            + 357.7 * specific_gravity_hydrocarbon
-            - 67.7 * specific_gravity_hydrocarbon**2
+            164.3 + 357.7 * specific_gravity_hydrocarbon - 67.7 * specific_gravity_hydrocarbon**2
         )
         pressure_critical_hydrocarbon = (
-            744
-            - 125.4 * specific_gravity_hydrocarbon
-            + 5.9 * specific_gravity_hydrocarbon**2
+            744 - 125.4 * specific_gravity_hydrocarbon + 5.9 * specific_gravity_hydrocarbon**2
         )
     temperature_star = fraction_hydrocarbon * temp_critical_hydrocarbon + sum(
         fraction * temp_critical_nonhc
@@ -524,7 +511,7 @@ def pseudopressure_Hussainy(
         pseudopressure (psi^2 / centipoise)
 
     Examples
-    -------
+    --------
     >>> pseudopressure_Hussainy(400, 100, -102, 649, 0.65)
     593363.7626437937
     """

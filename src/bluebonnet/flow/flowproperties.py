@@ -54,7 +54,7 @@ class FlowProperties:
         compressibility and viscosity.
 
         Parameters
-        -----------
+        ----------
         pvt_props : Mapping
             has accessors for pseudopressure, alpha (optional), compressibility, viscosity,
             z-factor
@@ -77,9 +77,7 @@ class FlowProperties:
         ):
             raise ValueError("Need pvt_props to have: " + ", ".join(need_cols_short))
         if "alpha" in pvt_props:
-            m_scale_func = interp1d(
-                pvt_props["pressure"], 1 / pvt_props["pseudopressure"]
-            )
+            m_scale_func = interp1d(pvt_props["pressure"], 1 / pvt_props["pseudopressure"])
             warnings.warn(
                 "warning: scaling pseudopressure, using user's hydraulic diffusivity",
                 RuntimeWarning,
@@ -131,7 +129,7 @@ class FlowPropertiesSimple(FlowProperties):
         compressibility and viscosity.
 
         Parameters
-        -----------
+        ----------
         pvt_props : Mapping
             has accessors for pressure, compressibility, viscosity
 
@@ -234,23 +232,14 @@ class FlowPropertiesTwoPhase(FlowProperties):
             msg = f"df_kr needs all of {need_cols_kr}"
             raise ValueError(msg)
         pvt = {
-            prop: interp1d(
-                pvt_props["pressure"], pvt_props[prop], fill_value="extrapolate"
-            )
+            prop: interp1d(pvt_props["pressure"], pvt_props[prop], fill_value="extrapolate")
             for prop in need_cols_pvt
         }
         pvt.update(reference_densities)
         # pvt.update({"rho_o0": rho_o0, "rho_g0": rho_g0, "rho_w0": rho_w0})
-        kr = {
-            fluid: interp1d(kr_props["So"], kr_props[fluid])
-            for fluid in ("kro", "krg", "krw")
-        }
-        alpha_calc = alpha_multiphase(
-            pvt_props["pressure"], pvt_props["So"], phi, Sw, pvt, kr
-        )
-        pseudopressure = pseudopressure_threephase(
-            pvt_props["pressure"], pvt_props["So"], pvt, kr
-        )
+        kr = {fluid: interp1d(kr_props["So"], kr_props[fluid]) for fluid in ("kro", "krg", "krw")}
+        alpha_calc = alpha_multiphase(pvt_props["pressure"], pvt_props["So"], phi, Sw, pvt, kr)
+        pseudopressure = pseudopressure_threephase(pvt_props["pressure"], pvt_props["So"], pvt, kr)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             object = cls(
@@ -287,9 +276,9 @@ def rescale_pseudopressure(
     """
     df_pvt = df_pvt.copy() if hasattr(df_pvt, "copy") else copy.deepcopy(df_pvt)
     pseudopressure = interp1d(df_pvt.pressure, df_pvt.pseudopressure)
-    df_pvt["pseudopressure"] = (
-        pseudopressure(df_pvt["pressure"]) - pseudopressure(p_frac)
-    ) / (pseudopressure(p_i) - pseudopressure(p_frac))
+    df_pvt["pseudopressure"] = (pseudopressure(df_pvt["pressure"]) - pseudopressure(p_frac)) / (
+        pseudopressure(p_i) - pseudopressure(p_frac)
+    )
     return df_pvt
 
 
@@ -331,9 +320,7 @@ def alpha_multiphase(
     return lambda_combined / compressibility_combined
 
 
-def lambda_combined_func(
-    pressure: ndarray, So: ndarray, pvt: dict, kr: dict
-) -> ndarray:
+def lambda_combined_func(pressure: ndarray, So: ndarray, pvt: dict, kr: dict) -> ndarray:
     """Calculate mobility for three phase system.
 
     Args
@@ -362,15 +349,11 @@ def lambda_combined_func(
         mobility for the cells
     """
     lambda_oil = pvt["rho_o0"] * (
-        pvt["Rv"](pressure)
-        * kr["krg"](So)
-        / (pvt["mu_g"](pressure) * pvt["Bg"](pressure))
+        pvt["Rv"](pressure) * kr["krg"](So) / (pvt["mu_g"](pressure) * pvt["Bg"](pressure))
         + kr["kro"](So) / (pvt["mu_o"](pressure) * pvt["Bo"](pressure))
     )
     lambda_gas = pvt["rho_g0"] * (
-        pvt["Rs"](pressure)
-        * kr["kro"](So)
-        / (pvt["mu_o"](pressure) * pvt["Bo"](pressure))
+        pvt["Rs"](pressure) * kr["kro"](So) / (pvt["mu_o"](pressure) * pvt["Bo"](pressure))
         + kr["krg"](So) / (pvt["mu_g"](pressure) * pvt["Bg"](pressure))
     )
     lambda_water = pvt["rho_w0"] * (
@@ -431,16 +414,12 @@ def compressibility_combined_func(
         )
     )
     water_cp = (
-        phi
-        * pvt["rho_w0"]
-        * (Sw / pvt["Bw"](pressure + 0.5) - Sw / pvt["Bw"](pressure - 0.5))
+        phi * pvt["rho_w0"] * (Sw / pvt["Bw"](pressure + 0.5) - Sw / pvt["Bw"](pressure - 0.5))
     )
     return oil_cp + gas_cp + water_cp
 
 
-def pseudopressure_threephase(
-    pressure: ndarray, So: ndarray, pvt: dict, kr: dict
-) -> ndarray:
+def pseudopressure_threephase(pressure: ndarray, So: ndarray, pvt: dict, kr: dict) -> ndarray:
     """Calculate pseudopressure over pressure for three-phase fluid.
 
     Args
@@ -468,20 +447,14 @@ def pseudopressure_threephase(
         pseudopressure : ndarray
     """
     lambda_oil = pvt["rho_o0"] * (
-        pvt["Rv"](pressure)
-        * kr["krg"](So)
-        / (pvt["mu_g"](pressure) * pvt["Bg"](pressure))
+        pvt["Rv"](pressure) * kr["krg"](So) / (pvt["mu_g"](pressure) * pvt["Bg"](pressure))
         + kr["kro"](So) / (pvt["mu_o"](pressure) * pvt["Bo"](pressure))
     )
     lambda_gas = pvt["rho_g0"] * (
-        pvt["Rs"](pressure)
-        * kr["kro"](So)
-        / (pvt["mu_o"](pressure) * pvt["Bo"](pressure))
+        pvt["Rs"](pressure) * kr["kro"](So) / (pvt["mu_o"](pressure) * pvt["Bo"](pressure))
         + kr["krg"](So) / (pvt["mu_g"](pressure) * pvt["Bg"](pressure))
     )
-    lambda_water = pvt["rho_w0"] * (
-        kr["krw"](So) / (pvt["mu_w"](pressure) * pvt["Bw"](pressure))
-    )
+    lambda_water = pvt["rho_w0"] * (kr["krw"](So) / (pvt["mu_w"](pressure) * pvt["Bw"](pressure)))
     integrand = lambda_oil + lambda_gas + lambda_water
     pseudopressure = cumulative_trapezoid(pressure, integrand, initial=0)
     return pseudopressure
@@ -515,7 +488,8 @@ class FlowPropertiesMultiPhase(FlowProperties):
         Args:
             df (Mapping[str, ndarray]): table, including pseudopressure, So, Sg, Sw
 
-        Raises:
+        Raises
+        ------
             ValueError: Table columns are missing
         """
         need_cols = {"pseudopressure", "alpha", "So", "Sg", "Sw"}
@@ -611,18 +585,9 @@ def relative_permeabilities(
         raise ValueError(msg)
 
     denominator = 1 - params.S_or - params.S_wc - params.S_gc
-    kro = (
-        params.k_ro_max
-        * ((saturations["So"] - params.S_or) / denominator) ** params.n_o
-    )
-    krw = (
-        params.k_rw_max
-        * ((saturations["Sw"] - params.S_wc) / denominator) ** params.n_w
-    )
-    krg = (
-        params.k_rg_max
-        * ((saturations["Sg"] - params.S_gc) / denominator) ** params.n_g
-    )
+    kro = params.k_ro_max * ((saturations["So"] - params.S_or) / denominator) ** params.n_o
+    krw = params.k_rw_max * ((saturations["Sw"] - params.S_wc) / denominator) ** params.n_w
+    krg = params.k_rg_max * ((saturations["Sg"] - params.S_gc) / denominator) ** params.n_g
     k_rel = np.array(
         list(zip(kro, krw, krg)),
         dtype=[(i, np.float64) for i in ("kro", "krw", "krg")],
@@ -632,9 +597,7 @@ def relative_permeabilities(
     return k_rel
 
 
-def relative_permeabilities_twophase(
-    params: RelPermParams, Sw: float = 0.1
-) -> pd.DataFrame:
+def relative_permeabilities_twophase(params: RelPermParams, Sw: float = 0.1) -> pd.DataFrame:
     """Make two-phase relative permeability curves from Brooks-Corey.
 
     Parameters

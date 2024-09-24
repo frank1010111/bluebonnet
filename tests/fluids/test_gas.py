@@ -143,9 +143,7 @@ def test_compressibility_DAK(gas_properties):
         real_compressibility = pytest.approx(0.01002548578259275, rel=1e-3)
     else:
         real_compressibility = pytest.approx(1.4644387216173005e-4, rel=1e-3)
-    compressibility = gas.compressibility_DAK(
-        temperature, pressure, temperature_pc, pressure_pc
-    )
+    compressibility = gas.compressibility_DAK(temperature, pressure, temperature_pc, pressure_pc)
     assert compressibility == real_compressibility
 
 

@@ -96,9 +96,7 @@ class TestRun:
         for density in (True, False):
             rf = reservoir.recovery_factor(density=density)
             slope = logslope(time, rf, (time > 0.1) & (time < 0.3))
-            assert (
-                np.abs(slope - 0.5) < 0.05
-            ), "Early recovery factor goes as the square root"
+            assert np.abs(slope - 0.5) < 0.05, "Early recovery factor goes as the square root"
 
     def test_rf_late_asymptotes(self, nx, pf, pi, fluid, Reservoir, nt):
         if Reservoir == MultiPhaseReservoir:

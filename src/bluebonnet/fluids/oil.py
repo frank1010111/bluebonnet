@@ -38,7 +38,7 @@ def b_o_Standing(
         Bo, the formation volume factor (V/V)
 
     Examples
-    -------
+    --------
     >>> b_o_Standing(200, 3_000, 35, 0.8, 650)
 
     >>> b_o_Standing(200, 2_000, 35, 0.8, 650)
@@ -116,7 +116,7 @@ def pressure_bubblepoint_Standing(
         Bubble point pressure in psia.
 
     Examples
-    -------
+    --------
     >>> pressure_bubblepoint_Standing(200, 35, 0.8, 650)
     2627.2017021875276
     """
@@ -237,7 +237,7 @@ def solution_gor_Standing(
         Solution GOR in scf/stb
 
     Examples
-    -------
+    --------
     >>> solution_gor_Standing(200, 3_000, 35, 0.8, 650)
     650
     >>> solution_gor_Standing(200, 2_000, 35, 0.8, 650)
@@ -249,8 +249,7 @@ def solution_gor_Standing(
 
     def gor_belowbubble(pressure: NDArray | float) -> NDArray | float:
         gor = gas_specific_gravity * (
-            (pressure / 18.2 + 1.4)
-            * 10 ** (0.0125 * api_gravity - 0.00091 * temperature)
+            (pressure / 18.2 + 1.4) * 10 ** (0.0125 * api_gravity - 0.00091 * temperature)
         ) ** (1 / 0.83)
         return gor
 
@@ -356,8 +355,7 @@ def oil_compressibility_undersat_Standing(
         temperature, api_gravity, gas_specific_gravity, solution_gor_initial
     )
     density_bubblepoint = (
-        62.37 * oil_specific_gravity
-        + 0.0136 * gas_specific_gravity * solution_gor_initial
+        62.37 * oil_specific_gravity + 0.0136 * gas_specific_gravity * solution_gor_initial
     ) / b_o_bubblepoint
     oil_compressibility = 1e-6 * math.exp(
         (density_bubblepoint + 0.004347 * (pressure - pressure_bubblepoint) - 79.1)
@@ -493,7 +491,7 @@ def oil_compressibility_Standing(
         oil compressibility in 1/psi
 
     Examples
-    ------
+    --------
     >>> oil_compressibility_Standing(200, 3000, 35, 0.8, 650, -72.2, 653)
 
     >>> oil_compressibility_Standing(200, 2000, 35, 0.8, 650, -72.2, 653)
@@ -536,9 +534,7 @@ def oil_compressibility_Standing(
         b_o_bubblepoint = b_o_bubblepoint_Standing(
             temperature, api_gravity, gas_specific_gravity, solution_gor_initial
         )
-        dBo_dGOR = db_o_dgor_Standing(
-            temperature, api_gravity, gas_specific_gravity, solution_gor
-        )
+        dBo_dGOR = db_o_dgor_Standing(temperature, api_gravity, gas_specific_gravity, solution_gor)
         compressibility = (b_g - dBo_dGOR) * dGOR_dpressure / b_o_bubblepoint
     return compressibility
 
@@ -571,7 +567,7 @@ def density_Standing(
         oil density (lb/ft^3)
 
     Examples
-    ------
+    --------
     >>> density_Standing(200, 2000, 35, 0.8, 650)
     44.989365953905136
     """
@@ -582,9 +578,7 @@ def density_Standing(
     b_o = b_o_Standing(
         temperature, pressure, api_gravity, gas_specific_gravity, solution_gor_initial
     )
-    density = (
-        62.37 * oil_specific_gravity + 0.0136 * gas_specific_gravity * solution_gor
-    ) / b_o
+    density = (62.37 * oil_specific_gravity + 0.0136 * gas_specific_gravity * solution_gor) / b_o
     return density
 
 
@@ -622,17 +616,13 @@ def viscosity_beggs_robinson(
         temperature, pressure, api_gravity, gas_specific_gravity, solution_gor_initial
     )
     if pressure >= pressure_bubblepoint:
-        mu_o_dead = (
-            10 ** (10 ** (3.0324 - 0.02023 * api_gravity) * temperature**-1.163) - 1
-        )
+        mu_o_dead = 10 ** (10 ** (3.0324 - 0.02023 * api_gravity) * temperature**-1.163) - 1
         mu_o_live = _mu_dead_to_live_br(mu_o_dead, solution_gor_initial)
         mu_o = mu_o_live * (pressure / pressure_bubblepoint) ** (
             2.6 * pressure**1.187 * np.exp(-11.513 - 8.98e-5 * pressure)
         )
     else:
-        mu_o_dead = (
-            10 ** (10 ** (3.0324 - 0.02023 * api_gravity) * temperature**-1.163) - 1
-        )
+        mu_o_dead = 10 ** (10 ** (3.0324 - 0.02023 * api_gravity) * temperature**-1.163) - 1
         mu_o = _mu_dead_to_live_br(mu_o_dead, solution_gor)
     return mu_o
 
