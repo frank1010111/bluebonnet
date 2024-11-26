@@ -10,7 +10,7 @@ from __future__ import annotations
 from bluebonnet.fluids.fluid import Fluid, build_pvt_gas, pseudopressure
 
 __all__ = [
-    "build_pvt_gas",
     "Fluid",
+    "build_pvt_gas",
     "pseudopressure",
 ]
