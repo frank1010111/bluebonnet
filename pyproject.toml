@@ -75,19 +75,24 @@ source = ["src/bluebonnet"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+log_cli_level = "INFO"
+xfail_strict = true
 addopts = [
+  "-ra",
   "--cov=bluebonnet",
   "--cov-append",
   "--cov-report=xml",
   "--cov-config=pyproject.toml",
   "--mpl",
   "--mpl-baseline-path=tests/baseline",
+  "--strict-config",
+  "--strict-markers",
 ]
 testpaths = ["tests"]
+filterwarnings = ["error"]
 
 [tool.ruff]
 line-length = 99
-target-version = "py39"
 
 [tool.ruff.lint]
 select = [
@@ -114,7 +119,7 @@ select = [
   "UP",   # pyupgrade
   "YTT",  # flake8-2020
 ]
-extend-ignore = [
+ignore = [
   "PLR",    # Design related pylint codes
   "PT004",  # Use underscore for non-returning fixture (use usefixture instead)
   "RET504", # 'unnecessary' variable assignment before return statement
@@ -132,3 +137,19 @@ isort.required-imports = ["from __future__ import annotations"]
 "noxfile.py" = ["T", "T201"]
 "tests/**.py" = ["D101", "D102", "D103"]
 "docs/**.ipynb" = ["T", "I002"]
+
+[tool.mypy]
+mypy_path = ["src"]
+files = ["src", "tests"]
+python_version = "3.10"
+warn_unused_configs = true
+strict = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+warn_unreachable = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14.1",
+]
