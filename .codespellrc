@@ -1,2 +1,2 @@
 [codespell]
-skip = docs/*.ipynb,paper/paper.bib
+skip = docs/*.ipynb,paper/paper.bib,uv.lock
