@@ -121,7 +121,6 @@ select = [
 ]
 ignore = [
   "PLR",    # Design related pylint codes
-  "PT004",  # Use underscore for non-returning fixture (use usefixture instead)
   "RET504", # 'unnecessary' variable assignment before return statement
 ]
 unfixable = [
