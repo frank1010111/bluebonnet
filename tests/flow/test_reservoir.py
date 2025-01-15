@@ -61,7 +61,7 @@ def reservoir_start(nx, pf, pi, fluid, Reservoir):
 
 @pytest.mark.parametrize("nt", nt)
 @pytest.mark.parametrize("Reservoir", reservoirs)
-@pytest.mark.parametrize("nx,pf,pi,fluid", sim_props)
+@pytest.mark.parametrize(("nx", "pf", "pi", "fluid"), sim_props)
 class TestRun:
     def test_rf_fails_early(self, nx, pf, pi, fluid, Reservoir, nt):  # noqa: ARG002
         if Reservoir == MultiPhaseReservoir:
