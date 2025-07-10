@@ -108,9 +108,12 @@ class TestRun:
         time = np.linspace(0, np.sqrt(end_t), nt) ** 2
         reservoir.simulate(time)
         if False:
-            import matplotlib.pyplot as plt
+            import matplotlib.pyplot as plt  # noqa: PLC0415
 
-            from bluebonnet.plotting import plot_pseudopressure, plot_recovery_factor
+            from bluebonnet.plotting import (  # noqa: PLC0415
+                plot_pseudopressure,
+                plot_recovery_factor,
+            )
 
             fig, ax = plt.subplots()
             ax = plot_recovery_factor(reservoir, ax)
