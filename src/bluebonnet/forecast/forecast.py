@@ -149,7 +149,7 @@ class ForecasterOnePhase:
                 """Forecast cumulative production."""
                 return _forecast_cum_onephase(self.rf_curve, time_on_production, M, tau)
 
-        fit, covariance = curve_fit(
+        fit, _covariance = curve_fit(
             forecast,
             time_on_production,
             cum_production,

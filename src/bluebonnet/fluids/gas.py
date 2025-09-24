@@ -530,5 +530,5 @@ def pseudopressure_Hussainy(
         return 2 * pressure / (viscosity * z_factor)
 
     # use scipy's quadrature (wraps QUADPACK) for integration
-    pseudopressure, err = quad(integrand, pressure_standard, pressure, limit=100)
+    pseudopressure, _err = quad(integrand, pressure_standard, pressure, limit=100)
     return pseudopressure
