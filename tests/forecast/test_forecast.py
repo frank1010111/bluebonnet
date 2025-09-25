@@ -56,9 +56,9 @@ def test_bounds():
         Bounds(M=(1, 2, 3), tau=(0, 1))
     with pytest.raises(ValueError, match="tau must be two elements"):
         Bounds(M=(1, 2), tau=(1,))
-    with pytest.raises(ValueError, match="M.* must be greater"):
+    with pytest.raises(ValueError, match=r"M.* must be greater"):
         Bounds(M=(1, 0), tau=(0, 1))
-    with pytest.raises(ValueError, match="tau.* must be greater"):
+    with pytest.raises(ValueError, match=r"tau.* must be greater"):
         Bounds((0, 1), (20, 10))
 
 

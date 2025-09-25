@@ -137,7 +137,7 @@ def test_compressibility_DAK(gas_properties):
         pressure,
         temperature_pc,
         pressure_pc,
-        gas_specific_gravity,
+        _gas_specific_gravity,
         fluid,
     ) = gas_properties
     if fluid == "dry gas":
