@@ -158,19 +158,19 @@ def test_relperm_bounds_errors(relperm_params, saturations_test):
         relative_permeabilities(saturations.to_records(index=False), relperm_params)
     # test parameter bounds
     relperm_wrong = relperm_params._replace(n_o=8)
-    with pytest.raises(ValueError, match="Exponents .* less than"):
+    with pytest.raises(ValueError, match=r"Exponents .* less than"):
         relative_permeabilities(saturations_test.to_records(index=False), relperm_wrong)
     relperm_wrong = relperm_params._replace(n_w=0)
-    with pytest.raises(ValueError, match="Exponents .* at least"):
+    with pytest.raises(ValueError, match=r"Exponents .* at least"):
         relative_permeabilities(saturations_test.to_records(index=False), relperm_wrong)
     relperm_wrong = relperm_params._replace(S_gc=-1)
-    with pytest.raises(ValueError, match="saturation.* at least"):
+    with pytest.raises(ValueError, match=r"saturation.* at least"):
         relative_permeabilities(saturations_test.to_records(index=False), relperm_wrong)
     relperm_wrong = relperm_params._replace(S_or=1.1)
-    with pytest.raises(ValueError, match="saturation.* less than"):
+    with pytest.raises(ValueError, match=r"saturation.* less than"):
         relative_permeabilities(saturations_test.to_records(index=False), relperm_wrong)
     relperm_wrong = relperm_params._replace(k_ro_max=1.1)
-    with pytest.raises(ValueError, match="relative permeability.* less than"):
+    with pytest.raises(ValueError, match=r"relative permeability.* less than"):
         relative_permeabilities(saturations_test.to_records(index=False), relperm_wrong)
 
 

@@ -90,7 +90,7 @@ class TestRun:
             def curve(time, intercept, slope):
                 return intercept + time * slope
 
-            (intercept, slope), _ = curve_fit(curve, time_log, rf_log, p0=[0, 1])
+            (_intercept, slope), _ = curve_fit(curve, time_log, rf_log, p0=[0, 1])
             return slope
 
         # rf goes as sqrt-time in early production

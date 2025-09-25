@@ -16,11 +16,11 @@ def test_bubblepoint_pressure_Standing(oil_properties):
     """Test Standing bubblepoint pressure calculation."""
     (
         temperature,
-        pressure,
+        _pressure,
         api_gravity,
         gas_specific_gravity,
         solution_gor_initial,
-        fluid,
+        _fluid,
     ) = oil_properties
     pressure_bubblepoint_real = pytest.approx(2603.1217021875277)
     pressure_bubblepoint = oil.pressure_bubblepoint_Standing(
@@ -77,11 +77,11 @@ def test_B_o_bubblepoint_Standing(oil_properties):
     """Test Standing bubblepoint formation volume factor."""
     (
         temperature,
-        pressure,
+        _pressure,
         api_gravity,
         gas_specific_gravity,
         solution_gor_initial,
-        fluid,
+        _fluid,
     ) = oil_properties
     B_o_bubblepoint_real = pytest.approx(1.3860514623492897)
     B_o_Standing = oil.b_o_bubblepoint_Standing(
@@ -98,7 +98,7 @@ def test_oil_compressibility_undersat_Standing(oil_properties):
         api_gravity,
         gas_specific_gravity,
         solution_gor_initial,
-        fluid,
+        _fluid,
     ) = oil_properties
 
     # overwrite pressure to be above saturation pressure
