@@ -25,8 +25,9 @@ class SquareRootScale(mscale.ScaleBase):
 
     name = "squareroot"
 
-    def __init__(self, axis=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Initialize for axis."""
+        axis = args[0] if args else kwargs.pop("axis", None)
         try:
             # Newer Matplotlib (>=3.11): axis parameter is being phased out
             super().__init__(**kwargs)
