@@ -25,9 +25,15 @@ class SquareRootScale(mscale.ScaleBase):
 
     name = "squareroot"
 
-    def __init__(self, axis, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Initialize for axis."""
-        mscale.ScaleBase.__init__(self, axis, **kwargs)
+        axis = args[0] if args else kwargs.pop("axis", None)
+        try:
+            # Newer Matplotlib (>=3.11): axis parameter is being phased out
+            super().__init__(**kwargs)
+        except TypeError:
+            # Older Matplotlib: axis is required
+            super().__init__(axis, **kwargs)
 
     def set_default_locators_and_formatters(self, axis):
         """Set major and minor locators and formatters."""
